@@ -68,7 +68,7 @@ joinTemplate = {
 	'token_id': '<vehicleID>'
 }
 
-distanceThresholds = {'ground': { 'bot': 2.5, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
+distanceThresholds = {'ground': { 'bot': 2, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
 
 userRacesTemplate = {
 	'address': mySettings['wallet_address'],
@@ -189,7 +189,7 @@ try:
 								allowed = False
 							else:
 								if vehicleClass == 'ground':
-									if (distance < distanceThresholds['ground']['bot'] and vehicleType not in ['delivery robot', 'van']):
+									if (distance < distanceThresholds['ground']['bot'] and vehicleType not in ['delivery robot']):
 										logging.info('			Distance is less than {0} and your WOF is not a bot; excluding from the race.'.format(distanceThresholds['ground']['bot']))
 										allowed = False
 									elif (distance < distanceThresholds['ground']['botvan'] and vehicleType not in ['delivery robot', 'van']):

@@ -7,6 +7,7 @@ INSTRUCTIONS FOR USE:
 	You will need Python3 to run this script (the script was developed with 3.9.7).  Unfortunately the method of installation of Python is beyond the scope of this instruction document, 
 	but there are good instructions at https://www.python.org and some Youtube instructional videos that tailor to each operating system.
 	You *may* also need pip3 to install some components the script uses.  If you encounter an error about a missing module, reach out to Galaphine#5831 on Discord for help resolving it.
+	Once you have these, download the racejoiner.py and the mysettings.json file from the same folder on github as this INSTRUCTIONS.txt file - you will need both.
 	
 3.	BEFORE RUNNING THE SCRIPT:  Open mysettings.json and change the following:
 	a.  Change the value in "wallet_address" to your wallet's value and the value in "authorization_key" to your browser's authorization key.

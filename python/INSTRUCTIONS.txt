@@ -10,7 +10,7 @@ INSTRUCTIONS FOR USE:
 	Once you have these, download the racejoiner.py and the mysettings.json file from the same folder on github as this INSTRUCTIONS.txt file - you will need both.
 	
 3.	BEFORE RUNNING THE SCRIPT:  Open mysettings.json and change the following:
-	a.  Change the value in "wallet_address" to your wallet's value and the value in "authorization_key" to your browser's authorization key.
+	a.	Change the value in "wallet_address" to your wallet's value and the value in "authorization_key" to your browser's authorization key.
 		How to find the authorization key (for most browsers) - note you will need to connect your wallet to the WOF website if you haven't done so already:
 		1.	Open the Developer Tools panel (F12)
 		2.	Click on the Network tab. 
@@ -22,13 +22,13 @@ INSTRUCTIONS FOR USE:
 		A higher number means your vehicle will be back in your fleet more quickly for faster reuse, but there is a chance you may miss out on the race if it fills very quickly.
 		A lower number means you will more likely get in the race, but your vehicle will be locked from reuse for a longer period.
 
-	c.  Update excluded_vehicles to list any vehicles you do not want to include in any race regardless of performance.  Enter each vehicle's token ID, separated by commas.
+	c.	Update excluded_vehicles to list any vehicles you do not want to include in any race regardless of performance.  Enter each vehicle's token ID, separated by commas.
 
 4.  This script is designed only for picking the best based on the following criteria:
 	a.	The vehicle's absolute max range vs the race's distance; if the vehicle's range is less than the race's distance, it will be excluded.  At the moment this cannot be overridden.
 	b.	The vehicle's type and a lookup to a preprogrammed set of range thresholds, compared against the race's distance.  
 		This prevents, for example, trains from racing in distances less than 10km.  This can be overridden by tweaking the script's distanceThresholds variable values.
-	c.  The vehicle's speed and emissions rate.  Once vehicles are restricted by the first two criteria above, the final set is sorted by speed and emission rate Descending,
+	c.	The vehicle's speed and emissions rate.  Once vehicles are restricted by the first two criteria above, the final set is sorted by speed and emission rate Descending,
 		and the first vehicle in this set is selected for racing.  If you wish to race your worst vehicles for the lottery, you can make one change:
 		Change: 
 			sortedAvailableVehiclesToRace = sorted(availableVehiclesToRace, key = lambda elem: (elem['speed'], elem['emission']), reverse = True)

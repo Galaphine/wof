@@ -147,6 +147,10 @@ try:
 			if len(joinedList) > 0:
 				for race in joinedList:
 					logging.info('	{0} (Type: {1} ; Participant(s): {2})'.format(race['name'], race['class'], str(len(race['participants']))))
+					if not (race['sponsor'] == None):
+						logging.info('		Sponsor: {0}'.format(race['sponsor']))
+					if not (race['promo_link'] == None):
+						logging.info('		Promo Link: {0}'.format(race['promo_link']))
 			else:
 					logging.info('	Your WOFs are sitting idle! You are currently not in any race.')
 				
@@ -165,6 +169,10 @@ try:
 				participantCount = len(participants)
 				distance = race['distance']/1000
 				logging.info('	{0} (Type: {1} ; Distance: {2}; Participant(s): {3})'.format(race['name'], race['class'], str(distance), str(participantCount)))
+				if not (race['sponsor'] == None):
+					logging.info('		Sponsor: {0}'.format(race['sponsor']))
+				if not (race['promo_link'] == None):
+					logging.info('		Promo Link: {0}'.format(race['promo_link']))
 				if participantCount >= participationThreshold:
 					# Get vehicles with same Transportation Mode as the race's class
 					availableVehiclesInClass = []

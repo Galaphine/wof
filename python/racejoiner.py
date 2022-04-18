@@ -68,7 +68,7 @@ joinTemplate = {
 	'token_id': '<vehicleID>'
 }
 
-distanceThresholds = {'ground': { 'bot': 2, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
+distanceThresholds = {'ground': { 'bot': 1, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
 
 userRacesTemplate = {
 	'address': mySettings['wallet_address'],
@@ -147,9 +147,9 @@ try:
 			if len(joinedList) > 0:
 				for race in joinedList:
 					logging.info('	{0} (Type: {1} ; Participant(s): {2})'.format(race['name'], race['class'], str(len(race['participants']))))
-					if not (race['sponsor'] == None):
+					if 'sponsor' in race.keys():
 						logging.info('		Sponsor: {0}'.format(race['sponsor']))
-					if not (race['promo_link'] == None):
+					if 'promo_link' in race.keys():
 						logging.info('		Promo Link: {0}'.format(race['promo_link']))
 			else:
 					logging.info('	Your WOFs are sitting idle! You are currently not in any race.')
@@ -169,9 +169,9 @@ try:
 				participantCount = len(participants)
 				distance = race['distance']/1000
 				logging.info('	{0} (Type: {1} ; Distance: {2}; Participant(s): {3})'.format(race['name'], race['class'], str(distance), str(participantCount)))
-				if not (race['sponsor'] == None):
+				if 'sponsor' in race.keys():
 					logging.info('		Sponsor: {0}'.format(race['sponsor']))
-				if not (race['promo_link'] == None):
+				if 'promo_link' in race.keys():
 					logging.info('		Promo Link: {0}'.format(race['promo_link']))
 				if participantCount >= participationThreshold:
 					# Get vehicles with same Transportation Mode as the race's class

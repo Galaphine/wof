@@ -15,9 +15,9 @@ def getData(apiName, apiType, parameters):
 	return jsonData
 
 # getUserIdFromUserRaces:  Function to get the User ID from the userRaces API call, and save it to the user's mysettings.json file
-def getUserIdFromUserRaces():
-	userRaces = getData('racing-arena/userRaces', 'post', userRacesTemplate)
-	userId = userRaces['data'][0]['results'][0]['user']['id']
+def getUserIdFromUserRaces(walletAddress):
+	userInfo = getData('racing-arena/racer/{0}'.format(walletAddress), 'get', {})
+	userId = userInfo['data']['_id']
 	mySettings.update({'user_id': userId})
 	with open('mysettings.json', 'w') as jsonFile:
 		json.dump(mySettings, jsonFile)
@@ -61,9 +61,12 @@ with open('mysettings.json', 'r') as jsonFile:
 # List of vehicles user wishes to exclude from consideration for racing (array of WOF NFT token IDs)	
 excludedVehicles = mySettings['excluded_vehicles']
 
+# User's wallet address from settings
+walletAddress = mySettings['wallet_address']
+
 # Template dictionaries and other variables
 joinTemplate = {
-	'address': mySettings['wallet_address'],
+	'address': walletAddress,
 	'raceId': '<raceID>',
 	'token_id': '<vehicleID>'
 }
@@ -71,13 +74,13 @@ joinTemplate = {
 distanceThresholds = {'ground': { 'bot': 1, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
 
 userRacesTemplate = {
-	'address': mySettings['wallet_address'],
+	'address': walletAddress,
 	'filter': {'raceClass': [], 'vehicleType': [], 'user_status': 'all', 'period': [], 'distance': []},
 	'limit': 1,
 	'sort': None
 }
 vehicleApiParameters = {
-	'address': mySettings['wallet_address'],
+	'address': walletAddress,
 	'sortBy': None,
 	'vehicleType': []
 }
@@ -99,7 +102,7 @@ session.headers.update(headers)
 try:
 	userId = mySettings['user_id']
 	if len(userId) == 0:
-		userId = getUserIdFromUserRaces()
+		userId = getUserIdFromUserRaces(walletAddress)
 		if len(userId) == 0:
 			raise
 except:

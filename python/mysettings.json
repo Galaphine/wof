@@ -3,5 +3,6 @@
 	"wallet_address": "<REPLACE WITH YOUR WALLET ADDRESS>",
 	"authorization_key": "<REPLACE WITH YOUR BROWSER'S AUTHORIZATION KEY>",
 	"participation_threshold": 8,
-	"excluded_vehicles": []
+	"excluded_vehicles": [],
+	"max_participants": 12
 }

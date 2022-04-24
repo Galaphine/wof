@@ -61,6 +61,13 @@ with open('mysettings.json', 'r') as jsonFile:
 # List of vehicles user wishes to exclude from consideration for racing (array of WOF NFT token IDs)	
 excludedVehicles = mySettings['excluded_vehicles']
 
+# Maximum number of participants in a race for the race to be skipped and considered full.	
+maxParticipants = 12
+try:
+	maxParticipants = mySettings['max_participants']
+except:
+	pass
+	
 # User's wallet address from settings
 walletAddress = mySettings['wallet_address']
 
@@ -114,6 +121,7 @@ except:
 active = True
 try:
 	while (active):
+		fullList = []
 		joinedList = []
 		unjoinedList = []
 		parameters = {}
@@ -140,11 +148,25 @@ try:
 			# Get a list of the upcoming games - this includes joined and unjoined races so they need to be bucketed appropriately.
 			upcomingRaces = getData('racing-arena/upcomingRaces', 'get', parameters)
 			for race in upcomingRaces['data']:
-				if any([True for elem in race['participants'] if userId in elem.values()]):
+				if len(race['participants']) == maxParticipants:
+					fullList.append(race)
+				elif any([True for elem in race['participants'] if userId in elem.values()]):
 					joinedList.append(race)
 				else:
 					unjoinedList.append(race)
 
+			# Show list of full races.
+			logging.info('Full:')
+			if len(fullList) > 0:
+				for race in fullList:
+					logging.info('	{0} (Type: {1} ; Participant(s): {2})'.format(race['name'], race['class'], str(len(race['participants']))))
+					if 'sponsor' in race.keys():
+						logging.info('		Sponsor: {0}'.format(race['sponsor']))
+					if 'promo_link' in race.keys():
+						logging.info('		Promo Link: {0}'.format(race['promo_link']))
+			else:
+					logging.info('	There are currently no full races.')
+			
 			# Show list of joined races.
 			logging.info('Joined:')
 			if len(joinedList) > 0:
@@ -162,7 +184,7 @@ try:
 			
 			# Inside each race's participants list is the user's selected WOF NFT token ID; put these participants lists in an array for determining if the vehicle is already in a race.
 			joinedParticipants = []
-			for race in joinedList:
+			for race in [*joinedList, *fullList]:
 				for participant in race['participants']:
 					joinedParticipants.append(participant)
 
@@ -243,7 +265,7 @@ try:
 							try:
 								jsonData = getData('racing-arena/join', 'post', joinApiData)
 								#joinResponse = session.post(joinRaceEndpoint, data=json.dumps(joinApiData))
-								#logging.info(jsonData)
+								logging.info("		{0}".format(jsonData))
 								logging.info('		{0} (ID #{1}) is now in the race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id']))
 								break;
 							except (ConnectionError, Timeout) as exC:

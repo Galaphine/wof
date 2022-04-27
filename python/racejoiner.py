@@ -105,20 +105,16 @@ headers = {
 session = Session()
 session.headers.update(headers)
 
-# Get User ID (note this is not the user's wallet address; it is a WOF internal ID)	
-try:
-	userId = mySettings['user_id']
-	if len(userId) == 0:
-		userId = getUserIdFromUserRaces(walletAddress)
-		if len(userId) == 0:
-			raise
-except:
-	active = False
-	logging.info('Unable to find any races you have entered; therefore unable to find your User ID (note this is NOT your wallet address).  Please enter at least 1 race before running this script.')
-	exit()
-			
 # This variable will allow the continuous looping of the race check; if at some point a fatal error occurs, this will be set to False and the script will terminate.
 active = True
+
+# Get User ID (note this is not the user's wallet address; it is a WOF internal ID)	
+userId = getUserIdFromUserRaces(walletAddress)
+if len(userId) == 0:
+	active = False
+	logging.info('Unable to find your User ID on the server - please make sure you are on the Polygon network and try again.')
+	exit()
+			
 try:
 	while (active):
 		fullList = []

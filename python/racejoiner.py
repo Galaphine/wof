@@ -188,8 +188,10 @@ try:
 			for race in sortedUnjoinedList:
 				participants = race['participants']
 				participantCount = len(participants)
-				distance = race['distance']/1000
-				logging.info('	{0} (Type: {1} ; Distance: {2}; Participant(s): {3})'.format(race['name'], race['class'], str(distance), str(participantCount)))
+				distance = round(race['distance'], 4)
+				cargoWeight = race['weight']
+				
+				logging.info('	{0} (Type: {1}; Cargo Wgt (kg): {2}; Distance: {3}; Participant(s): {4})'.format(race['name'], race['class'], str(cargoWeight), str(distance), str(participantCount)))
 				if 'sponsor' in race.keys():
 					logging.info('		Sponsor: {0}'.format(race['sponsor']))
 				if 'promo_link' in race.keys():
@@ -204,35 +206,43 @@ try:
 					# Put into a list of available vehicles to race those whose max range is >= race distance and above/below the threshold for a given Vehicle Type
 					# Thresholds are defined in the dictionaries at the top; you can adjust these and create additional scenarios as needed.
 					availableVehiclesToRace = []
+					logging.info('\n		Vehicle; Type; Class; Capacity (kg); Range; Normalized Speed: # of trips')
 					for vehicle in availableVehiclesInClass:
 						allowed = True
+						vehicleName = vehicle['name'];
 						vehicleType = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Vehicle Type'][0].lower()
+						vehicleClass = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Transportation Mode'][0].lower()
+						vehicleMaxCapacity = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Capacity'][0]
 						vehicleMaxRange = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Range'][0]
 						vehicleMaxSpeed = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
-						vehicleClass = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Transportation Mode'][0].lower()
+						numOfTrips = math.ceil(cargoWeight / vehicleMaxCapacity)
+						normalizedSpeed = vehicleMaxCapacity / numOfTrips
 						
 						if not any([True for elem in joinedParticipants if vehicle['token_id'] == elem['vehicle']['token_id']]):
-							logging.info('		Distance: {0}, Vehicle: {1} ; Type: {2} ; Range: {3} ; Speed: {4} '.format(str(distance), vehicle['name'], vehicleType, vehicleMaxRange, vehicleMaxSpeed))
+							logging.info('			{0}; {1}; {2}; {3}; {4}; {5}; {6}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, vehicleMaxSpeed, numOfTrips))
 							if (distance > vehicleMaxRange):
-								logging.info('			Distance is greater than vehicle\'s range; excluding from the race.')
+								logging.info('				Distance is greater than vehicle\'s range; excluding from the race (refueling not yet factored in).')
+								allowed = False
+							elif (numOfTrips > 5):
+								logging.info('				Number of trips is greater than 5; excluding.')
 								allowed = False
 							else:
 								if vehicleClass == 'ground':
 									if (distance < distanceThresholds['ground']['bot'] and vehicleType not in ['delivery robot']):
-										logging.info('			Distance is less than {0} and your WOF is not a bot; excluding from the race.'.format(distanceThresholds['ground']['bot']))
+										logging.info('				Distance is less than {0} and your WOF is not a bot; excluding from the race.'.format(distanceThresholds['ground']['bot']))
 										allowed = False
 									elif (distance < distanceThresholds['ground']['botvan'] and vehicleType not in ['delivery robot', 'van']):
-										logging.info('			Distance is less than {0} and your WOF  is not a bot or van; excluding from the race.'.format(distanceThresholds['ground']['botvan']))
+										logging.info('				Distance is less than {0} and your WOF  is not a bot or van; excluding from the race.'.format(distanceThresholds['ground']['botvan']))
 										allowed = False
 									elif (distance < distanceThresholds['ground']['botvantrain'] and vehicleType not in ['delivery robot', 'locomotive / train', 'van']):
-										logging.info('			Distance is less than {0} and your WOF is not a bot or train or van; excluding from the race.'.format(distanceThresholds['ground']['botvantrain']))
+										logging.info('				Distance is less than {0} and your WOF is not a bot or train or van; excluding from the race.'.format(distanceThresholds['ground']['botvantrain']))
 										allowed = False
 									elif (distance > distanceThresholds['ground']['semitruck'] and vehicleType != 'semi truck'):
-										logging.info('			Distance is greater than {0} and your WOF is not a semi-truck; excluding from the race.'.format(distanceThresholds['ground']['semitruck']))
+										logging.info('				Distance is greater than {0} and your WOF is not a semi-truck; excluding from the race.'.format(distanceThresholds['ground']['semitruck']))
 										allowed = False
 								elif vehicleClass == 'air':
 									if (distance < distanceThresholds['air']['drone'] and vehicleType not in ['drone']):
-										logging.info('			Distance is less than {0} and your WOF is not a drone; excluding from the race..'.format(distanceThresholds['air']['drone']))
+										logging.info('				Distance is less than {0} and your WOF is not a drone; excluding from the race..'.format(distanceThresholds['air']['drone']))
 										allowed = False
 							if allowed:
 								availableVehiclesToRace.append(vehicle)
@@ -241,10 +251,17 @@ try:
 					if len(availableVehiclesToRace) > 0:
 						selectedVehicle = None
 						logging.info('		---------------------------------------------------------------------------------------------------')
-						logging.info('		There are available Vehicles to race in/on {0}; choosing the best based on speed and emission rate:'.format(race['class']))
+						logging.info('		There are available Vehicles to race in/on {0}\n		Choosing the best based on capacity, normalized speed, and emission rate:'.format(race['class']))
 						sortedAvailableVehiclesToRace = availableVehiclesToRace
 						for vehicle in availableVehiclesToRace:
-							vehicle.update({'speed': [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0], 'emission': [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0] })
+							availableVehicleName = vehicle['name']
+							availableVehicleMaxCapacity = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Capacity'][0]
+							availableVehicleMaxSpeed  = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
+							availableVehicleNumOfTrips = math.ceil(cargoWeight / availableVehicleMaxCapacity)
+							availableVehicleNormalizedSpeed = availableVehicleMaxSpeed / availableVehicleNumOfTrips
+							availableVehicleEmissionRate = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0]
+							vehicle.update({'speed': availableVehicleNormalizedSpeed, 'emission': availableVehicleEmissionRate })
+							logging.info('			{0}; {1}; {2}; {3}'.format(availableVehicleName, availableVehicleMaxCapacity, availableVehicleNormalizedSpeed, availableVehicleEmissionRate))
 						sortedAvailableVehiclesToRace = sorted(availableVehiclesToRace, key = lambda elem: (elem['speed'], elem['emission']), reverse = True)
 						selectedVehicle = sortedAvailableVehiclesToRace[0]
 						logging.info('		{0} (ID #{1}) has been chosen!  Entering in race now...'.format(selectedVehicle['name'], selectedVehicle['token_id']))
@@ -260,9 +277,8 @@ try:
 							#joinRaceEndpoint = apiDetails[0]['url']
 							try:
 								jsonData = getData('racing-arena/join', 'post', joinApiData)
-								#joinResponse = session.post(joinRaceEndpoint, data=json.dumps(joinApiData))
-								logging.info("		{0}".format(jsonData))
-								logging.info('		{0} (ID #{1}) is now in the race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id']))
+								logging.info("			{0}".format(jsonData))
+								logging.info('			{0} (ID #{1}) is now in the race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id']))
 								break;
 							except (ConnectionError, Timeout) as exC:
 								raise(exC)

@@ -78,7 +78,18 @@ joinTemplate = {
 	'token_id': '<vehicleID>'
 }
 
-distanceThresholds = {'ground': { 'bot': 1, 'botvan': 10, 'botvantrain': 111, 'semitruck': 782 }, 'air': {'drone': 10}}
+vehicleThresholds =  {
+	'airship / zeppelin': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.12},
+	'box truck': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.04},
+	'cargo ship': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.12},
+	'delivery robot': {'min': 0, 'max': 20, 'refuelingDelay': 0.08},
+	'drone': {'min': 0, 'max': 1000, 'refuelingDelay': 0.15},
+	'freight aircraft': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.1},
+	'hot-air balloon': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.04},
+	'locomotive / train': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.15},
+	'semi truck': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.06},
+	'van': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.02},
+}
 
 userRacesTemplate = {
 	'address': walletAddress,
@@ -186,12 +197,14 @@ try:
 
 			logging.info('Not Joined (Sorted by Participant Count Desc):')
 			for race in sortedUnjoinedList:
+				raceClass = race['class']
+				raceName = race['name']
 				participants = race['participants']
 				participantCount = len(participants)
-				distance = round(race['distance'], 4)
+				raceDistance = round(race['distance'], 4)
 				cargoWeight = race['weight']
 				
-				logging.info('	{0} (Type: {1}; Cargo Wgt (kg): {2}; Distance: {3}; Participant(s): {4})'.format(race['name'], race['class'], str(cargoWeight), str(distance), str(participantCount)))
+				logging.info('	{0} (Type: {1}; Cargo Wgt (kg): {2}; Distance: {3}; Participant(s): {4})'.format(raceName, raceClass, cargoWeight, raceDistance, participantCount))
 				if 'sponsor' in race.keys():
 					logging.info('		Sponsor: {0}'.format(race['sponsor']))
 				if 'promo_link' in race.keys():
@@ -200,13 +213,13 @@ try:
 					# Get vehicles with same Transportation Mode as the race's class
 					availableVehiclesInClass = []
 					for vehicle in myVehicles:
-						if [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Transportation Mode'][0].lower() in race['class'].lower():
+						if [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Transportation Mode'][0].lower() in raceClass.lower():
 							availableVehiclesInClass.append(vehicle)
 							
 					# Put into a list of available vehicles to race those whose max range is >= race distance and above/below the threshold for a given Vehicle Type
 					# Thresholds are defined in the dictionaries at the top; you can adjust these and create additional scenarios as needed.
 					availableVehiclesToRace = []
-					logging.info('\n		Vehicle; Type; Class; Capacity (kg); Range; Normalized Speed: # of trips')
+					logging.info('\n		Vehicle; Type; Class; Capacity (kg); Range; True:Normalized Speed; # of trips; # of refuels')
 					for vehicle in availableVehiclesInClass:
 						allowed = True
 						vehicleName = vehicle['name'];
@@ -215,35 +228,25 @@ try:
 						vehicleMaxCapacity = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Capacity'][0]
 						vehicleMaxRange = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Range'][0]
 						vehicleMaxSpeed = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
+						maxDistanceThreshold = vehicleThresholds[vehicleType]['max']
+						minDistanceThreshold = vehicleThresholds[vehicleType]['min']
+						refuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']
+						numOfRefuels = math.ceil(raceDistance / vehicleMaxRange)
 						numOfTrips = math.ceil(cargoWeight / vehicleMaxCapacity)
-						normalizedSpeed = vehicleMaxCapacity / numOfTrips
+						normalizedSpeed = (vehicleMaxSpeed / numOfTrips) * (1 - ((numOfRefuels-1)*refuelingDelay))
 						
 						if not any([True for elem in joinedParticipants if vehicle['token_id'] == elem['vehicle']['token_id']]):
-							logging.info('			{0}; {1}; {2}; {3}; {4}; {5}; {6}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, vehicleMaxSpeed, numOfTrips))
-							if (distance > vehicleMaxRange):
-								logging.info('				Distance is greater than vehicle\'s range; excluding from the race (refueling not yet factored in).')
+							logging.info('			{0}; {1}; {2}; {3}; {4}; {5}:{6}; {7}; {8}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, vehicleMaxSpeed, normalizedSpeed, numOfTrips, numOfRefuels))
+							if (numOfRefuels > 5):
+								logging.info('				Number of refuels is > 5; excluding from the race.')
 								allowed = False
 							elif (numOfTrips > 5):
 								logging.info('				Number of trips is greater than 5; excluding.')
 								allowed = False
 							else:
-								if vehicleClass == 'ground':
-									if (distance < distanceThresholds['ground']['bot'] and vehicleType not in ['delivery robot']):
-										logging.info('				Distance is less than {0} and your WOF is not a bot; excluding from the race.'.format(distanceThresholds['ground']['bot']))
-										allowed = False
-									elif (distance < distanceThresholds['ground']['botvan'] and vehicleType not in ['delivery robot', 'van']):
-										logging.info('				Distance is less than {0} and your WOF  is not a bot or van; excluding from the race.'.format(distanceThresholds['ground']['botvan']))
-										allowed = False
-									elif (distance < distanceThresholds['ground']['botvantrain'] and vehicleType not in ['delivery robot', 'locomotive / train', 'van']):
-										logging.info('				Distance is less than {0} and your WOF is not a bot or train or van; excluding from the race.'.format(distanceThresholds['ground']['botvantrain']))
-										allowed = False
-									elif (distance > distanceThresholds['ground']['semitruck'] and vehicleType != 'semi truck'):
-										logging.info('				Distance is greater than {0} and your WOF is not a semi-truck; excluding from the race.'.format(distanceThresholds['ground']['semitruck']))
-										allowed = False
-								elif vehicleClass == 'air':
-									if (distance < distanceThresholds['air']['drone'] and vehicleType not in ['drone']):
-										logging.info('				Distance is less than {0} and your WOF is not a drone; excluding from the race..'.format(distanceThresholds['air']['drone']))
-										allowed = False
+								if not ((raceDistance >= minDistanceThreshold) and (raceDistance <= maxDistanceThreshold)):
+									logging.info('				Distance {0} is outside the thresholds {1}-{2} for {3}; excluding from the race.'.format(raceDistance, minDistanceThreshold, maxDistanceThreshold, vehicleType))
+									allowed = False
 							if allowed:
 								availableVehiclesToRace.append(vehicle)
 
@@ -256,12 +259,15 @@ try:
 						for vehicle in availableVehiclesToRace:
 							availableVehicleName = vehicle['name']
 							availableVehicleMaxCapacity = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Capacity'][0]
+							availableVehicleMaxRange = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Range'][0]
 							availableVehicleMaxSpeed  = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
-							availableVehicleNumOfTrips = math.ceil(cargoWeight / availableVehicleMaxCapacity)
-							availableVehicleNormalizedSpeed = availableVehicleMaxSpeed / availableVehicleNumOfTrips
 							availableVehicleEmissionRate = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0]
+							availableVehicleRefuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']
+							availableVehicleNumOfRefuels = math.ceil(raceDistance / availableVehicleMaxRange)
+							availableVehicleNumOfTrips = math.ceil(cargoWeight / availableVehicleMaxCapacity)
+							availableVehicleNormalizedSpeed = (availableVehicleMaxSpeed / availableVehicleNumOfTrips) * (1 - ((availableVehicleNumOfRefuels-1)*availableVehicleRefuelingDelay))
 							vehicle.update({'speed': availableVehicleNormalizedSpeed, 'emission': availableVehicleEmissionRate })
-							logging.info('			{0}; {1}; {2}; {3}'.format(availableVehicleName, availableVehicleMaxCapacity, availableVehicleNormalizedSpeed, availableVehicleEmissionRate))
+							logging.info('			{0}; {1}; {2}:{3}; {4}'.format(availableVehicleName, availableVehicleMaxCapacity, availableVehicleMaxSpeed, availableVehicleNormalizedSpeed, availableVehicleEmissionRate))
 						sortedAvailableVehiclesToRace = sorted(availableVehiclesToRace, key = lambda elem: (elem['speed'], elem['emission']), reverse = True)
 						selectedVehicle = sortedAvailableVehiclesToRace[0]
 						logging.info('		{0} (ID #{1}) has been chosen!  Entering in race now...'.format(selectedVehicle['name'], selectedVehicle['token_id']))

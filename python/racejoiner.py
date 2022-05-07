@@ -79,16 +79,16 @@ joinTemplate = {
 }
 
 vehicleThresholds =  {
-	'airship / zeppelin': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.04},
-	'box truck': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.03},
-	'cargo ship': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.06},
-	'delivery robot': {'min': 0, 'max': 20, 'refuelingDelay': 0.02},
-	'drone': {'min': 0, 'max': 1000, 'refuelingDelay': 0.08},
-	'freight aircraft': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06},
-	'hot-air balloon': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.02},
-	'locomotive / train': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06},
-	'semi truck': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.04},
-	'van': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.02},
+	'airship / zeppelin': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.04, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 4}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'box truck': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.03, 'weather': {'Foggy': 2.5, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 1.5, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
+	'cargo ship': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2.5, 'Icy': 3.5, 'Rainy': 1.5, 'Snowy': 2.5, 'Sunny': 1, 'Windy': 3}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'delivery robot': {'min': 0, 'max': 20, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2.5, 'Icy': 3, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 1.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1.5, 'Ice': 1.5, 'Sand': 3, 'Snow': 1.5 } },
+	'drone': {'min': 0, 'max': 1000, 'refuelingDelay': 0.08, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 4}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'freight aircraft': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 3.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'hot-air balloon': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'locomotive / train': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2, 'Icy': 3, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
+	'semi truck': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.04, 'weather': {'Foggy': 3, 'Icy': 5, 'Rainy': 2, 'Snowy': 3.5, 'Sunny': 1, 'Windy': 3}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 2, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
+	'van': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2.5, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 1.5, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
 }
 
 userRacesTemplate = {
@@ -265,7 +265,7 @@ try:
 							availableVehicleEmissionRate = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0]
 							availableVehicleRefuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']
 							availableVehicleNumOfTrips = math.ceil(cargoWeight / availableVehicleMaxCapacity)
-							availableVehicleAdjustedRaceDistance = raceDistance + (availableVehicleNumOfTrips-1)*raceDistance
+							availableVehicleAdjustedRaceDistance = raceDistance + (availableVehicleNumOfTrips-1)*raceDistance*2 # Times 2 for round trip
 							availableVehicleNumOfRefuels = math.ceil(availableVehicleAdjustedRaceDistance / availableVehicleMaxRange)
 							availableVehicleNormalizedSpeed = availableVehicleMaxSpeed*(1 - ((availableVehicleNumOfRefuels-1)*availableVehicleRefuelingDelay))
 							estimatedTimeToComplete = (availableVehicleAdjustedRaceDistance / availableVehicleNormalizedSpeed)*3600

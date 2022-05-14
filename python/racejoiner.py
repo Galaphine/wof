@@ -20,7 +20,7 @@ def getUserIdFromUserRaces(walletAddress):
 	userId = userInfo['data']['_id']
 	mySettings.update({'user_id': userId})
 	with open('mysettings.json', 'w') as jsonFile:
-		json.dump(mySettings, jsonFile)
+		json.dump(mySettings, jsonFile, indent=4, sort_keys=True)
 		
 	return userId
 
@@ -48,6 +48,7 @@ def setLogging():
 	logging.getLogger().addHandler(console)
 
 # Constants
+CURRENT_VERSION = "0.3.4"
 ROOT_API_URL = 'https://api.worldoffreight.xyz'
 
 # Setup
@@ -78,31 +79,358 @@ joinTemplate = {
 	'token_id': '<vehicleID>'
 }
 
-vehicleThresholds =  {
-	'airship / zeppelin': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.04, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 4}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'box truck': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.03, 'weather': {'Foggy': 2.5, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 1.5, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
-	'cargo ship': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2.5, 'Icy': 3.5, 'Rainy': 1.5, 'Snowy': 2.5, 'Sunny': 1, 'Windy': 3}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'delivery robot': {'min': 0, 'max': 20, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2.5, 'Icy': 3, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 1.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1.5, 'Ice': 1.5, 'Sand': 3, 'Snow': 1.5 } },
-	'drone': {'min': 0, 'max': 1000, 'refuelingDelay': 0.08, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 4}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'freight aircraft': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 3.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'hot-air balloon': {'min': 0, 'max': 999999999, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'locomotive / train': {'min': 100, 'max': 999999999, 'refuelingDelay': 0.06, 'weather': {'Foggy': 2, 'Icy': 3, 'Rainy': 1.5, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1, 'Gravel': 1, 'Ice': 1, 'Sand': 1, 'Snow': 1 } },
-	'semi truck': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.04, 'weather': {'Foggy': 3, 'Icy': 5, 'Rainy': 2, 'Snowy': 3.5, 'Sunny': 1, 'Windy': 3}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 2, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
-	'van': {'min': 2, 'max': 999999999, 'refuelingDelay': 0.02, 'weather': {'Foggy': 2.5, 'Icy': 4, 'Rainy': 2, 'Snowy': 3, 'Sunny': 1, 'Windy': 2.5}, 'terrain': {'Asphalt': 1, 'Clay': 1.5, 'Gravel': 1.5, 'Ice': 4, 'Sand': 3, 'Snow': 3 } },
-}
-
 userRacesTemplate = {
 	'address': walletAddress,
 	'filter': {'raceClass': [], 'vehicleType': [], 'user_status': 'all', 'period': [], 'distance': []},
 	'limit': 1,
 	'sort': None
 }
+
 vehicleApiParameters = {
 	'address': walletAddress,
 	'sortBy': None,
 	'vehicleType': []
 }
 
+vehicle_thresholds = {
+        "aa-9 coruscant freighter": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 0,
+            "min": 0,
+            "refuelingDelay": 0,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "airship / zeppelin": {
+            "accelerationDelay": 900,
+            "decelerationDelay": 900,
+            "max": 999999999,
+            "min": 100,
+            "refuelingDelay": 300,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "box truck": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 999999999,
+            "min": 0,
+            "refuelingDelay": 180,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "cargo ship": {
+            "accelerationDelay": 55800,
+            "decelerationDelay": 55800,
+            "max": 999999999,
+            "min": 0,
+            "refuelingDelay": 3600,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "delivery robot": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 20,
+            "min": 0,
+            "refuelingDelay": 0,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "drone": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 1000,
+            "min": 0,
+            "refuelingDelay": 3600,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "flying saucer (ufo)": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 0,
+            "min": 0,
+            "refuelingDelay": 0,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "freight aircraft": {
+            "accelerationDelay": 1800,
+            "decelerationDelay": 1800,
+            "max": 999999999,
+            "min": 100,
+            "refuelingDelay": 1800,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "hot-air balloon": {
+            "accelerationDelay": 900,
+            "decelerationDelay": 900,
+            "max": 999999999,
+            "min": 0,
+            "refuelingDelay": 120,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "locomotive / train": {
+            "accelerationDelay": 900,
+            "decelerationDelay": 900,
+            "max": 999999999,
+            "min": 100,
+            "refuelingDelay": 1800,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "semi truck": {
+            "accelerationDelay": 300,
+            "decelerationDelay": 300,
+            "max": 999999999,
+            "min": 2,
+            "refuelingDelay": 600,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "space launcher": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 0,
+            "min": 0,
+            "refuelingDelay": 0,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "van": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 999999999,
+            "min": 2,
+            "refuelingDelay": 120,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        },
+        "x-wing": {
+            "accelerationDelay": 0,
+            "decelerationDelay": 0,
+            "max": 0,
+            "min": 0,
+            "refuelingDelay": 0,
+            "terrain": {
+                "": 1,
+                "Asphalt": 1,
+                "Clay": 1,
+                "Gravel": 1,
+                "Ice": 1,
+                "Sand": 1,
+                "Snow": 1
+            },
+            "weather": {
+                "Foggy": 1,
+                "Icy": 1,
+                "Rainy": 1,
+                "Snowy": 1,
+                "Sunny": 1,
+                "Windy": 1
+            }
+        }
+    }
+#vehicleThresholds = mySettings['vehicle_thresholds']
 participationThreshold = mySettings['participation_threshold']
 
 # Session instantiation with headers
@@ -134,7 +462,7 @@ try:
 		parameters = {}
 		
 		try:
-			logging.info('WOF Racing!  {0}'.format(datetime.datetime.today().strftime('%y-%m-%d %H:%M:%S')))
+			logging.info('WOF Racing v{0} ({1})'.format(CURRENT_VERSION, datetime.datetime.today().strftime('%y-%m-%d %H:%M:%S')))
 			
 			# Get latest list of user's vehicles, filtering out excluded vehicles.
 			try:
@@ -198,10 +526,12 @@ try:
 			logging.info('Not Joined (Sorted by Participant Count Desc):')
 			for race in sortedUnjoinedList:
 				raceClass = race['class']
+				raceDistance = round(race['distance'], 4)
 				raceName = race['name']
+				raceWeather = race['weather']
+				raceTerrain = '' if 'terrain' not in race else race['terrain']
 				participants = race['participants']
 				participantCount = len(participants)
-				raceDistance = round(race['distance'], 4)
 				cargoWeight = race['weight']
 				
 				logging.info('	{0} (Type: {1}; Cargo Wgt (kg): {2}; Distance: {3}; Participant(s): {4})'.format(raceName, raceClass, cargoWeight, raceDistance, participantCount))
@@ -219,7 +549,7 @@ try:
 					# Put into a list of available vehicles to race those whose max range is >= race distance and above/below the threshold for a given Vehicle Type
 					# Thresholds are defined in the dictionaries at the top; you can adjust these and create additional scenarios as needed.
 					availableVehiclesToRace = []
-					logging.info('\n		Vehicle; Type; Class; Capacity (kg); Max:Adjusted Range; Max:Normalized Speed; # of trips; # of refuels')
+					logging.info('\n		Vehicle; Type; Class; Capacity (kg); Max:Adjusted Range; Max Speed; Fuel Eff.; Emm. Rate; # of trips; # of refuels')
 					for vehicle in availableVehiclesInClass:
 						allowed = True
 						vehicleName = vehicle['name'];
@@ -228,16 +558,17 @@ try:
 						vehicleMaxCapacity = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Capacity'][0]
 						vehicleMaxRange = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Range'][0]
 						vehicleMaxSpeed = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
+						vehicleEmissionRate = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0]
+						vehicleFuelEfficiency = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Fuel Efficiency'][0]
 						maxDistanceThreshold = vehicleThresholds[vehicleType]['max']
 						minDistanceThreshold = vehicleThresholds[vehicleType]['min']
-						refuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']
 						numOfTrips = math.ceil(cargoWeight / vehicleMaxCapacity)
 						adjustedRaceDistance = raceDistance + (numOfTrips-1)*raceDistance
 						numOfRefuels = math.ceil(adjustedRaceDistance / vehicleMaxRange)
-						normalizedSpeed = vehicleMaxSpeed*(1 - ((numOfRefuels-1)*refuelingDelay))
+						refuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']*(numOfRefuels-1)*(vehicleEmissionRate/10)
 						
 						if not any([True for elem in joinedParticipants if vehicle['token_id'] == elem['vehicle']['token_id']]):
-							logging.info('			{0}; {1}; {2}; {3}; {4}:{5}; {6}:{7}; {8}; {9}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, "N/A" if numOfTrips > 5 else adjustedRaceDistance, vehicleMaxSpeed, "N/A" if numOfRefuels > 5 else normalizedSpeed, numOfTrips, numOfRefuels))
+							logging.info('			{0}; {1}; {2}; {3}; {4}:{5}; {6}; {7}; {8}; {9}; {10}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, "N/A" if numOfTrips > 5 else round(adjustedRaceDistance, 4), vehicleMaxSpeed, vehicleFuelEfficiency, vehicleEmissionRate, numOfTrips, numOfRefuels))
 							if (numOfRefuels > 5):
 								logging.info('				Number of refuels is > 5; excluding from the race.')
 								allowed = False
@@ -263,14 +594,33 @@ try:
 							availableVehicleMaxRange = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Range'][0]
 							availableVehicleMaxSpeed  = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Max Speed'][0]
 							availableVehicleEmissionRate = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Emission Rate'][0]
-							availableVehicleRefuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']
+							availableVehicleFuelEfficiency = [tt['value'] for tt in vehicle['attributes'] if tt['trait_type'] == 'Fuel Efficiency'][0]
+							
+							availableVehicleAccelerationDelay = vehicleThresholds[vehicleType]['accelerationDelay']
+							availableVehicleDecelerationDelay = vehicleThresholds[vehicleType]['decelerationDelay']
+							
 							availableVehicleNumOfTrips = math.ceil(cargoWeight / availableVehicleMaxCapacity)
 							availableVehicleAdjustedRaceDistance = raceDistance + (availableVehicleNumOfTrips-1)*raceDistance*2 # Times 2 for round trip
 							availableVehicleNumOfRefuels = math.ceil(availableVehicleAdjustedRaceDistance / availableVehicleMaxRange)
-							availableVehicleNormalizedSpeed = availableVehicleMaxSpeed*(1 - ((availableVehicleNumOfRefuels-1)*availableVehicleRefuelingDelay))
-							estimatedTimeToComplete = (availableVehicleAdjustedRaceDistance / availableVehicleNormalizedSpeed)*3600
-							vehicle.update({'estimatedTimeInSeconds': estimatedTimeToComplete, 'speed': availableVehicleNormalizedSpeed, 'emission': availableVehicleEmissionRate })
-							logging.info('			{0}; {1}; Est. Time: {2}; Range: {3}:{4}, Speed: {5}:{6}'.format(availableVehicleName, availableVehicleMaxCapacity, round(estimatedTimeToComplete, 4), availableVehicleMaxRange, availableVehicleAdjustedRaceDistance, availableVehicleMaxSpeed, availableVehicleNormalizedSpeed))
+
+							availableVehicleRefuelingDelay = vehicleThresholds[vehicleType]['refuelingDelay']*(availableVehicleNumOfRefuels-1)*(availableVehicleEmissionRate/10)
+							
+							estimatedTimeToComplete = (availableVehicleAdjustedRaceDistance / availableVehicleMaxSpeed)*3600 + (availableVehicleAccelerationDelay + availableVehicleDecelerationDelay)*(availableVehicleNumOfRefuels + 1) # Extra accel/decel delay for start and stop
+							try:
+								terrainAdjustment = vehicleThresholds[vehicleType]['terrain'][raceTerrain]
+							except:
+								terrainAdjustment = 1
+								
+							try:
+								weatherAdjustment = vehicleThresholds[vehicleType]['weather'][raceWeather]
+							except:
+								weatherAdjustment = 1
+							terrainAndWeatherAdjustedTime = estimatedTimeToComplete * weatherAdjustment * terrainAdjustment
+							
+							finalAdjustedTime = terrainAndWeatherAdjustedTime
+							
+							vehicle.update({'estimatedTimeInSeconds': finalAdjustedTime, 'speed': availableVehicleMaxSpeed, 'emission': availableVehicleEmissionRate })
+							logging.info('			{0}; {1}; Est. Time: {2}; Range: {3}:{4}, Speed: {5}; FE: {6}; ER: {7}'.format(availableVehicleName, availableVehicleMaxCapacity, round(finalAdjustedTime, 4), availableVehicleMaxRange, availableVehicleAdjustedRaceDistance, availableVehicleMaxSpeed, availableVehicleFuelEfficiency, availableVehicleEmissionRate))
 						sortedAvailableVehiclesToRace = sorted(availableVehiclesToRace, key = lambda elem: (elem['estimatedTimeInSeconds']))
 						selectedVehicle = sortedAvailableVehiclesToRace[0]
 						logging.info('		{0} (ID #{1}) has been chosen!  Entering in race now...'.format(selectedVehicle['name'], selectedVehicle['token_id']))

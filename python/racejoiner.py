@@ -92,7 +92,7 @@ vehicleApiParameters = {
 	'vehicleType': []
 }
 
-vehicle_thresholds = {
+vehicleThresholds = {
         "aa-9 coruscant freighter": {
             "accelerationDelay": 0,
             "decelerationDelay": 0,

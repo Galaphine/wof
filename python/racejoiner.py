@@ -491,7 +491,7 @@ try:
 					unjoinedList.append(race)
 
 			# Show list of full races.
-			logging.info('Full:')
+			logging.info('Full / Ready for Racing:')
 			if len(fullList) > 0:
 				for race in fullList:
 					logging.info('	{0} (Type: {1} ; Participant(s): {2})'.format(race['name'], race['class'], str(len(race['participants']))))
@@ -512,7 +512,7 @@ try:
 					if 'promo_link' in race.keys():
 						logging.info('		Promo Link: {0}'.format(race['promo_link']))
 			else:
-					logging.info('	Your WOFs are sitting idle! You are currently not in any race.')
+					logging.info('	Your non-racing WOFs are sitting idle!  There are no races at your given participation threshold of {0}.'.format(participationThreshold))
 				
 			# Sort the unjoined list of races.
 			sortedUnjoinedList = sorted(unjoinedList, key = lambda i: len(i['participants']), reverse = True)
@@ -623,24 +623,30 @@ try:
 							logging.info('			{0}; {1}; Est. Time: {2}; Range: {3}:{4}, Speed: {5}; FE: {6}; ER: {7}'.format(availableVehicleName, availableVehicleMaxCapacity, round(finalAdjustedTime, 4), availableVehicleMaxRange, availableVehicleAdjustedRaceDistance, availableVehicleMaxSpeed, availableVehicleFuelEfficiency, availableVehicleEmissionRate))
 						sortedAvailableVehiclesToRace = sorted(availableVehiclesToRace, key = lambda elem: (elem['estimatedTimeInSeconds']))
 						selectedVehicle = sortedAvailableVehiclesToRace[0]
-						logging.info('		{0} (ID #{1}) has been chosen!  Entering in race now...'.format(selectedVehicle['name'], selectedVehicle['token_id']))
+						logging.info('		{0} (ID #{1}) has been chosen!  Attempting to enter race now...'.format(selectedVehicle['name'], selectedVehicle['token_id']))
 						if selectedVehicle is not None:
 							selectedVehicleClass = [tt['value'] for tt in selectedVehicle['attributes'] if tt['trait_type'] == 'Transportation Mode'][0]
 							logging.info('			Selected Vehicle: {0} ({1})'.format(selectedVehicle['name'], selectedVehicleClass))
 							selectedRaceId = race['_id']
 							selectedTokenId = selectedVehicle['token_id']
 							selectedVehicleId = selectedVehicle['id']
-							joinApiData = joinTemplate.copy()
-							joinApiData.update({'raceId': selectedRaceId, 'vehicle': selectedVehicleId, 'token_id': selectedTokenId})
-							#logging.info(joinApiData)
-							#joinRaceEndpoint = apiDetails[0]['url']
-							try:
-								jsonData = getData('racing-arena/join', 'post', joinApiData)
-								logging.info("			{0}".format(jsonData))
-								logging.info('			{0} (ID #{1}) is now in the race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id']))
-								break;
-							except (ConnectionError, Timeout) as exC:
-								raise(exC)
+							latestRaces = getData('racing-arena/upcomingRaces', 'get', parameters)
+							fullRace = next((latestRace for latestRace in latestRaces['data'] if len(latestRace['participants']) >= maxParticipants and race['_id'] == latestRace['_id']), None)
+							isFull = not (fullRace is None)
+							if (not isFull):
+								joinApiData = joinTemplate.copy()
+								joinApiData.update({'address': walletAddress, 'raceId': selectedRaceId, 'vehicle': selectedVehicleId, 'token_id': selectedTokenId})
+								#logging.info(joinApiData)
+								#joinRaceEndpoint = apiDetails[0]['url']
+								try:
+									jsonData = getData('racing-arena/join', 'post', joinApiData)
+									logging.info("			{0}".format(jsonData))
+									logging.info('			{0} (ID #{1}) is now in the {1} race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id'], race['name']))
+									break;
+								except (ConnectionError, Timeout) as exC:
+									raise(exC)
+							else:
+								logging.info('			Unfortunately this race filled too quickly and cannot be entered; moving to the next race...')
 					else:
 						logging.info('		No vehicles in this class available to race.')
 			logging.info('\n')

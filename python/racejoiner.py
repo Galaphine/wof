@@ -48,7 +48,7 @@ def setLogging():
 	logging.getLogger().addHandler(console)
 
 # Constants
-CURRENT_VERSION = "0.3.4"
+CURRENT_VERSION = "0.3.5"
 ROOT_API_URL = 'https://api.worldoffreight.xyz'
 
 # Setup
@@ -483,7 +483,7 @@ try:
 			# Get a list of the upcoming games - this includes joined and unjoined races so they need to be bucketed appropriately.
 			upcomingRaces = getData('racing-arena/upcomingRaces', 'get', parameters)
 			for race in upcomingRaces['data']:
-				if len(race['participants']) == maxParticipants:
+				if len(race['participants']) >= maxParticipants:
 					fullList.append(race)
 				elif any([True for elem in race['participants'] if userId in elem.values()]):
 					joinedList.append(race)

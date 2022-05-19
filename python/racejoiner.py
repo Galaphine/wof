@@ -48,7 +48,7 @@ def setLogging():
 	logging.getLogger().addHandler(console)
 
 # Constants
-CURRENT_VERSION = "0.3.5"
+CURRENT_VERSION = "0.4.0"
 ROOT_API_URL = 'https://api.worldoffreight.xyz'
 
 # Setup
@@ -641,7 +641,7 @@ try:
 								try:
 									jsonData = getData('racing-arena/join', 'post', joinApiData)
 									logging.info("			{0}".format(jsonData))
-									logging.info('			{0} (ID #{1}) is now in the {1} race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id'], race['name']))
+									logging.info('			{0} (ID #{1}) is now in the {2} race - good luck!'.format(selectedVehicle['name'], selectedVehicle['token_id'], race['name']))
 									break;
 								except (ConnectionError, Timeout) as exC:
 									raise(exC)

@@ -1,6 +1,10 @@
+# WOF RaceJoiner v0.4.1
+# Latest updates:
+#	Added -i (--ignorealgo) for those who want to enter more races irrespective of # of trips and # of refuels
+
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-import argparse, datetime, json, logging, math, operator, time
+import argparse, datetime, json, logging, math, operator, sys, time
 
 # getData:  Generic function to return JSON data (as a Python dictionary) from a WOF API call
 def getData(apiName, apiType, parameters):
@@ -27,6 +31,8 @@ def getUserIdFromUserRaces(walletAddress):
 # setArgParser: Function to get arguments from command line (currently not used)
 def setArgParser():
 	parser = argparse.ArgumentParser(description='World of Freight Race Auto-Joiner\n')
+	parser.add_argument('-i', '--ignorealgo', action='store_true', help='Ignore the WOF Algorithm parameters (Number of trips, refueling, etc.) when determining best vehicle.\nWARNING!  BE SURE YOU WANT TO SET THIS!  THIS WILL LIKELY CAUSE YOU TO SUBSTANTIALLY MISS WINNING!', required=False)
+	
 	return parser.parse_args()
 
 # setLogging: Function to enable logging to a file and to the console (set logging level to 
@@ -48,7 +54,7 @@ def setLogging():
 	logging.getLogger().addHandler(console)
 
 # Constants
-CURRENT_VERSION = "0.4.0"
+CURRENT_VERSION = "0.4.1"
 ROOT_API_URL = 'https://api.worldoffreight.xyz'
 
 # Setup
@@ -441,6 +447,13 @@ headers = {
 'Authorization': mySettings['authorization_key']
 }
 
+if (appArgs.ignorealgo):
+	logging.info('WARNING!!  You have specified the --ignorealgo (-i) argument when starting this script!\nTHIS WILL MOST CERTAINLY CAUSE YOU TO MISS WINS!\nAre you sure you wish to continue?  Type "yes" (no quotes) to continue, anything else to exit.')
+	confirmIgnore = input("")
+	if confirmIgnore.lower() != 'yes':
+		sys.exit()
+	
+	
 session = Session()
 session.headers.update(headers)
 
@@ -569,14 +582,14 @@ try:
 						
 						if not any([True for elem in joinedParticipants if vehicle['token_id'] == elem['vehicle']['token_id']]):
 							logging.info('			{0}; {1}; {2}; {3}; {4}:{5}; {6}; {7}; {8}; {9}; {10}'.format(vehicleName, vehicleType, vehicleClass, vehicleMaxCapacity, vehicleMaxRange, "N/A" if numOfTrips > 5 else round(adjustedRaceDistance, 4), vehicleMaxSpeed, vehicleFuelEfficiency, vehicleEmissionRate, numOfTrips, numOfRefuels))
-							if (numOfRefuels > 5):
+							if (numOfRefuels > 5 and not appArgs.ignorealgo):
 								logging.info('				Number of refuels is > 5; excluding from the race.')
 								allowed = False
-							elif (numOfTrips > 5):
+							elif (numOfTrips > 5 and not appArgs.ignorealgo):
 								logging.info('				Number of trips is greater than 5; excluding from the race.')
 								allowed = False
 							else:
-								if not ((raceDistance >= minDistanceThreshold) and (raceDistance <= maxDistanceThreshold)):
+								if (not ((raceDistance >= minDistanceThreshold) and (raceDistance <= maxDistanceThreshold))) and not appArgs.ignorealgo:
 									logging.info('				Distance {0} is outside thresholds {1}-{2} for {3}; excluding.'.format(raceDistance, minDistanceThreshold, maxDistanceThreshold, vehicleType))
 									allowed = False
 							if allowed:
@@ -586,7 +599,7 @@ try:
 					if len(availableVehiclesToRace) > 0:
 						selectedVehicle = None
 						logging.info('		---------------------------------------------------------------------------------------------------')
-						logging.info('		There are available Vehicles to race in/on {0}\n		Choosing the best based on quickest estimated time:'.format(race['class']))
+						logging.info('		There are available Vehicles to race in/on {0}\n		Choosing the best based on quickest estimated time{1}:'.format(race['class'], ' (IGNORING ALGO PARAMETERS!!)' if appArgs.ignorealgo else ''))
 						sortedAvailableVehiclesToRace = availableVehiclesToRace
 						for vehicle in availableVehiclesToRace:
 							availableVehicleName = vehicle['name']

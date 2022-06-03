@@ -1,0 +1,214 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="./jquery.infinite.tabs/css/infinite.tabs.min.css" />
+		<link rel="stylesheet" href="./styles.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+		<script src="./jquery.infinite.tabs/jquery.infinite.tabs.min.js"></script>
+		<script src="./racer.js"></script>
+	</head>
+	<body>
+		<div class="panel panel-container-vertical">
+			<table class="header-panel">
+				<tr>
+					<td class="panel header-panel-left">
+						<div><br />WOF Racer v<span class="wof-version" /></div>
+						<div id="userInfo">
+							<p />
+							<div>User Name: <span data-bind="text: username" /></div>
+							<div />
+							<div>Participation Threshold: <span data-bind="text: participationThreshold" /></div>
+							<div />
+							<div>Refreshed: <span id="lastUpdated"></span></div>
+						</div>
+					</td>
+					<td class="header-panel-right"></td>
+				</tr>
+			</table>
+			<div class="panel panel-body">
+				<div class="panel panel-container-horizontal">
+					<div class="panel panel-left">
+						<div class="item-title">Unjoined Races</div>
+						<table class="item-title" id="unjoinedRacesFilter" style="display: none;">
+							<tr>
+								<td class="icon-container icon-filter-title">Filters:</td>
+								<td class="icon-container icon-filter-group-class">
+									<table>
+										<tr>
+											<td class="icon-padder"> </td>
+											<td id="tdClass" class="icon-filter icon-filter-class-all"><span id="spnClassAll" title="All Vehicle Classes">ALL</span></td>
+											<td class="icon-padder"> </td>
+											<td id="tdTerrain" class="icon-filter icon-filter-terrain-all"><span id="spnTerrainAll" title="All Terrains">ALL</span></td>
+											<td class="icon-padder"> </td>
+											<td id="tdWeather" class="icon-filter icon-filter-weather-all"><span id="spnWeatherAll" title="All Weather Types">ALL</span></td>
+											<td class="icon-padder"> </td>
+										</tr>
+									</table>
+									<table class="menu-filter-class" style="position: absolute; visibility: hidden;">
+										<tr>
+											<td class="icon-filter icon-filter-class-all" data-bind="click: filterClass.bind($data, 'All')"><span id="spnClassAllTemplate" title="All Vehicle Classes">ALL</span></td>
+										</tr>
+										<tr>
+											<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Ground')"><span id="spnGroundTemplate" title="Ground"></span></td>
+										</tr>
+										<tr>
+											<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Water')"><span id="spnWaterTemplate" title="Water"></span></td>
+										</tr>
+										<tr>
+											<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Air')"><span id="spnAirTemplate" title="Air"></span></td>
+										</tr>
+										<tr>
+											<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Space')"><span id="spnSpaceTemplate" title="Space"></span></td>
+										</tr>
+									</table>
+								</td>
+								<td class="icon-container icon-filter-group-weather"> </td>
+							</tr>
+						</table>
+						<div id="unjoinedRaces">
+							<span data-bind='foreach: unjoinedRaceList'>
+								<div class="item-unjoined-race">
+									<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
+										<table class="item-text item-unjoined-race item-unjoined-race-details">
+											<tr>
+												<td class="cell-race-class">
+													<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+												</td>
+												<td class="cell-race-title">
+													<div data-bind="text: name"></div>
+													<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: $data.raceDistance"></span>km</div>
+													<div>Your Best: 
+														<!-- ko if: $data.selectedVehicle -->
+														<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+														<!-- /ko -->
+													</div>
+												</td>
+												<td class="cell-race-image">
+													<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+														<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+													<!-- /ko -->
+												</td>
+												<td class="cell-race-terrain">
+													<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+												</td>
+												<td class="cell-race-weather">
+													<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+												</td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</span>
+						</div>
+					</div>
+					<div class="panel panel-container-vertical">
+						<div class="tab-inner-container">
+							<ul class="infinite-tabs" id="tabsMiddle">
+								<li class="active locked tab" id="adjustablesTab"><a href="#adjustablesContent">Adjustables</a></li>
+								<li class="locked tab" id="statusTab"><a href="#statusContent">Status Log</a></li>
+								<li class="locked tab" id="instructionsTab"><a href="#instructionsContent">Instructions</a></li>
+							</ul>
+							<div class="tab-content" id="adjustablesContent">
+								Adjustables View Coming Soon!
+							</div>
+							<div class="tab-content" id="statusContent">
+								Status Log View Coming Soon!
+								<!--
+								<table class="status-table">
+									<thead>
+										<tr>
+											<th class="status-header-time">Time</th>
+											<th class="status-header-severity">Severity</th>
+											<th class="status-header-message">Message</th>
+										</tr>
+									</thead>
+									<tbody id="statusTable">
+										<tr>
+											<td class="severity-info status-content-time" id="logStart"></td>
+											<td class="severity-info status-content-severity">Info</td>
+											<td class="severity-info status-content-message">Start of log</td>
+										</tr>
+									</tbody>
+								</table>
+								-->
+							</div>
+							<div class="tab-content" id="instructionsContent">
+								<div class="panel">
+									<div class="item-title item-text">
+										Instructions View Coming Soon!
+									</div>
+								</div>
+							</div>	
+						</div>
+					</div>
+					<div class="panel panel-right" id="tab-container">
+						<div class="tab-inner-container">
+							<div class="right-panel-content">
+								<ul class="infinite-tabs" id="tabsRight">
+									<li class="active locked tab" id="joinedTab"><a href="#joinedContent">Joined</a></li>
+									<li class="locked tab" id="nextToRaceTab"><a href="#nextToRaceContent">Next to Race</a></li>
+									<li class="locked tab" id="resultsTab"><a href="#resultsContent">Results</a></li>
+								</ul>
+								<div class="tab-content" id="joinedContent">
+									<div id="joinedRaces">
+										<span data-bind='foreach: joinedRaceList'>
+											<div class="item-text item-joined-race">
+												<div data-bind="attr: {class: 'item-joined-race-' + $data.class}">
+													<table class="item-text item-joined-race item-joined-race-details">
+														<tr>
+															<td class="cell-race-class">
+																<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+															</td>
+															<td class="cell-race-title">
+																<div data-bind="text: name"></div>
+																<div>Participant Count: <span data-bind="text: $data.participants.length"></span></div>
+																<div>Your Entry: <span data-bind="text: $data.enteredVehicle.name"></span></div>
+															</td>
+															<td class="cell-race-image">
+																<img class="image-vehicle-thumbnail" data-bind="attr: {title: '{0} (ID #{1})'.replace('{0}', $data.enteredVehicle.name).replace('{1}', $data.enteredVehicle.id), src: $data.enteredVehicle.image}" />
+															</td>
+															<td class="cell-race-terrain">
+																<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+															</td>
+															<td class="cell-race-weather">
+																<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+															</td>
+														</tr>
+													</table>
+												</div>
+											</div>
+										</span>
+									</div>
+								</div>
+								<div class="tab-content" id="nextToRaceContent">
+									Next-to-Race View Coming Soon!
+								</div>
+								<div class="tab-content" id="resultsContent">
+									Results View Coming Soon!
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="userVehicles" style="visibility: hidden;"></div>
+		<div style="visibility: hidden;">
+			<svg title="Ground" id="img_class_ground" xmlns="http://www.w3.org/2000/svg" width="24.777" height="10.282" viewBox="0 0 24.777 10.282"><g id="Group_3619" data-name="Group 3619" transform="translate(-3326.844 -1033.487)"><g id="Group_3610" data-name="Group 3610" transform="translate(3328.101 1037.079)"><path id="Path_923" data-name="Path 923" d="M3351.657,1044.976h-4.691v-.55a1.5,1.5,0,1,0-2.994,0v.55h-7.442v-.55a1.5,1.5,0,1,0-2.994,0v.55h-4.3v-2.9l2.8-1.741,9.662.005,6.686.912.031.008a2.969,2.969,0,0,1,2.135,1.506Zm-3.65-1.1h1.872l-.34-.686a2.015,2.015,0,0,0-1.366-.859l-1.5-.2A2.6,2.6,0,0,1,3348.008,1043.876Zm-10.436,0h5.359a2.607,2.607,0,0,1,1.993-1.989l-3.333-.455h-9.237l-2.016,1.253v1.191h2.158a2.6,2.6,0,0,1,5.076,0Z" transform="translate(-3329.238 -1040.332)" fill="#11d552"></path></g><g id="Group_3613" data-name="Group 3613" transform="translate(3331.299 1038.576)"><g id="Group_3611" data-name="Group 3611" transform="translate(0 0)"><path id="Path_924" data-name="Path 924" d="M3337.931,1048.378a2.6,2.6,0,1,1,2.6-2.6A2.6,2.6,0,0,1,3337.931,1048.378Zm0-4.093a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,3337.931,1044.285Z" transform="translate(-3335.334 -1043.185)" fill="#11d552"></path></g><g id="Group_3612" data-name="Group 3612" transform="translate(10.436 0)"><path id="Path_925" data-name="Path 925" d="M3357.818,1048.378a2.6,2.6,0,1,1,2.6-2.6A2.6,2.6,0,0,1,3357.818,1048.378Zm0-4.093a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,3357.818,1044.285Z" transform="translate(-3355.222 -1043.185)" fill="#11d552"></path></g></g><g id="Group_3614" data-name="Group 3614" transform="translate(3348.786 1040.623)"><rect id="Rectangle_659" data-name="Rectangle 659" width="2.835" height="1.1" transform="translate(0)" fill="#11d552"></rect></g><g id="Group_3615" data-name="Group 3615" transform="translate(3326.844 1033.487)"><rect id="Rectangle_660" data-name="Rectangle 660" width="5.637" height="1.1" fill="#11d552"></rect></g><g id="Group_3616" data-name="Group 3616" transform="translate(3328.633 1033.656)"><rect id="Rectangle_661" data-name="Rectangle 661" width="1.1" height="4.523" transform="matrix(0.976, -0.218, 0.218, 0.976, 0, 0.24)" fill="#11d552"></rect></g><g id="Group_3617" data-name="Group 3617" transform="translate(3338.447 1035.147)"><path id="Path_926" data-name="Path 926" d="M3353.013,1039.333h-1.1a1.285,1.285,0,0,0-.383-.982,2.617,2.617,0,0,0-1.475-.571v1.215h-1.1v-2.318l.526-.023a4.268,4.268,0,0,1,2.81.9A2.36,2.36,0,0,1,3353.013,1039.333Z" transform="translate(-3348.955 -1036.651)" fill="#11d552"></path></g><g id="Group_3618" data-name="Group 3618" transform="translate(3334.355 1036.107)"><rect id="Rectangle_662" data-name="Rectangle 662" width="1.1" height="1.522" transform="translate(0 0)" fill="#11d552"></rect></g></g></svg>
+			<svg title="Water" id="img_class_water" xmlns="http://www.w3.org/2000/svg" width="14.726" height="16.985" viewBox="0 0 14.726 16.985"><g id="Group_3635" data-name="Group 3635" transform="translate(-3450.782 -1223.896)"><g id="Group_3631" data-name="Group 3631" transform="translate(3450.782 1235.209)"><path id="Path_930" data-name="Path 930" d="M3459.9,1260.2h-3.6a3.532,3.532,0,0,1-2.732-1.287l-2.615-3.168a.743.743,0,0,1,.573-1.216h13.237a.743.743,0,0,1,.565,1.225l-2.732,3.2A3.536,3.536,0,0,1,3459.9,1260.2Zm-8.31-4.9,2.573,3.117a2.76,2.76,0,0,0,2.136,1.006h3.6a2.766,2.766,0,0,0,2.107-.972l2.688-3.151Zm-.065-.387v.387h0Z" transform="translate(-3450.782 -1254.531)" fill="#87deff"></path></g><g id="Group_3632" data-name="Group 3632" transform="translate(3457.758 1223.896)"><rect id="Rectangle_670" data-name="Rectangle 670" width="0.774" height="11.7" transform="translate(0 0)" fill="#87deff"></rect></g><g id="Group_3633" data-name="Group 3633" transform="translate(3457.998 1224.189)"><path id="Path_931" data-name="Path 931" d="M3470.323,1235.4v-.774a4.583,4.583,0,0,0,0-9.167v-.774a5.357,5.357,0,1,1,0,10.715Z" transform="translate(-3470.323 -1224.69)" fill="#87deff"></path></g><g id="Group_3634" data-name="Group 3634" transform="translate(3458.696 1236.717)"><path id="Path_932" data-name="Path 932" d="M3473.539,1261.27a1.327,1.327,0,1,1,1.328-1.327A1.329,1.329,0,0,1,3473.539,1261.27Zm0-1.881a.554.554,0,1,0,.553.553A.554.554,0,0,0,3473.539,1259.39Z" transform="translate(-3472.212 -1258.616)" fill="#87deff"></path></g></g></svg>
+			<svg title="Air" id="img_class_air" xmlns="http://www.w3.org/2000/svg" width="27.239" height="15.761" viewBox="0 0 27.239 15.761"><g id="Group_3630" data-name="Group 3630" transform="translate(-3323.204 -916.508)"><g id="Group_3620" data-name="Group 3620" transform="translate(3334.479 920.064)"><path id="Path_927" data-name="Path 927" d="M3352.788,933.429c-.494,0-.992-.014-1.475-.027-.456-.013-.887-.025-1.288-.025a4.969,4.969,0,0,1,0-9.934c1.394,0,3.21,1.019,4.859,2.727,1.247,1.291,2.58,3.223,2.58,4.77a2.032,2.032,0,0,1-.613,1.516C3356.007,933.278,3354.421,933.429,3352.788,933.429Zm-2.762-8.911a3.894,3.894,0,0,0,0,7.784c.416,0,.854.012,1.318.025,1.775.049,3.985.111,4.759-.641a.973.973,0,0,0,.288-.746c0-1-.916-2.613-2.278-4.024C3352.683,925.438,3351.118,924.519,3350.025,924.519Z" transform="translate(-3345.193 -923.444)" fill="#acacac"></path></g><g id="Group_3621" data-name="Group 3621" transform="translate(3327.634 922.926)"><rect id="Rectangle_663" data-name="Rectangle 663" width="7.618" height="1.075" fill="#acacac"></rect></g><g id="Group_3622" data-name="Group 3622" transform="translate(3327.634 924.494)"><rect id="Rectangle_664" data-name="Rectangle 664" width="7.382" height="1.075" fill="#acacac"></rect></g><g id="Group_3623" data-name="Group 3623" transform="translate(3323.204 921.684)"><path id="Path_928" data-name="Path 928" d="M3325.858,931.91a2.654,2.654,0,1,1,2.654-2.654A2.657,2.657,0,0,1,3325.858,931.91Zm0-4.233a1.579,1.579,0,1,0,1.58,1.579A1.581,1.581,0,0,0,3325.858,927.677Z" transform="translate(-3323.204 -926.602)" fill="#acacac"></path></g><g id="Group_3624" data-name="Group 3624" transform="translate(3338.774 916.508)"><rect id="Rectangle_665" data-name="Rectangle 665" width="1.075" height="4.094" fill="#acacac"></rect></g><g id="Group_3625" data-name="Group 3625" transform="translate(3328.179 917.798)"><rect id="Rectangle_666" data-name="Rectangle 666" width="22.264" height="1.075" fill="#acacac"></rect></g><g id="Group_3626" data-name="Group 3626" transform="translate(3332.685 931.194)"><rect id="Rectangle_667" data-name="Rectangle 667" width="13.252" height="1.075" fill="#acacac"></rect></g><g id="Group_3627" data-name="Group 3627" transform="translate(3323.986 922.466)"><rect id="Rectangle_668" data-name="Rectangle 668" width="4.221" height="1.075" transform="translate(0 2.984) rotate(-45)" fill="#acacac"></rect></g><g id="Group_3628" data-name="Group 3628" transform="translate(3323.986 922.466)"><rect id="Rectangle_669" data-name="Rectangle 669" width="1.075" height="4.221" transform="translate(0 0.76) rotate(-45)" fill="#acacac"></rect></g><g id="Group_3629" data-name="Group 3629" transform="translate(3337.432 920.852)"><path id="Path_929" data-name="Path 929" d="M3359.732,932.381h-2.962l-2.64-2.64h-3.178v-4.761h1.074v3.686h2.549l2.64,2.64h2.517Z" transform="translate(-3350.952 -924.981)" fill="#acacac"></path></g></g></svg>
+			<svg title="Space" id="img_class_space" xmlns="http://www.w3.org/2000/svg" width="18.35" height="18.35" viewBox="0 0 18.35 18.35"><g id="Group_3643" data-name="Group 3643" transform="translate(-3447.31 -1118.343)"><g id="Group_3637" data-name="Group 3637" transform="translate(3455.601 1119.071)"><path id="Path_933" data-name="Path 933" d="M3473.15,1129.533a4.663,4.663,0,1,1,3.3-1.365A4.653,4.653,0,0,1,3473.15,1129.533Zm0-8.511a3.845,3.845,0,1,0,2.72,1.125h0A3.835,3.835,0,0,0,3473.15,1121.022Z" transform="translate(-3468.485 -1120.202)" fill="#bd2f50"></path></g><g id="Group_3638" data-name="Group 3638" transform="translate(3447.31 1120.42)"><rect id="Rectangle_671" data-name="Rectangle 671" width="12.959" height="0.821" transform="translate(0 8.623) rotate(-41.716)" fill="#bd2f50"></rect></g><g id="Group_3639" data-name="Group 3639" transform="translate(3450.828 1123.446)"><rect id="Rectangle_672" data-name="Rectangle 672" width="12.937" height="0.821" transform="matrix(0.707, -0.707, 0.707, 0.707, 0, 9.148)" fill="#bd2f50"></rect></g><g id="Group_3640" data-name="Group 3640" transform="translate(3454.347 1126.474)"><rect id="Rectangle_673" data-name="Rectangle 673" width="12.959" height="0.821" transform="translate(0 9.673) rotate(-48.286)" fill="#bd2f50"></rect></g><g id="Group_3641" data-name="Group 3641" transform="translate(3462.403 1118.343)"><rect id="Rectangle_674" data-name="Rectangle 674" width="3.784" height="0.821" transform="translate(0 2.676) rotate(-45)" fill="#bd2f50"></rect></g><g id="Group_3642" data-name="Group 3642" transform="translate(3460.907 1119.693)"><path id="Path_934" data-name="Path 934" d="M3485.439,1125.194a3.407,3.407,0,0,1-3.4-3.4h.821a2.585,2.585,0,0,0,2.583,2.582Z" transform="translate(-3482.036 -1121.791)" fill="#bd2f50"></path></g></g></svg>
+
+			<svg title="Foggy" id="img_weather_foggy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M22.332,16.668a.5.5,0,0,1-.664.747c-5.009-4.459-6.912-3.111-10.062-.88-.422.3-.861.611-1.328.922a5.65,5.65,0,0,1-3.192,1,8.772,8.772,0,0,1-5.439-2.392.5.5,0,0,1,.707-.707c.151.15,3.758,3.682,7.369,1.271.458-.306.891-.611,1.3-.9C14.214,13.464,16.731,11.681,22.332,16.668ZM11.027,20.721c-.378.267-.771.546-1.184.824a.5.5,0,1,0,.559.83c.421-.284.819-.566,1.2-.838,3.153-2.233,5.054-3.58,10.063.877a.5.5,0,0,0,.664-.746C16.731,16.681,14.212,18.465,11.027,20.721ZM16,5.459H14.473a4.5,4.5,0,0,0-8.948.025A4.518,4.518,0,0,0,2.669,6.933,4.464,4.464,0,0,0,1.521,10.4a4.629,4.629,0,0,0,4.651,4.06h4.041c.509-.359,1.007-.7,1.5-1H6.172A3.621,3.621,0,0,1,2.517,10.3,3.5,3.5,0,0,1,6,6.459a.5.5,0,0,0,.5-.5,3.5,3.5,0,0,1,7,0,.5.5,0,0,0,.5.5h2a2.5,2.5,0,0,1,2.5,2.5v.107a1.4,1.4,0,0,0,1.393,1.393,1.562,1.562,0,0,1,1.532,1.016,1.527,1.527,0,0,1-.218,1.375,1.483,1.483,0,0,1-.748.529c.307.188.622.4.946.627a2.471,2.471,0,0,0,.606-.562,2.52,2.52,0,0,0,.371-2.262,2.567,2.567,0,0,0-2.489-1.723.393.393,0,0,1-.393-.393V8.959A3.5,3.5,0,0,0,16,5.459Z"></path></svg>
+			<svg title="Icy" id="img_weather_icy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5.381,4.876A4.631,4.631,0,0,1,7.2,5.269a.507.507,0,0,0,.448-.028A.55.55,0,0,0,7.9,4.876a4.4,4.4,0,0,1,8.688-.392.513.513,0,0,0,.5.392h.084c2.494,0,4.428,2.69,4.428,5.016s-1.934,5.016-4.428,5.016H5.409c-2.494,0-4.428-2.69-4.428-5.016S2.887,4.876,5.381,4.876Zm0,11.042h11.77c3.083,0,5.409-3.167,5.409-6,0-2.746-2.158-5.8-5.1-6a5.382,5.382,0,0,0-10.425.252,5.458,5.458,0,0,0-1.625-.252C2.326,3.923,0,7.09,0,9.921S2.27,15.918,5.381,15.918Z" fill="#ddd"></path><path d="M14.763,64.44l1.878-1.878a.377.377,0,0,0-.532-.532L14.23,63.908a.39.39,0,0,0,0,.532.417.417,0,0,0,.252.112A1.932,1.932,0,0,0,14.763,64.44Z" transform="translate(-10.167 -44.571)" fill="#ddd"></path><path d="M22.363,76.619l.757-.757a.377.377,0,0,0-.532-.532l-.757.757a.39.39,0,0,0,0,.532.417.417,0,0,0,.252.112A.266.266,0,0,0,22.363,76.619Z" transform="translate(-15.637 -54.143)" fill="#ddd"></path><path d="M28.539,59.417h0a.819.819,0,0,1,.454.15l.035.023,1.144,1.144.018.024a.846.846,0,0,1,.16.7l0,.013-.393,1.488a.748.748,0,0,1-.556.562l-1.489.393a.784.784,0,0,1-.19.023.773.773,0,0,1-.546-.218L26.08,62.624a.787.787,0,0,1-.195-.735v-.005l.39-1.476a.748.748,0,0,1,.556-.562L28.3,59.46A.726.726,0,0,1,28.539,59.417Zm.987,1.861L28.518,60.27l-1.436.379-.374,1.414,1.025,1.025,1.414-.374.378-1.432Z" transform="translate(-18.614 -42.766)" fill="#ddd"></path><path d="M46.127,63.462a.773.773,0,0,1,.546.218L48.1,65.109a.7.7,0,0,1,.184.775L47.765,67.8a.748.748,0,0,1-.554.56l-1.966.534a.784.784,0,0,1-.19.023.773.773,0,0,1-.546-.218L43.08,67.273a.787.787,0,0,1-.195-.735l0-.008.53-1.951a.748.748,0,0,1,.554-.56l1.967-.534A.784.784,0,0,1,46.127,63.462Zm1.346,2.207-1.361-1.361-1.891.513-.513,1.891,1.361,1.361,1.891-.513Z" transform="translate(-30.85 -45.677)" fill="#ddd"></path></svg>
+			<svg title="Rainy" id="img_weather_rainy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M12,17.5a.5.5,0,0,1,.5.5v4a.5.5,0,0,1-1,0V18A.5.5,0,0,1,12,17.5ZM7.5,18v4a.5.5,0,0,0,1,0V18a.5.5,0,1,0-1,0Zm-4,0v4a.5.5,0,0,0,1,0V18a.5.5,0,0,0-1,0Zm12,0v4a.5.5,0,1,0,1,0V18a.5.5,0,0,0-1,0Zm4,0v4a.5.5,0,0,0,1,0V18a.5.5,0,0,0-1,0Zm.5-3.5H6.172a4.63,4.63,0,0,1-4.651-4.06A4.465,4.465,0,0,1,2.669,6.974,4.52,4.52,0,0,1,5.525,5.525,4.5,4.5,0,0,1,14.473,5.5H16A3.5,3.5,0,0,1,19.5,9v.107a.392.392,0,0,0,.392.393,2.567,2.567,0,0,1,2.489,1.723A2.507,2.507,0,0,1,20,14.5Zm1.424-2.984A1.561,1.561,0,0,0,19.893,10.5,1.394,1.394,0,0,1,18.5,9.107V9A2.5,2.5,0,0,0,16,6.5H14a.5.5,0,0,1-.5-.5,3.5,3.5,0,0,0-7,0,.5.5,0,0,1-.5.5,3.5,3.5,0,0,0-3.484,3.846A3.622,3.622,0,0,0,6.172,13.5H20a1.49,1.49,0,0,0,1.207-.609A1.53,1.53,0,0,0,21.425,11.516Z"></path></svg>
+			<svg title="Snowy" id="img_weather_snowy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M17.5,16a.5.5,0,0,1-.5.5H13.207l2.682,2.682a.5.5,0,0,1-.707.707L12.5,17.207V21a.5.5,0,0,1-1,0V17.207L8.818,19.889a.5.5,0,0,1-.707-.707L10.793,16.5H7a.5.5,0,0,1,0-1h3.793L8.111,12.818a.5.5,0,0,1,.707-.707L11.5,14.793V11a.5.5,0,0,1,1,0v3.793l2.682-2.682a.5.5,0,0,1,.707.707L13.207,15.5H17A.5.5,0,0,1,17.5,16Zm2.393-5.5a.393.393,0,0,1-.393-.393V10A3.5,3.5,0,0,0,16,6.5H14.473a4.5,4.5,0,0,0-8.948.025A4.513,4.513,0,0,0,2.67,7.974,4.465,4.465,0,0,0,1.521,11.44a4.568,4.568,0,0,0,3.591,3.927,1.994,1.994,0,0,1,.626-.907,3.588,3.588,0,0,1-3.222-3.115A3.5,3.5,0,0,1,6,7.5.5.5,0,0,0,6.5,7a3.5,3.5,0,0,1,7,0,.5.5,0,0,0,.5.5h2A2.5,2.5,0,0,1,18.5,10v.107A1.4,1.4,0,0,0,19.893,11.5a1.562,1.562,0,0,1,1.532,1.016,1.53,1.53,0,0,1-.218,1.375A1.487,1.487,0,0,1,20,14.5H18.311a2,2,0,0,1,.619,1H20a2.507,2.507,0,0,0,2.382-3.277A2.567,2.567,0,0,0,19.893,10.5Z"></path></svg>
+			<svg title="Sunny" id="img_weather_sunny" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M6.5,12A5.5,5.5,0,1,0,12,6.5,5.506,5.506,0,0,0,6.5,12ZM12,7.5A4.5,4.5,0,1,1,7.5,12,4.505,4.505,0,0,1,12,7.5Zm0-3a.5.5,0,0,1-.5-.5V2a.5.5,0,0,1,1,0V4A.5.5,0,0,1,12,4.5Zm0,15a.5.5,0,0,1,.5.5v2a.5.5,0,0,1-1,0V20A.5.5,0,0,1,12,19.5ZM19.425,5.283,18.011,6.7A.5.5,0,1,1,17.3,5.99l1.414-1.414a.5.5,0,0,1,.707.707ZM6.7,17.3a.5.5,0,0,1,0,.707L5.282,19.425a.5.5,0,1,1-.707-.707L5.99,17.3A.5.5,0,0,1,6.7,17.3ZM22.5,12a.5.5,0,0,1-.5.5H20a.5.5,0,0,1,0-1h2A.5.5,0,0,1,22.5,12Zm-18,0a.5.5,0,0,1-.5.5H2a.5.5,0,0,1,0-1H4A.5.5,0,0,1,4.5,12Zm13.511,5.3,1.414,1.415a.5.5,0,0,1-.707.707L17.3,18.01a.5.5,0,0,1,.707-.707ZM6.7,5.99A.5.5,0,0,1,5.99,6.7L4.575,5.283a.5.5,0,1,1,.707-.707Z"></path></svg>
+			<svg title="Stormy" id="img_weather_stormy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M17.7,14.2H6.3C4,14.2,1.9,12,1.9,9.6C1.9,7.2,4,5,6.3,5C6.9,5,7.5,5.1,8,5.4c0.1,0.1,0.3,0.1,0.4,0C8.6,5.3,8.7,5.1,8.7,5 C9,2.8,10.8,1.2,13,1.2c2.1,0,3.8,1.4,4.2,3.4C17.3,4.8,17.4,5,17.7,5c0.1,0,0.1,0,0.1,0c2.3,0,4.3,2.1,4.3,4.6 C22,12,20,14.2,17.7,14.2z M18,4c-0.6-2.2-2.7-3.8-5.1-3.8c-2.5,0-4.6,1.7-5.1,4.1C7.3,4.1,6.8,4,6.3,4C3.4,4,1,6.6,1,9.6 s2.4,5.6,5.3,5.6h11.5c2.8,0,5.3-2.5,5.3-5.6C23,6.7,20.8,4.2,18,4z"></path><path d="M7.7,23.9C7.8,23.9,7.9,24,8,24c0.1,0,0.2-0.1,0.4-0.1l3-3.1c0.1-0.1,0.2-0.4,0.1-0.5c-0.1-0.2-0.2-0.3-0.4-0.3H9.9l1.9-1.8 c0.2-0.2,0.2-0.5,0-0.7c-0.2-0.2-0.5-0.2-0.7,0L8.4,20c-0.1,0.1-0.2,0.4-0.1,0.5c0.1,0.2,0.2,0.3,0.4,0.3h1.2l-2.2,2.3 C7.5,23.4,7.5,23.7,7.7,23.9z"></path><path d="M14.5,20.2l2.4-2.4c0.2-0.2,0.2-0.5,0-0.7s-0.5-0.2-0.7,0l-2.4,2.4c-0.2,0.2-0.2,0.5,0,0.7c0.1,0.1,0.2,0.1,0.3,0.1 C14.3,20.3,14.4,20.3,14.5,20.2z"></path><path d="M4.9,20.2l2.4-2.4c0.2-0.2,0.2-0.5,0-0.7c-0.2-0.2-0.5-0.2-0.7,0l-2.4,2.4C4,19.7,4,20,4.2,20.2c0.1,0.1,0.2,0.1,0.3,0.1 C4.7,20.3,4.8,20.3,4.9,20.2z"></path></svg>
+			<svg title="Windy" id="img_weather_windy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M1.5,8A.5.5,0,0,1,2,7.5H9a2.5,2.5,0,0,0,0-5H8a.5.5,0,0,1,0-1H9a3.5,3.5,0,0,1,0,7H2A.5.5,0,0,1,1.5,8ZM2,16.5H19a2.5,2.5,0,0,1,0,5H18a.5.5,0,0,0,0,1h1a3.5,3.5,0,0,0,0-7H2a.5.5,0,0,0,0,1Zm0-4H19a3.5,3.5,0,0,0,0-7H18a.5.5,0,0,0,0,1h1a2.5,2.5,0,0,1,0,5H2a.5.5,0,0,0,0,1Z"></path></svg>
+		</div>
+</body>
+</html>

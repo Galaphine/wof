@@ -1,7 +1,0 @@
-{
-    "authorization_key": "<replace-with-your-authorization-key>",
-    "excluded_vehicles": [],
-    "max_participants": 12,
-    "participation_threshold": 8,
-    "wallet_address": "<replace-with-your-wallet-address>"
-}

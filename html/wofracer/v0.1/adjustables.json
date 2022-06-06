@@ -1,0 +1,451 @@
+{
+    "vehicleAdjustables":
+    [
+        {
+            "vehicleType": "aa-9 coruscant freighter",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "airship / zeppelin",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 900,
+                    "decelerationDelay": 900,
+                    "refuelingDelay": 300
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "box truck",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 180
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "cargo ship",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 55800,
+                    "decelerationDelay": 55800,
+                    "refuelingDelay": 3600
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "delivery robot",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "drone",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 3600
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "flying saucer (ufo)",
+            "adjustables": {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "freight aircraft",
+            "adjustables": {
+                "delays":
+                {
+                    "accelerationDelay": 1800,
+                    "decelerationDelay": 1800,
+                    "refuelingDelay": 1800
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "hot-air balloon",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 900,
+                    "decelerationDelay": 900,
+                    "refuelingDelay": 120
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "locomotive / train",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 900,
+                    "decelerationDelay": 900,
+                    "refuelingDelay": 1800
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "semi truck",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 300,
+                    "decelerationDelay": 300,
+                    "refuelingDelay": 600
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+        }
+        },
+        {
+            "vehicleType": "space launcher",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "van",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 120
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        },
+        {
+            "vehicleType": "x-wing",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            }
+        }
+    ]
+}

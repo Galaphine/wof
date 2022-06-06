@@ -1,0 +1,494 @@
+body, table
+{
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+}
+
+/* Sets the containers height and width */
+.base-timer 
+{
+    color: lightyellow;
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+/* Removes SVG styling that would hide the time label */
+.base-timer__circle 
+{
+    fill: none;
+    stroke: none;
+}
+
+  .base-timer__label 
+{
+    position: absolute;
+    
+    /* Size should match the parent container */
+    width: 32px;
+    height: 32px;
+    
+    /* Keep the label aligned to the top */
+    top: 0;
+    
+    /* Create a flexible box that centers content vertically and horizontally */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    /* Sort of an arbitrary number; adjust to your liking */
+    font-size: 9px;
+}
+
+/* The SVG path that displays the timer's progress */
+.base-timer__path-elapsed 
+{
+    stroke-width: 6px;
+    stroke: grey;
+}
+
+.base-timer__path-remaining 
+{
+    /* Just as thick as the original ring */
+    stroke-width: 6px;
+  
+    /* Rounds the line endings to create a seamless circle */
+    stroke-linecap: round;
+  
+    /* Makes sure the animation starts at the top of the circle */
+    transform: rotate(90deg);
+    transform-origin: center;
+  
+    /* One second aligns with the speed of the countdown timer */
+    transition: 1s linear all;
+  
+    /* Allows the ring to change color when the color value updates */
+    stroke: currentColor;
+  }
+  
+.base-timer__path-remaining.info
+{
+    color: rgb(65, 184, 131);
+}
+    
+.base-timer__path-remaining.alert
+{
+    color: orange;
+}
+    
+.base-timer__path-remaining.warning
+{
+    color: red;
+}
+      
+
+    .base-timer__svg 
+  {
+    /* Flips the svg and makes the animation to move left-to-right */
+    transform: scaleX(-1);
+  }
+
+
+.cell-race-class
+{
+    text-align: right;
+    padding-right: 3px;
+    white-space: nowrap;
+    width: 30px;
+    vertical-align: middle;
+}
+
+.cell-race-details
+{
+    width: 90%;
+    vertical-align: middle;
+}
+
+.cell-race-image
+{
+    width: 35px;
+}
+
+.cell-race-terrain
+{
+    width: 20px; 
+    text-align: center;
+    vertical-align: middle;
+}
+
+.cell-race-weather
+{
+    width: 20px; 
+    vertical-align: middle;
+}
+
+.form-input
+{
+    background: radial-gradient(lightblue, lightyellow);
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    outline: none;
+}
+
+.form-input-adjustable-delay
+{
+    color: brown;
+    width: 50px;
+}
+
+.header-panel
+{
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 100px;
+    white-space: nowrap;
+    width: 100%;
+    z-index: 0;
+}
+
+.header-panel-left
+{
+    border: 1px solid #888;
+    flex: 0 0 auto;
+    height: 100%;
+    padding-left: 10px;
+    white-space: nowrap;
+    min-width: 390px;
+    vertical-align: top;
+    width: 390px;
+}
+
+.header-panel-right
+{
+    border: 1px solid #888;
+    flex: 0 0 auto;
+    height: 100%;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.icon-container
+{
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+.icon-filter
+{
+    cursor: pointer;
+    height: 20px;
+    min-height: 20px;
+    min-width: 30px;
+    text-align: center;
+    width: 30px;
+}
+
+.icon-filter-class-all
+{
+    font-size: 12pt;
+    color: red;
+    kerning: 0px;
+}
+
+.icon-filter-terrain-all
+{
+    font-size: 12pt;
+    color: darkgoldenrod;
+    kerning: 0px;
+}
+
+.icon-filter-weather-all
+{
+    font-size: 12pt;
+    color: lightblue;
+    kerning: 0px;
+}
+
+.icon-filter-group-class
+{
+    padding: 5px;
+    width: 45%;
+}
+
+.icon-filter-title
+{
+    color: lightyellow;
+    padding-right: 10px;
+    white-space: nowrap;
+    width: 10%;
+}
+
+.icon-letter-terrain
+{
+    font-size: 18pt;
+    color: grey;
+}
+
+.icon-padder
+{
+    display: inline-block;
+    width: 6px;
+}
+
+.image-vehicle-thumbnail
+{
+    width: 30px;
+}
+
+.item-title
+{
+    border-bottom: 1px dotted #888;
+}
+
+.item-text
+{
+    color: lightyellow;
+}
+
+.item-joined-race, .item-unjoined-race
+{
+    cursor: pointer;
+}
+
+.item-joined-race-air, .item-unjoined-race-air
+{
+    background: linear-gradient(black, #444);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-details, .item-unjoined-race-details
+{
+    width: 100%;
+}
+
+.item-joined-race-ground, .item-unjoined-race-ground
+{
+    background: linear-gradient(black, darkgreen);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-space, .item-unjoined-race-space
+{
+    background: linear-gradient(black, #500000);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-water, .item-unjoined-race-water
+{
+    background: linear-gradient(black, darkblue);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.menu-filter-class td
+{
+    background: linear-gradient(black, #333);
+}
+
+.message-popup
+{
+    background-color: pink;
+    color: red;
+    font-size: 10pt;
+    height: 40px;
+    line-height: 40px;
+    max-width: 400px;
+    padding: 10px;
+    position: absolute;
+    right: 10px;
+    top: 20px;
+    vertical-align: middle;
+    width: 400px;
+    z-index: 99;
+}
+
+.panel
+{
+    background: black;
+    border: 1px solid #888;
+    border-collapse: collapse;
+    color: white;
+}
+
+.panel-body
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    height: 50%;
+    padding: 0px;
+}
+
+.panel-bottom 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    max-height: 60%;
+    min-height: 60%;
+    padding: 10px;
+}
+
+.panel-container-horizontal
+{
+    border-collapse: collapse;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.panel-container-vertical
+{
+    border-collapse: collapse;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.panel-header
+{
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding: 10px;
+    height: 70px;
+    min-height: 70px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.panel-left 
+{
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding: 10px;
+    min-height: 200px;
+    min-width: 380px;
+    white-space: nowrap;
+    width: 380px;
+    overflow-y: auto;
+}
+
+.panel-right 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    /* resizable */
+    padding: 10px;
+    min-height: 200px;
+    min-width: 400px;
+}
+
+.panel-top 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    padding: 10px;
+    height: 400px;
+    white-space: nowrap;
+    width: 100%;
+    z-index: 0;
+}
+
+.right-panel-content
+{
+    border: 1px solid #444;
+    height: 100%;
+}
+
+.severity-info
+{
+    color: lightgreen;
+}
+
+.severity-error
+{
+    color: #ff6666;
+}
+
+.status-content-message
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    width: 56%;
+}
+
+.status-content-severity
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    width: 14%;
+}
+
+.status-content-time
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    white-space: nowrap;
+    width: 30%;
+}
+
+.status-header-message
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-header-severity
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-header-time
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-table
+{
+    width: 100%;
+}
+
+.tab 
+{
+    z-index: auto;
+}
+
+.tab-content
+{
+    vertical-align: top;
+    z-index: auto;
+}
+
+.tab-inner-container
+{
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    text-align: left;
+    width: 100%;
+}
+

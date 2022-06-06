@@ -1,8 +1,8 @@
 {
-    "authorization_key": "HSleYZOtXtfrLwwDu/pt90DRrUYBbtg9UltVnI3e5enEo33ggkDd9o8WTZqlLX5v2LaLbZ5GbECAsoHQvozvJg==",
+    "authorization_key": "<Your Authorization Key>",
     "excluded_vehicles": [],
     "max_participants": 12,
     "participation_threshold": 8,
-    "user_id": "6197ade959191ccbc32c0db5",
-    "wallet_address": "0x4d83C61ce3722c93fB9E6B226344dca246FC4aD9"
+    "user_id": "",
+    "wallet_address": "<Your Wallet Address>"
 }

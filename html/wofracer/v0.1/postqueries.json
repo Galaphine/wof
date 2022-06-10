@@ -26,7 +26,7 @@
             },
             "query": "query Racers($address: String!) {\n  racers(where: {address: {_regex: $address}}) {\n    address\n    username\n    races_won\n    tokens_won\n    __typename\n  }\n}"
         },
-        "Races":
+        "UpcomingRaces":
         {
             "operationName": "Races",
             "variables": {
@@ -35,13 +35,21 @@
               "distance": {},
               "period": {},
               "sortBy": {
-                "created_at": "desc"
+                "created_at": "asc"
               },
               "limit": 20
             },
-            "query": "fragment VehicleFields on token_metadata {\n  token_id\n  name\n  image\n  wins\n  podium_places\n  races_raced\n  __typename\n}\n\nfragment VehicleStats on token_metadata {\n  stats: attributes {\n    max_capacity\n    max_range\n    max_speed\n    fuel_efficiency\n    emission_rate\n    __typename\n  }\n  __typename\n}\n\nfragment RaceFields on races {\n  id\n  name\n  class\n  distance\n  weather\n  terrain\n  weight\n  cargo\n  fromCoord\n  toCoord\n  prize_pool\n  start\n  sponsor\n  promo_link\n  promo_banner\n  participants {\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  results {\n    time\n    place\n    prize\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  participants_aggregate {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nquery Races($limit: Int, $sortBy: [races_order_by!], $status: String!, $raceClasses: String_comparison_exp, $userStatus: [races_bool_exp!], $distance: Float_comparison_exp, $period: timestamptz_comparison_exp) {\n  races(\n    where: {status: {_eq: $status}, class: $raceClasses, distance: $distance, start: $period}\n    order_by: $sortBy\n    limit: $limit\n  ) {\n    ...RaceFields\n    __typename\n  }\n  races_aggregate(\n    where: {status: {_eq: $status}, class: $raceClasses, distance: $distance, start: $period}\n  ) {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n}"
+            "query": "fragment VehicleFields on token_metadata {\n  token_id\n  name\n  image\n  wins\n  podium_places\n  races_raced\n  __typename\n}\n\nfragment VehicleStats on token_metadata {\n  stats: attributes {\n    max_capacity\n    max_range\n    max_speed\n    fuel_efficiency\n    emission_rate\n    __typename\n  }\n  __typename\n}\n\nfragment RaceFields on races {\n  id\n  name\n  class\n  distance\n  weather\n  terrain\n  weight\n  cargo\n  fromCoord\n  toCoord\n  prize_pool\n  entry_fee\n start\n  sponsor\n  promo_link\n  promo_banner\n  participants {\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  results {\n    time\n    place\n    prize\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  participants_aggregate {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nquery Races($limit: Int, $sortBy: [races_order_by!], $status: String!, $raceClasses: String_comparison_exp, $userStatus: [races_bool_exp!], $distance: Float_comparison_exp, $period: timestamptz_comparison_exp) {\n  races(\n    where: {status: {_eq: $status}, class: $raceClasses, distance: $distance, start: $period}\n    order_by: $sortBy\n    limit: $limit\n  ) {\n    ...RaceFields\n    __typename\n  }\n  races_aggregate(\n    where: {status: {_eq: $status}, class: $raceClasses, distance: $distance, start: $period}\n  ) {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n}"
+        },
+        "NextToRaceRaces":
+        {
+            "operationName": "NextToRaceRaces",
+            "variables": {
+            "raceClasses": {}
+            },
+            "query": "fragment VehicleFields on token_metadata {\n  token_id\n  name\n  image\n  wins\n  podium_places\n  races_raced\n  __typename\n}\n\nfragment VehicleStats on token_metadata {\n  stats: attributes {\n    max_capacity\n    max_range\n    max_speed\n    fuel_efficiency\n    emission_rate\n    __typename\n  }\n  __typename\n}\n\nfragment RaceFields on races {\n  id\n  name\n  class\n  distance\n  weather\n  terrain\n  weight\n  cargo\n  fromCoord\n  toCoord\n  prize_pool\n  entry_fee\n start\n  sponsor\n  promo_link\n  promo_banner\n  participants {\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  results {\n    time\n    place\n    prize\n    racer {\n      address\n      username\n      __typename\n    }\n    vehicle {\n      ...VehicleStats\n      ...VehicleFields\n      __typename\n    }\n    __typename\n  }\n  participants_aggregate {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n  results_aggregate {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nquery NextToRaceRaces($raceClasses: String_comparison_exp) {\n  races(\n    where: {status: {_eq: \"next_to_race\"}, class: $raceClasses}\n    order_by: {start: asc}\n    limit: 50\n  ) {\n    ...RaceFields\n    __typename\n  }\n}"
         }
-          
+
           
     }
 }

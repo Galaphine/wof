@@ -59,7 +59,34 @@ function JoinedRacesVM(joinedRaces)
     self.joinedRaceList = ko.observableArray(joinedRaces);
 }
 
-function UnjoinedRacesVM(unjoinedRaces)
+function MySettingsVM()
+{
+    var self = this;
+
+    self.authorization_key = ko.observable();
+    self.excluded_vehicles = ko.observableArray();
+    self.participation_threshold = ko.observable();
+    self.refreshRateMilliseconds = ko.pureComputed(function() {return self.refreshRateSeconds()*1000;});
+    self.refresh_rate_seconds = ko.observable();
+    self.refreshRateSeconds = ko.pureComputed(function() {return (!isNaN(self.refresh_rate_seconds()) && (self.refresh_rate_seconds() >= 30) ) ? self.refresh_rate_seconds() : 30; });
+    self.wallet_address = ko.observable();
+}
+
+function NextToRaceRacesVM(nextToRaceRaces)
+{
+    if (nextToRaceRaces == null) return;
+
+    var self = this;
+
+    self.terrainIcon = function(terrain)
+    {
+        return (terrain) ? terrain.substring(0, 1) : '';
+    }
+
+    self.joinedRaceList = ko.observableArray(nextToRaceRaces);
+}
+
+function UnjoinedRacesVM(unjoineRaces)
 {
     if (unjoinedRaces == null) return;
     
@@ -69,7 +96,6 @@ function UnjoinedRacesVM(unjoinedRaces)
 
     self.selectRace = function(data, event)
     {
-        
     }
 
     self.terrainIcon = function(terrain)
@@ -77,16 +103,17 @@ function UnjoinedRacesVM(unjoinedRaces)
         return (terrain) ? terrain.substring(0, 1) : '';
     }
 
-    self.unjoinedRaceList = ko.observableArray(unjoinedRaces);
+    self.unjoinedRaceList = ko.observableArray();
 }
-function UserInfoVM(username, userParticipationThreshold)
+
+function UserInfoVM(username)
 {
     var self = this;
     self.username = ko.observable(username);
-    self.participationThreshold = ko.observable(userParticipationThreshold);
+    self.participationThreshold = ko.pureComputed(function() { return mySettings.participation_threshold() });
 }
 
-/* API calls - data retrieval */
+/* API calls + data retrieval */
 function getLocalData()
 {
     Log('getLocalData() - Start Function', 'severity-info', 'Info');
@@ -96,11 +123,20 @@ function getLocalData()
         {
             Log('getLocalData() - Begin mysettings.json getJSON()', 'severity-info', 'Info');
 
-            authorizationKey = data.authorization_key;
-            walletAddress = data.wallet_address;
-            participationThreshold = data.participation_threshold;
-            joinTemplate.address = walletAddress;
-            userRacesTemplate.address = walletAddress;
+            if (!bound['mySettingsVM'])
+            {
+                mySettings = new MySettingsVM();
+                ko.applyBindings(mySettings, $('#divNavSettings').get(0));
+                bound['mySettingsVM'] = true;
+            }
+
+            mySettings.authorization_key(data.authorization_key);
+            mySettings.excluded_vehicles(data.excluded_vehicles);
+            mySettings.wallet_address(data.wallet_address);
+            mySettings.participation_threshold(data.participation_threshold);
+            mySettings.refresh_rate_seconds(data.refresh_rate_seconds);
+            joinTemplate.address = mySettings.wallet_address();
+            userRacesTemplate.address = mySettings.wallet_address();
 
             Log('getLocalData() - End mysettings.json getJSON()', 'severity-info', 'Info');
         }, 'json'),
@@ -125,7 +161,7 @@ function getLocalData()
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': authorizationKey
+                        'Authorization': mySettings.authorization_key()
                     }
                 }
             );
@@ -143,15 +179,15 @@ function getLocalData()
 function getServerData()
 {
     Log('getServerData() - Start', 'severity-info', 'Info');
-    postQueries.Racers.variables.address = walletAddress;
-    postQueries.Fleet.variables.address = walletAddress;
+    postQueries.Racers.variables.address = mySettings.wallet_address();
+    postQueries.Fleet.variables.address = mySettings.wallet_address();
 
     $.when(
         $.post(graphQlApi, JSON.stringify(postQueries.Racers), function(data) {
             Log('getServerData() - Begin Racers post()', 'severity-info', 'Info');
             if (!bound['userInfoVM'])
             {
-                userInfoVM = new UserInfoVM(data.data.racers[0].username, participationThreshold);
+                userInfoVM = new UserInfoVM(data.data.racers[0].username);
                 ko.applyBindings(userInfoVM, $('#userInfo').get(0));
                 bound['userInfoVM'] = true;
             }
@@ -163,17 +199,35 @@ function getServerData()
                 if (!bound['userVehiclesVM'])
                 {
                     userVehiclesVM = ko.mapping.fromJS(data.data.token_metadata);
-                    ko.applyBindings(userVehiclesVM, $('#userVehicles').get(0));
+                    ko.applyBindings(userVehiclesVM, $('#divUserVehicles').get(0));
+                    $('#divUserVehicles').children().appendTo('#divExcludedUserVehicles');
                     bound['userVehiclesVM'] = true;
                 }
                 Log('getServerData() - End Fleet post()', 'severity-info', 'Info');
-                Log(JSON.stringify(userVehicles), 'severity-info', 'Info');
+                Log(JSON.stringify(userVehiclesVM), 'severity-info', 'Info');
             }
         , 'json'),
-        $.post(graphQlApi, JSON.stringify(postQueries.Races), function(data) {
+        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces), function(data) {
             Log('getServerData() - Begin Races post()', 'severity-info', 'Info');
 
-            races = data.data.races;
+            upcomingRaces = data.data.races;
+
+            Log('getServerData() - End Racers post()', 'severity-info', 'Info');
+        }, 'json'),
+        $.post(graphQlApi, JSON.stringify(postQueries.NextToRaceRaces), function(data) {
+            Log('getServerData() - Begin Races post()', 'severity-info', 'Info');
+
+            nextToRaceRaces = data.data.races;
+            if (nextToRaceRaces.length > 0)
+            {
+                $('#divAtLeast1NextToRaceRaces').show();
+                $('#divNoNextToRaceRaces').hide();
+            } 
+            else
+            {
+                $('#divAtLeast1NextToRaceRaces').hide();
+                $('#divNoNextToRaceRaces').show();
+            }
 
             Log('getServerData() - End Racers post()', 'severity-info', 'Info');
         }, 'json')
@@ -183,6 +237,7 @@ function getServerData()
             Log('getServerData() - Begin done()', 'severity-info', 'Info');
 
             Log('getServerData() - Call afterRaceQuery()', 'severity-info', 'Info')
+            setupSettings();
             afterRaceQuery(true);
 
             Log('getServerData() - End done()', 'severity-info', 'Info'); 
@@ -204,8 +259,11 @@ function afterRaceQuery(doSetTimeout, ignoreJoinRace)
     if (timerIntervalId) clearInterval(timerIntervalId);
     startTimer();
 
-    Log('afterRaceQuery() - Call setupRaces()', 'severity-info', 'Info')
-    setupRaces();
+    Log('afterRaceQuery() - Call setupNextToRaceRaces()', 'severity-info', 'Info')
+    setupNextToRaceRaces();
+
+    Log('afterRaceQuery() - Call setupUpcomingRaces()', 'severity-info', 'Info')
+    setupUpcomingRaces();
 
     Log('afterRaceQuery() - Call assignUserVehicles()', 'severity-info', 'Info')
     assignUserVehicles();
@@ -221,7 +279,7 @@ function afterRaceQuery(doSetTimeout, ignoreJoinRace)
         timeoutId = setTimeout(function() 
         { 
             refreshData(doSetTimeout); 
-        }, refreshRate);
+        }, mySettings.refreshRateMilliseconds());
     }
 
     Log('afterRaceQuery() - End', 'severity-info', 'Info'); 
@@ -229,12 +287,12 @@ function afterRaceQuery(doSetTimeout, ignoreJoinRace)
 
 function assignUserVehicles()
 {
-    Log('assignBestVehicles() - Start Function', 'severity-info', 'Info');
+    Log('assignUserVehicles() - Start Function', 'severity-info', 'Info');
 
     $.each(unjoinedRacesVM.unjoinedRaceList(), function(index)
         {
             var unjoinedRace = unjoinedRacesVM.unjoinedRaceList()[index];
-            Log('assignBestVehicles() - Begin Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
+            Log('assignUserVehicles() - Begin Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
 
             raceClass = unjoinedRace.class.toLowerCase();
             raceDistance = Math.round(unjoinedRace.distance, 4);
@@ -259,10 +317,11 @@ function assignUserVehicles()
             
             var availableVehiclesInClass = [];
             var availableVehiclesToRace = [];
+            var excludedDueToTripsOrRefuels = [];
 
             userVehiclesVM().forEach(userVehicle =>
                 {
-                    if (userVehicle.staticAttributes.transportation_mode().toLowerCase() == raceClass)
+                    if ((userVehicle.staticAttributes.transportation_mode().toLowerCase() == raceClass) && (mySettings.excluded_vehicles.indexOf(userVehicle.token_id()) == -1))
                     {
                         userVehicle.vehicleImageUrl = userVehicle.image();
                         userVehicle.vehicleName = userVehicle.name();
@@ -292,14 +351,19 @@ function assignUserVehicles()
                         vehicleAccelerationDelay = vehicleAdjustable.adjustables.delays.accelerationDelay;
                         vehicleDecelerationDelay = vehicleAdjustable.adjustables.delays.decelerationDelay;
                         vehicleRefuelingDelay = vehicleAdjustable.adjustables.delays.refuelingDelay * (numberOfRefuels-1) * (vehicleEmissionRate/10);
+                        availableVehicle.numberOfTrips = numberOfTrips;
+                        availableVehicle.numberOfRefuels = numberOfRefuels;
 
-                        if (joinedRaces.some(joinedRace => joinedRace.participants.filter(participant => { return participant.vehicle.token_id === availableVehicle.token_id() }).length > 0 ))
+                        var alreadyJoinedRace = joinedRaces.filter(joinedRace => { return joinedRace.participants.filter(participant => { return participant.vehicle.token_id === availableVehicle.token_id() }).length > 0} );
+                        if (alreadyJoinedRace.length > 0)
                         {
                             Log('{0} is already joined in a race; eliminating.'
                                 .replace('{0}', vehicleName)
                                 , 'severity-info', 'Info'
                             );
                             allowedVehicle = false;
+                            alreadyJoinedRace[0].enteredVehicle.numberOfRefuels = 0;
+                            alreadyJoinedRace[0].enteredVehicle.numberOfTrips = 0;
                         }
                         else if (numberOfTrips > 5)
                         {
@@ -310,6 +374,8 @@ function assignUserVehicles()
                                 , 'severity-info', 'Info'
                             );
                             allowedVehicle = false;
+							availableVehicle.finalAdjustedTime = 0;
+                            excludedDueToTripsOrRefuels.push(availableVehicle);
                         }
                         else if (numberOfRefuels > 5)
                         {
@@ -320,6 +386,8 @@ function assignUserVehicles()
                                 , 'severity-info', 'Info'
                             );
                             allowedVehicle = false;
+							availableVehicle.finalAdjustedTime = 0;
+                            excludedDueToTripsOrRefuels.push(availableVehicle);
                         }
 
                         if (allowedVehicle)
@@ -359,24 +427,51 @@ function assignUserVehicles()
                 }
                 else
                 {
+                    unjoinedRace.selectedVehicle.numberOfRefuels((excludedDueToTripsOrRefuels.length > 0) ? excludedDueToTripsOrRefuels[0].numberOfRefuels : 0);
+                    unjoinedRace.selectedVehicle.numberOfTrips((excludedDueToTripsOrRefuels.length > 0) ? excludedDueToTripsOrRefuels[0].numberOfTrips : 0);
                     unjoinedRace.selectedVehicle.vehicleId('');
                     unjoinedRace.selectedVehicle.vehicleImageUrl('');
                     unjoinedRace.selectedVehicle.vehicleTokenId('');
-                    unjoinedRace.selectedVehicle.vehicleName("No available {0} WOFs.".replace('{0}', raceClass));
+                    unjoinedRace.selectedVehicle.vehicleName("No suitable {0} WOFs.".replace('{0}', raceClass));
                 }
             }
             else
             {
+                unjoinedRace.selectedVehicle.numberOfRefuels(0);
+                unjoinedRace.selectedVehicle.numberOfTrips(0);
                 unjoinedRace.selectedVehicle.vehicleId('');
                 unjoinedRace.selectedVehicle.vehicleImageUrl('');
                 unjoinedRace.selectedVehicle.vehicleTokenId('');
-                unjoinedRace.selectedVehicle.vehicleName("No {0} WOFs to race.".replace('{0}', raceClass));
+                unjoinedRace.selectedVehicle.vehicleName("No {0} WOFs in fleet.".replace('{0}', raceClass));
             }
-            Log('assignBestVehicles() - End Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
+            Log('assignUserVehicles() - End Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
         }
     );
 
-    Log('assignBestVehicles() - End Function', 'severity-info', 'Info');
+    Log('assignUserVehicles() - End Function', 'severity-info', 'Info');
+}
+
+function cloneImages()
+{
+    $('#td_icon_ground').empty().append($('#img_class_ground').clone().prop('id', 'img_class_ground_clone_nav'));
+    $('#td_icon_water').empty().append($('#img_class_water').clone().prop('id', 'img_class_water_clone_nav'));
+    $('#td_icon_air').empty().append($('#img_class_air').clone().prop('id', 'img_class_air_clone_nav'));
+    $('#td_icon_space').empty().append($('#img_class_space').clone().prop('id', 'img_class_space_clone_nav'));
+
+    $('#td_icon_fleet').empty().append($('#img_garage_performance').clone().prop('id', 'img_garage_performance_nav'));
+    
+    $('.race-image-class-ground').empty().append($('#img_class_ground').clone().prop('id', 'img_class_ground_clone')).attr({'title': 'Ground'});
+    $('.race-image-class-water').empty().append($('#img_class_water').clone().prop('id', 'img_class_water_clone')).attr({'title': 'Water'});
+    $('.race-image-class-air').empty().append($('#img_class_air').clone().prop('id', 'img_class_air_clone')).attr({'title': 'Air'});
+    $('.race-image-class-space').empty().append($('#img_class_space').clone().prop('id', 'img_class_space_clone')).attr({'title': 'Space'});
+
+    $('.race-image-weather-foggy').empty().append($('#img_weather_foggy').clone().prop('id', 'img_class_weather_foggy_clone')).attr({'title': 'Foggy'});
+    $('.race-image-weather-icy').empty().append($('#img_weather_icy').clone().prop('id', 'img_class_weather_icy_clone')).attr({'title': 'Icy'});
+    $('.race-image-weather-rainy').empty().append($('#img_weather_rainy').clone().prop('id', 'img_class_weather_rainy_clone')).attr({'title': 'Rainy'});
+    $('.race-image-weather-snowy').empty().append($('#img_weather_snowy').clone().prop('id', 'img_class_weather_snowy_clone')).attr({'title': 'Snowy'});
+    $('.race-image-weather-sunny').empty().append($('#img_weather_sunny').clone().prop('id', 'img_class_weather_sunny_clone')).attr({'title': 'Sunny'});
+    $('.race-image-weather-stormy').empty().append($('#img_weather_stormy').clone().prop('id', 'img_class_weather_stormy_clone')).attr({'title': 'Stormy'});
+    $('.race-image-weather-windy').empty().append($('#img_weather_windy').clone().prop('id', 'img_class_weather_windy_clone')).attr({'title': 'Windy'});
 }
 
 function joinRace()
@@ -393,15 +488,15 @@ function joinRace()
 
         participantCount = unjoinedRace.participants.length;
         i++;
-        modifiedParticipationThreshold = (unjoinedRace.class.toLowerCase() == 'space') ? Math.round(participationThreshold*.7, 0) : participationThreshold;
-        if ((participantCount >= modifiedParticipationThreshold) && (unjoinedRace.selectedVehicle.vehicleTokenId()))
+        modifiedParticipationThreshold = (unjoinedRace.class.toLowerCase() == 'space') ? Math.round(userInfoVM.participationThreshold()*.7, 0) : userInfoVM.participationThreshold();
+        if ((participantCount >= modifiedParticipationThreshold) && (unjoinedRace.selectedVehicle.vehicleTokenId()) && (unjoinedRace.entry_fee === 0))
         {
             joined = true;
             joinApiData = structuredClone(joinTemplate);
-            joinApiData.address = walletAddress;
+            joinApiData.address = mySettings.wallet_address();
             joinApiData.raceId = unjoinedRace.id;
             joinApiData.tokenId = unjoinedRace.selectedVehicle.vehicleTokenId();
-            Log('walletAddress: ' + walletAddress, '\nselectedRaceId: ' + joinApiData.raceId + '\nselectedVehicleId: ' + joinApiData.tokenId, 'severity-info', 'Info');
+            Log('walletAddress: ' + mySettings.wallet_address(), '\nselectedRaceId: ' + joinApiData.raceId + '\nselectedVehicleId: ' + joinApiData.tokenId, 'severity-info', 'Info');
             Log('joinApiData:\n' + JSON.stringify(joinApiData), 'severity-info', 'Info');
             $.when(
                 $.post(joinApi, JSON.stringify(joinApiData), function(data) 
@@ -441,10 +536,27 @@ function refreshData(doSetTimeout, ignoreJoinRace)
     Log('refreshData() - Start', 'severity-info', 'Info');
 
     $.when(
-        $.post(graphQlApi, JSON.stringify(postQueries.Races), function(data) {
+        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces), function(data) {
             Log('refreshData() - Begin Races post()', 'severity-info', 'Info');
 
-            races = data.data.races;
+            upcomingRaces = data.data.races;
+
+            Log('refreshData() - End Racers post()', 'severity-info', 'Info');
+        }, 'json'),
+        $.post(graphQlApi, JSON.stringify(postQueries.NextToRaceRaces), function(data) {
+            Log('refreshData() - Begin Races post()', 'severity-info', 'Info');
+
+            nextToRaceRaces = data.data.races;
+            if (nextToRaceRaces.length > 0)
+            {
+                $('#divAtLeast1NextToRaceRaces').show();
+                $('#divNoNextToRaceRaces').hide();
+            } 
+            else
+            {
+                $('#divAtLeast1NextToRaceRaces').hide();
+                $('#divNoNextToRaceRaces').show();
+            }
 
             Log('refreshData() - End Racers post()', 'severity-info', 'Info');
         }, 'json')
@@ -457,16 +569,122 @@ function refreshData(doSetTimeout, ignoreJoinRace)
         console.log(err);
     });		
 
+    Log('refreshData() - End', 'severity-info', 'Info');
 }
 
-function setupRaces()
+function setNavPages()
 {
-    var unjoinedRaces = races.filter(function(race) { return !(race.participants.some(participant => participant.racer.username === userInfoVM.username())) });
-    joinedRaces = races.filter(function(race) { return race.participants.some(participant => participant.racer.username === userInfoVM.username()) });
+    Log('setNavPages() - Begin', 'severity-info', 'Info');
+
+    $('.nav-icon').click(function()
+        {
+            Log('setNavPages() - Begin nav-icon onclick', 'severity-info', 'Info');
+
+            $('.nav-page').hide();
+            var targetNavPage = '#' + $(this).attr('for');
+            $(targetNavPage).show();
+
+            $('.nav-icon').removeClass('nav-icon-border');
+            $(this).addClass('nav-icon-border');
+
+            Log('setNavPages() - End nav-icon onclick', 'severity-info', 'Info');
+        }
+    );
+    $('#linkRaces').click();
+
+    $('.settings-link').click(function()
+        {
+            Log('setNavPages() - Begin settings-item onclick', 'severity-info', 'Info');
+
+            $('.settings-detail').hide();
+            var targetSettingsDetail = '#' + $(this).attr('for');
+            $(targetSettingsDetail).show();
+
+            Log('setNavPages() - End settings-item onclick', 'severity-info', 'Info');
+        }
+    );
+    $('#tdLinkAuthKey').click();
+
+    Log('setNavPages() - End', 'severity-info', 'Info');
+}
+
+function setupNextToRaceRaces()
+{
+    $.each(nextToRaceRaces, function(index)
+        {
+            var enteredVehicle = nextToRaceRaces[index].participants.filter(function(participant) {return participant.racer.username === userInfoVM.username()})[0];
+            decimalPlaces = (nextToRaceRaces[index].distance < 100) ? 2 : 0;
+            nextToRaceRaces[index].enteredVehicle = 
+            {
+                id:  (enteredVehicle) ? enteredVehicle.vehicle.token_id : 0,
+                image: (enteredVehicle) ? enteredVehicle.vehicle.image : null,
+                name: (enteredVehicle) ? enteredVehicle.vehicle.name : '',
+                raceDistance: nextToRaceRaces[index].distance.toFixed(decimalPlaces)
+            }
+        }
+    );
+
+    if (!bound['nextToRaceRacesVM'])
+    {
+        nextToRaceRacesVM = new NextToRaceRacesVM(nextToRaceRaces);
+        ko.applyBindings(nextToRaceRacesVM, $('#nextToRaceRaces').get(0))
+        bound['nextToRaceRacesVM'] = true;
+    }
+
+    nextToRaceRacesVM.joinedRaceList(nextToRaceRaces);
+}
+
+function setupSettings()
+{
+    var exclusionsToRemove = []
+    $.each(mySettings.excluded_vehicles(), function(index)
+        {
+            var vehicleImage = $('#vehicle_' + mySettings.excluded_vehicles()[index]);
+            if (vehicleImage.length > 0)
+            {
+                vehicleImage.addClass('image-vehicle-excluded');
+                vehicleImage.prop('excluded', true);
+            }
+            else
+            {
+                exclusionsToRemove.push(mySettings.excluded_vehicles()[index]);
+            }
+        }
+    );
+    while (exclusionsToRemove.length > 0)
+    {
+        itemToRemove = exclusionsToRemove.pop();
+        mySettings.excluded_vehicles.remove(itemToRemove);
+    }
+
+    $('.image-vehicle-small').click(function(e)
+        {
+            e.target.excluded = !e.target.excluded;
+            var tokenId = parseInt(e.target.id.replace('vehicle_', ''));
+            if (e.target.excluded)
+            {
+                $('#' + e.target.id).addClass('image-vehicle-excluded');
+                mySettings.excluded_vehicles.push(tokenId);
+            }
+            else
+            {
+                $('#' + e.target.id).removeClass('image-vehicle-excluded');
+                mySettings.excluded_vehicles.remove(tokenId);
+            }
+            mySettings.excluded_vehicles().sort();
+            afterRaceQuery(true, false);
+        }
+    );
+}
+
+function setupUpcomingRaces()
+{
+    var unjoinedRaces = upcomingRaces.filter(function(race) { return !(race.participants.some(participant => participant.racer.username === userInfoVM.username())) });
+    joinedRaces = upcomingRaces.filter(function(race) { return race.participants.some(participant => participant.racer.username === userInfoVM.username()) });
 
     $.each(unjoinedRaces, function(index)
         {
-            unjoinedRaces[index].selectedVehicle = ko.mapping.fromJS({vehicleId: null, vehicleName: '(TBD)', vehicleImageUrl: null, vehicleTokenId: null});
+            unjoinedRaces[index].selectedVehicle = ko.mapping.fromJS({numberOfRefuels: 0, numberOfTrips: 0, vehicleId: null, vehicleName: '(TBD)', vehicleImageUrl: null, vehicleTokenId: null});
             decimalPlaces = (unjoinedRaces[index].distance < 100) ? 2 : 0;
             unjoinedRaces[index].raceDistance = unjoinedRaces[index].distance.toFixed(decimalPlaces);
         }
@@ -474,14 +692,24 @@ function setupRaces()
 
     $.each(joinedRaces, function(index)
         {
-            var enteredVehicle = joinedRaces[index].participants.filter(function(participant) {return participant.racer.username === userInfoVM.username()})[0];
-            decimalPlaces = (joinedRaces[index].distance < 100) ? 2 : 0;
+            var joinedRace = joinedRaces[index];
+            var enteredVehicle = joinedRace.participants.filter(function(participant) {return participant.racer.username === userInfoVM.username()})[0];
+            raceDistance = Math.round(joinedRace.distance, 4);
+            cargoWeight = joinedRace.weight;
+            vehicleMaxCapacity = enteredVehicle.vehicle.stats.max_capacity;
+            vehicleMaxRange = enteredVehicle.vehicle.stats.max_range;
+            decimalPlaces = (joinedRace.distance < 100) ? 2 : 0;
+            numberOfTrips = Math.ceil(cargoWeight / vehicleMaxCapacity);
+            vehicleAdjustedRaceDistance = raceDistance + ((numberOfTrips-1)*raceDistance*2);
+            numberOfRefuels = Math.ceil(vehicleAdjustedRaceDistance / vehicleMaxRange);
             joinedRaces[index].enteredVehicle = 
             {
                 id:  enteredVehicle.vehicle.token_id,
                 image: enteredVehicle.vehicle.image,
                 name: enteredVehicle.vehicle.name,
-                raceDistance: joinedRaces[index].distance.toFixed(decimalPlaces)
+                numberOfRefuels: numberOfRefuels,
+                numberOfTrips: numberOfTrips,
+                raceDistance: joinedRace.distance.toFixed(decimalPlaces)
             }
         }
     );
@@ -500,18 +728,7 @@ function setupRaces()
     joinedRaces.sort(function(a, b) {return a.participants.length < b.participants.length ? 1 : -1});
     joinedRacesVM.joinedRaceList(joinedRaces);
 
-    $('.race-image-class-ground').empty().append($('#img_class_ground').clone().prop('id', 'img_class_ground_clone')).attr({'title': 'Ground'});
-    $('.race-image-class-water').empty().append($('#img_class_water').clone().prop('id', 'img_class_water_clone')).attr({'title': 'Water'});
-    $('.race-image-class-air').empty().append($('#img_class_air').clone().prop('id', 'img_class_air_clone')).attr({'title': 'Air'});
-    $('.race-image-class-space').empty().append($('#img_class_space').clone().prop('id', 'img_class_space_clone')).attr({'title': 'Space'});
-
-    $('.race-image-weather-foggy').empty().append($('#img_weather_foggy').clone().prop('id', 'img_class_weather_foggy_clone')).attr({'title': 'Foggy'});
-    $('.race-image-weather-icy').empty().append($('#img_weather_icy').clone().prop('id', 'img_class_weather_icy_clone')).attr({'title': 'Icy'});
-    $('.race-image-weather-rainy').empty().append($('#img_weather_rainy').clone().prop('id', 'img_class_weather_rainy_clone')).attr({'title': 'Rainy'});
-    $('.race-image-weather-snowy').empty().append($('#img_weather_snowy').clone().prop('id', 'img_class_weather_snowy_clone')).attr({'title': 'Snowy'});
-    $('.race-image-weather-sunny').empty().append($('#img_weather_sunny').clone().prop('id', 'img_class_weather_sunny_clone')).attr({'title': 'Sunny'});
-    $('.race-image-weather-stormy').empty().append($('#img_weather_stormy').clone().prop('id', 'img_class_weather_stormy_clone')).attr({'title': 'Stormy'});
-    $('.race-image-weather-windy').empty().append($('#img_weather_windy').clone().prop('id', 'img_class_weather_windy_clone')).attr({'title': 'Windy'});
+    cloneImages();
 
     $('#lastUpdated').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
 
@@ -519,11 +736,12 @@ function setupRaces()
 
 function startTimer() {
     timePassed = 0;
+    timeLeft = mySettings.refreshRateSeconds();
     timerIntervalId = setInterval(() => 
     {
       // The amount of time passed increments by one
       timePassed = timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
+      timeLeft = mySettings.refreshRateSeconds() - timePassed;
       
       // The time left label is updated
       $('#spnTimeLeft').html(updateTimer_FormatTimeLeft(timeLeft)); 
@@ -580,7 +798,7 @@ function updateTimer_FormatTimeLeft(time)
 function updateTimer_SetCircleDasharray() 
 {
     const circleDashArray = `${(
-      (timeLeft / TIME_LIMIT) * FULL_DASH_ARRAY
+      (timeLeft / mySettings.refreshRateSeconds()) * FULL_DASH_ARRAY
     ).toFixed(0)} 283`;
 
     $(".base-timer__path-remaining").attr("stroke-dasharray", circleDashArray);
@@ -591,15 +809,15 @@ function updateTimer_SetRemainingPathColor(timeLeft)
     var { alert, warning, info } = colorCodes;
   
     // If the remaining time is less than or equal to 5, remove the "warning" class and apply the "alert" class.
-    if (timeLeft <= alert.threshold) {
-        $(".base-timer__path-remaining").removeClass(warning.color);
-        $(".base-timer__path-remaining").addClass(alert.color);
+    if (timeLeft <= warning.threshold) {
+        $(".base-timer__path-remaining").removeClass(alert.color);
+        $(".base-timer__path-remaining").addClass(warning.color);
     } 
     // If the remaining time is less than or equal to 10, remove the base color and apply the "warning" class.
-    else if (timeLeft <= warning.threshold) 
+    else if (timeLeft <= alert.threshold) 
     {
         $(".base-timer__path-remaining").removeClass(info.color);
-        $(".base-timer__path-remaining").addClass(warning.color);
+        $(".base-timer__path-remaining").addClass(alert.color);
     }
   }
   
@@ -617,10 +835,14 @@ $(function() {
     $('.wof-version').html(CURRENT_VERSION);
     $('#logStart').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
 
-    //$('ul.infinite-tabs#target').infiniteTabs();
+    $('#aWofWebsite').attr('href', WOF_WEBSITE + '/racing-arena/upcoming');
+    setNavPages();
+
+    $('#tabsLeft#target').infiniteTabs();
     $('#tabsMiddle#target').infiniteTabs();
     $('#tabsRight#target').infiniteTabs();
-    $('ul.infinite-tabs').find('li.tab').click(function(e) {
+    $('ul.infinite-tabs').find('li.tab').click(function(e) 
+        {
             e.preventDefault();
             e.stopPropagation();
             $thisTab = $(this);
@@ -630,11 +852,25 @@ $(function() {
             $(ulId + ' ~ div.tab-content').hide();
             var activeTabContent = '#' + $($thisTab).attr('id').replace('Tab', 'Content');
             $(activeTabContent).show();
-    });
+        }
+    );
+    $('#tabsLeft').find('li.tab').first().click();
     $('#tabsMiddle').find('li.tab').first().click();
     $('#tabsRight').find('li.tab').first().click();
 
     $('input:text, input:password, input[type=email]').button().addClass('form-input');
+    $('#btnSaveSettings').click(function(e)
+        {
+            var mySettingsJson = ko.mapping.toJSON(mySettings);
+            var a = document.createElement("a");
+            var file = new Blob([mySettingsJson], {type: 'text/plain'});
+            a.href = URL.createObjectURL(file);
+            a.download = 'mysettings.json';
+            a.click();
+            $('#divSaved').show(500);
+            setTimeout(function() {$('#divSaved').hide(750);}, 5000);
+        }
+    );
 
     $('#img_class_ground').clone().prop('id', 'img_class_ground_filter').appendTo('#spnGround');
     $('#img_class_water').clone().prop('id', 'img_class_water_filter').appendTo('#spnWater');
@@ -661,41 +897,39 @@ userRacesTemplate = {
     'sort': null
 }
 
+const CURRENT_VERSION = "0.1.2";
+const FULL_DASH_ARRAY = 283;
+const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
+const ROOT_API_URL = 'https://api.worldoffreight.xyz';
+const ROOT_GRAPH_URL = 'https://graph.worldoffreight.xyz/v1';
+
 var adjustablesVM = null;
-var authorizationKey = '';
 var bound = [];
 var timerIntervalId = null;
 var joinedRaces = [];
-var participationThreshold = 8
+var mySettings = null;
+var nextToRaceRaces = [];
 var postQueries = {};
-var races = [];
-var refreshRate = 30000;
 var timeoutId = null;
 var unjoinedRacesVM = null;
+var upcomingRaces = [];
 var userInfoVM = null;
 var userVehiclesVM  = [];
 var vehicleAdjustables = []
-var walletAddress = '';
 
-const ALERT_THRESHOLD = 5;
-const CURRENT_VERSION = "0.1.1";
-const FULL_DASH_ARRAY = 283;
-const ROOT_API_URL = 'https://api.worldoffreight.xyz';
-const ROOT_GRAPH_URL = 'https://graph.worldoffreight.xyz/v1';
-const TIME_LIMIT = refreshRate/1000;
-const WARNING_THRESHOLD = 10;
+var timerThresholds = {alert: 10, warning: 5}
 
 var colorCodes = {
     info: {
         color: "info"
     },
     warning: {
-        color: "alert",
-        threshold: WARNING_THRESHOLD
+        color: "warning",
+        threshold: timerThresholds.warning
     },
     alert: {
-        color: "warning",
-        threshold: ALERT_THRESHOLD
+        color: "alert",
+        threshold: timerThresholds.alert
     }
 };
 
@@ -703,5 +937,5 @@ var graphQlApi = `${ROOT_GRAPH_URL}/graphql`;
 var joinApi = `${ROOT_API_URL}/racing-arena/join`;
 
 var remainingPathColor = colorCodes.info.color;
-var timeLeft = TIME_LIMIT;
+var timeLeft = 0;
 var timePassed = 0;

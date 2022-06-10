@@ -1,8 +1,10 @@
 body, table
 {
     border-collapse: collapse;
+    border-width: 1px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9pt;
+    margin: 0px;
 }
 
 /* Sets the containers height and width */
@@ -21,7 +23,7 @@ body, table
     stroke: none;
 }
 
-  .base-timer__label 
+.base-timer__label 
 {
     position: absolute;
     
@@ -65,7 +67,7 @@ body, table
   
     /* Allows the ring to change color when the color value updates */
     stroke: currentColor;
-  }
+}
   
 .base-timer__path-remaining.info
 {
@@ -82,13 +84,19 @@ body, table
     color: red;
 }
       
-
-    .base-timer__svg 
-  {
+.base-timer__svg 
+{
     /* Flips the svg and makes the animation to move left-to-right */
     transform: scaleX(-1);
-  }
+}
 
+.button-save
+{
+    border-radius: 8px;
+    background-color: green;
+    color: lightyellow;
+    padding: 4px;
+}
 
 .cell-race-class
 {
@@ -107,6 +115,7 @@ body, table
 
 .cell-race-image
 {
+    text-align: center;
     width: 35px;
 }
 
@@ -140,6 +149,7 @@ body, table
 
 .header-panel
 {
+    background-color: black;
     border-collapse: collapse;
     flex: 0 0 auto;
     padding-left: 10px;
@@ -234,19 +244,26 @@ body, table
     width: 6px;
 }
 
+.image-vehicle-excluded
+{
+    border: 1px solid greenyellow;
+}
+
 .image-vehicle-thumbnail
 {
     width: 30px;
 }
 
-.item-title
+.image-vehicle-small
 {
-    border-bottom: 1px dotted #888;
+    width: 100px;
 }
 
-.item-text
+.image-vehicle-spacer
 {
-    color: lightyellow;
+    min-width: 40px;
+    white-space: nowrap;
+    width: 40px;
 }
 
 .item-joined-race, .item-unjoined-race
@@ -291,6 +308,23 @@ body, table
     padding: 5px 10px;
 }
 
+.item-text
+{
+    color: lightyellow;
+}
+
+.item-text-empty-content
+{
+    color: lightyellow;
+    font-size: 10pt;
+    margin: 10px;
+}
+
+.item-title
+{
+    border-bottom: 1px dotted #888;
+}
+
 .menu-filter-class td
 {
     background: linear-gradient(black, #333);
@@ -311,6 +345,54 @@ body, table
     vertical-align: middle;
     width: 400px;
     z-index: 99;
+}
+
+.nav-icon
+{
+    text-align: center;
+    vertical-align: middle;
+    width: 100px;
+}
+
+.nav-icon-border
+{
+    border: 1px solid greenyellow;
+}
+
+.nav-page
+{
+    background-color: black;
+    color: lightyellow;
+    display: none;
+    height: 100%;
+}
+
+.nav-spacer
+{
+    min-width: 10px;
+    width: 40px;
+}
+
+.nav-image
+{
+    cursor: pointer;
+    margin: 0px;
+    text-align: center;
+}
+
+.nav-image-outer
+{
+    padding: 3px;
+    height: 40px;
+}
+
+.nav-title
+{
+    cursor: pointer;
+    font-size: 12pt;
+    margin: 0px;
+    padding: 2px;
+    text-align: center;
 }
 
 .panel
@@ -406,6 +488,51 @@ body, table
 {
     border: 1px solid #444;
     height: 100%;
+}
+
+.settings-detail
+{
+    width: 100%;
+}
+
+.settings-input-numeric
+{
+    color: darkgreen;
+    height: 30px;
+    width: 100%;
+}
+
+.settings-input-string
+{
+    color: darkred;
+    height: 30px;
+    width: 100%;
+}
+
+.settings-item
+{
+    color: lightyellow;
+    cursor: pointer;
+    height: 40px; 
+    line-height: 40px;
+}
+
+.settings-link
+{
+    display: block;  
+}
+
+.settings-panel
+{
+    background: radial-gradient(black, #444);
+    background-color: black;
+    margin: 2px;
+    padding: 5px 10px;
+}
+.settings-spacer
+{
+    font-size: 8pt;
+    height: 20px;
 }
 
 .severity-info

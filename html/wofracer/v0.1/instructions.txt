@@ -96,7 +96,12 @@ INSTRUCTIONS FOR USE:
 	
 	Future versions of this script will provide more analysis tools as well as options to let you adjust certain variables like terrain:vehicle and weather:vehicle factors, and many more options.
 			
-6.	Lastly, but most of all, HAVE FUN!  This script is not meant to be a substitute for your engagement, but rather give you another tool to better understand how your vehicles perform and how you can 
+6.  You can now update your personal settings on the Settings tab.  You can adjust your authorization key excluded-vehicles list, Refresh Rate (not more frequent than 30 seconds), and wallet address.
+	If you adjust the Excluded Vehicles list, the script will reselect your best vehicles automatically.
+	When you click Save, a new mysettings.json file will be generated and downloaded to your Downloads folder - simply copy this version and replace your existing
+	mysettings.json file wherever you're running this script.
+
+7.	Lastly, but most of all, HAVE FUN!  This script is not meant to be a substitute for your engagement, but rather give you another tool to better understand how your vehicles perform and how you can 
 	optimize their performances.  Please remember to keep an eye on the running script from time to time to make sure it isn't doing anything unexpected.  And stay engaged in the community!
 		
 Please report any bugs to Galaphine#5831 in the WorldOfFreight Discord.  Thank you!

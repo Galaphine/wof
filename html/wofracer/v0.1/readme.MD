@@ -1,4 +1,4 @@
-WOF Racer 0.1.2
+WOF Racer 0.1.3
 
 Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.1
 
@@ -6,7 +6,15 @@ Read the included Instructions.txt file for details on how to set up and run the
 
 Version history:
 
-    0.1.2 (2022-06-08):
+    0.1.3 (2022-06-11):
+        * Added counts to the Free Races, Paid Races, Joined, and Next To Race tabs.
+        * Sorted returned races by Entry Fee, Ascending - this gives preference to Free Races.
+            - This can also now be changed under Settings to give preference to Paid Races.
+            - Made the result limit configurable under Settings as well.
+            - Note that the sorting by Entry Fee will be removed in an upcoming version so that Free and Paid races are separate queries.
+        * Additional minor fixes
+
+    0.1.2 (2022-06-10):
         * Added navigation menu icons:  Races, My Fleet, and My Settings.
         * Fixed the link in readme.md.
         * Added individual settings from mySettings to the new Settiings page.

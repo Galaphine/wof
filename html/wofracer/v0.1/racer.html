@@ -132,90 +132,103 @@
 							</table>
 							<div id="unjoinedRaces">
 								<ul class="infinite-tabs" id="tabsLeft">
-									<li class="active locked tab" id="freeRacesTab"><a href="#freeRacesContent">Free Races</a></li>
-									<li class="locked tab" id="paidRacesTab"><a href="#paidRacesContent">Paid Races</a></li>
+									<li class="active locked tab" id="freeRacesTab"><a href="#freeRacesContent">Free Races (<span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0}).length"></span>)</a></li>
+									<li class="locked tab" id="paidRacesTab"><a href="#paidRacesContent">Paid Races (<span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0}).length"></span>)</a></li>
 								</ul>
 								<div class="tab-content" id="freeRacesContent">
-									<div data-bind='foreach: unjoinedRaceList'>
-										<!-- ko if: $data.entry_fee === 0 -->
-											<div class="item-unjoined-race">
-												<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
-													<table class="item-text item-unjoined-race item-unjoined-race-details">
-														<tr>
-															<td class="cell-race-class">
-																<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
-															</td>
-															<td class="cell-race-title">
-																<div data-bind="text: name"></div>
-																<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
-																<div>Your Best: 
-																	<!-- ko if: $data.selectedVehicle -->
-																		<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0 }).length === 0 -->
+									<div> Sorry, there are currently no free races.</div>
+									<!-- /ko -->
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0 }).length > 0 -->
+										<div data-bind='foreach: unjoinedRaceList'>
+											<!-- ko if: $data.entry_fee === 0 -->
+												<div class="item-unjoined-race">
+													<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
+														<table class="item-text item-unjoined-race item-unjoined-race-details">
+															<tr>
+																<td class="cell-race-class">
+																	<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+																</td>
+																<td class="cell-race-title">
+																	<div data-bind="text: name"></div>
+																	<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
+																	<div>Your Best: 
+																		<!-- ko if: $data.selectedVehicle -->
+																			<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+																		<!-- /ko -->
+																	</div>
+																	<div>Entry Fee: FREE</div>
+																</td>
+																<td class="cell-race-image">
+																	<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																		<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																		<br />
+																		<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
 																	<!-- /ko -->
-																</div>
-																<div>Entry Fee: FREE</div>
-															</td>
-															<td class="cell-race-image">
-																<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
-																	<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
-																	<br />
-																	<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
-																<!-- /ko -->
-															</td>
-															<td class="cell-race-terrain">
-																<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-															</td>
-															<td class="cell-race-weather">
-																<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
-															</td>
-														</tr>
-													</table>
+																</td>
+																<td class="cell-race-terrain">
+																	<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																</td>
+																<td class="cell-race-weather">
+																	<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																</td>
+															</tr>
+														</table>
+													</div>
 												</div>
-											</div>
-										<!-- /ko -->
-									</div>
+											<!-- /ko -->
+										</div>
+									<!-- /ko -->
 								</div>
 								<div class="tab-content" id="paidRacesContent">
-									Note - This script will not automatically enter you into Paid races.<br />
-									You must use the <a href="#" id="aWofWebsite" target="_new">World of Freight Website</a> to enter these.
-									<div data-bind='foreach: unjoinedRaceList'>
-										<!-- ko if: $data.entry_fee > 0 -->
-											<div class="item-unjoined-race">
-												<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
-													<table class="item-text item-unjoined-race item-unjoined-race-details">
-														<tr>
-															<td class="cell-race-class">
-																<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
-															</td>
-															<td class="cell-race-title">
-																<div data-bind="text: name"></div>
-																<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
-																<div>Your Best: 
-																	<!-- ko if: $data.selectedVehicle -->
-																		<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
-																	<!-- /ko -->
-																</div>
-																<div>Entry Fee: <span data-bind="text: $data.entry_fee"></div>
-															</td>
-															<td class="cell-race-image">
-																<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
-																	<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
-																	<br />
-																	<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
-																<!-- /ko -->
-															</td>
-															<td class="cell-race-terrain">
-																<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-															</td>
-															<td class="cell-race-weather">
-																<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
-															</td>
-														</tr>
-													</table>
-												</div>
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0 }).length === 0 -->
+									<div> Sorry, there are currently no paid races.</div>
+									<!-- /ko -->
+
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0 }).length > 0 -->
+										<div>
+											Note - This script will not automatically enter you into Paid races.<br />
+											You must use the <a href="#" id="aWofWebsite" target="_new">World of Freight Website</a> to enter these.
+											<div data-bind='foreach: unjoinedRaceList'>
+												<!-- ko if: $data.entry_fee > 0 -->
+													<div class="item-unjoined-race">
+														<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
+															<table class="item-text item-unjoined-race item-unjoined-race-details">
+																<tr>
+																	<td class="cell-race-class">
+																		<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+																	</td>
+																	<td class="cell-race-title">
+																		<div data-bind="text: name"></div>
+																		<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
+																		<div>Your Best: 
+																			<!-- ko if: $data.selectedVehicle -->
+																				<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+																			<!-- /ko -->
+																		</div>
+																		<div>Entry Fee: <span data-bind="text: $data.entry_fee"></div>
+																	</td>
+																	<td class="cell-race-image">
+																		<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																			<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																			<br />
+																			<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
+																		<!-- /ko -->
+																	</td>
+																	<td class="cell-race-terrain">
+																		<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																	</td>
+																	<td class="cell-race-weather">
+																		<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																	</td>
+																</tr>
+															</table>
+														</div>
+													</div>
+												<!-- /ko -->
 											</div>
-										<!-- /ko -->
-									</div>
+										</div>
+									<!-- /ko -->
 								</div>
 							</div>
 						</div>
@@ -263,8 +276,8 @@
 							<div class="tab-inner-container">
 								<div class="right-panel-content">
 									<ul class="infinite-tabs" id="tabsRight">
-										<li class="active locked tab" id="joinedTab"><a href="#joinedContent">Joined</a></li>
-										<li class="locked tab" id="nextToRaceTab"><a href="#nextToRaceContent">Next to Race</a></li>
+										<li class="active locked tab" id="joinedTab"><a href="#joinedContent">Joined (<span id="spnJoinedRacesCount"></span>)</a></li>
+										<li class="locked tab" id="nextToRaceTab"><a href="#nextToRaceContent">Next to Race (<span id="spnNextToRaceCount"></span>)</a></li>
 										<li class="locked tab" id="resultsTab"><a href="#resultsContent">Results</a></li>
 									</ul>
 									<div class="tab-content" id="joinedContent">
@@ -402,6 +415,14 @@
 							<td class="settings-spacer">&nbsp;</td>
 						</tr>
 						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingRaceQuery" id="tdLinkRaceQuery">
+								<div style="vertical-align: middle;">Race Query</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
 							<td class="settings-panel settings-item settings-link" for="tdSettingRefreshRate" id="tdLinkRefreshRate">
 								<div style="vertical-align: middle;">Refresh Rate (Min 30 seconds)</div>
 							</td>
@@ -474,6 +495,40 @@
 										<td class="settings-item">
 											<div>
 												<input class="settings-input-numeric" data-bind="value: participation_threshold" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingRaceQuery">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Entry Fee Sort Direction</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" colspan="2">
+											<div>
+												<input class="item-text" data-bind="checked: race_query_entry_fee_sort_direction" type="radio" value="asc">Ascending (Preference for Free Races)
+												&nbsp;&nbsp;&nbsp;&nbsp;
+												<input class="item-text" data-bind="checked: race_query_entry_fee_sort_direction" type="radio" value="desc">Descending (Preference for Paid Races)
+											</div>
+										</td>
+									</tr>
+									<tr><td colspan="2"><div>&nbsp;</div></td></tr>
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Limit Total Results (Free + Paid Race) to:</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 40px;">Value:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: race_query_result_limit" type="text" />
 											</div>
 										</td>
 									</tr>

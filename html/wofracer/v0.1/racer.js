@@ -66,6 +66,8 @@ function MySettingsVM()
     self.authorization_key = ko.observable();
     self.excluded_vehicles = ko.observableArray();
     self.participation_threshold = ko.observable();
+    self.race_query_entry_fee_sort_direction = ko.observable();
+    self.race_query_result_limit = ko.observable();
     self.refreshRateMilliseconds = ko.pureComputed(function() {return self.refreshRateSeconds()*1000;});
     self.refresh_rate_seconds = ko.observable();
     self.refreshRateSeconds = ko.pureComputed(function() {return (!isNaN(self.refresh_rate_seconds()) && (self.refresh_rate_seconds() >= 30) ) ? self.refresh_rate_seconds() : 30; });
@@ -135,6 +137,8 @@ function getLocalData()
             mySettings.wallet_address(data.wallet_address);
             mySettings.participation_threshold(data.participation_threshold);
             mySettings.refresh_rate_seconds(data.refresh_rate_seconds);
+            mySettings.race_query_entry_fee_sort_direction((data.race_query_entry_fee_sort_direction) ? data.race_query_entry_fee_sort_direction : "asc");
+            mySettings.race_query_result_limit((data.race_query_result_limit) ? data.race_query_result_limit : 50);
             joinTemplate.address = mySettings.wallet_address();
             userRacesTemplate.address = mySettings.wallet_address();
 
@@ -207,7 +211,7 @@ function getServerData()
                 Log(JSON.stringify(userVehiclesVM), 'severity-info', 'Info');
             }
         , 'json'),
-        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces), function(data) {
+        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces).replace('{race_query_entry_fee_sort_direction}', mySettings.race_query_entry_fee_sort_direction()).replace('"{race_query_result_limit}"', mySettings.race_query_result_limit()), function(data) {
             Log('getServerData() - Begin Races post()', 'severity-info', 'Info');
 
             upcomingRaces = data.data.races;
@@ -536,7 +540,7 @@ function refreshData(doSetTimeout, ignoreJoinRace)
     Log('refreshData() - Start', 'severity-info', 'Info');
 
     $.when(
-        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces), function(data) {
+        $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces).replace('{race_query_entry_fee_sort_direction}', mySettings.race_query_entry_fee_sort_direction()).replace('"{race_query_result_limit}"', mySettings.race_query_result_limit()), function(data) {
             Log('refreshData() - Begin Races post()', 'severity-info', 'Info');
 
             upcomingRaces = data.data.races;
@@ -572,13 +576,13 @@ function refreshData(doSetTimeout, ignoreJoinRace)
     Log('refreshData() - End', 'severity-info', 'Info');
 }
 
-function setNavPages()
+function setupNavPages()
 {
-    Log('setNavPages() - Begin', 'severity-info', 'Info');
+    Log('setupNavPages() - Begin', 'severity-info', 'Info');
 
     $('.nav-icon').click(function()
         {
-            Log('setNavPages() - Begin nav-icon onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - Begin nav-icon onclick', 'severity-info', 'Info');
 
             $('.nav-page').hide();
             var targetNavPage = '#' + $(this).attr('for');
@@ -587,25 +591,25 @@ function setNavPages()
             $('.nav-icon').removeClass('nav-icon-border');
             $(this).addClass('nav-icon-border');
 
-            Log('setNavPages() - End nav-icon onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - End nav-icon onclick', 'severity-info', 'Info');
         }
     );
     $('#linkRaces').click();
 
     $('.settings-link').click(function()
         {
-            Log('setNavPages() - Begin settings-item onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - Begin settings-item onclick', 'severity-info', 'Info');
 
             $('.settings-detail').hide();
             var targetSettingsDetail = '#' + $(this).attr('for');
             $(targetSettingsDetail).show();
 
-            Log('setNavPages() - End settings-item onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - End settings-item onclick', 'severity-info', 'Info');
         }
     );
     $('#tdLinkAuthKey').click();
 
-    Log('setNavPages() - End', 'severity-info', 'Info');
+    Log('setupNavPages() - End', 'severity-info', 'Info');
 }
 
 function setupNextToRaceRaces()
@@ -623,6 +627,8 @@ function setupNextToRaceRaces()
             }
         }
     );
+
+    $('#spnNextToRaceCount').html(nextToRaceRaces.length);
 
     if (!bound['nextToRaceRacesVM'])
     {
@@ -672,7 +678,7 @@ function setupSettings()
                 mySettings.excluded_vehicles.remove(tokenId);
             }
             mySettings.excluded_vehicles().sort();
-            afterRaceQuery(true, false);
+            afterRaceQuery(true, true);
         }
     );
 }
@@ -713,6 +719,7 @@ function setupUpcomingRaces()
             }
         }
     );
+    $('#spnJoinedRacesCount').html(joinedRaces.length);
 
     if (!bound['unjoinedRacesVM'])
     {
@@ -836,7 +843,7 @@ $(function() {
     $('#logStart').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
 
     $('#aWofWebsite').attr('href', WOF_WEBSITE + '/racing-arena/upcoming');
-    setNavPages();
+    setupNavPages();
 
     $('#tabsLeft#target').infiniteTabs();
     $('#tabsMiddle#target').infiniteTabs();
@@ -869,6 +876,7 @@ $(function() {
             a.click();
             $('#divSaved').show(500);
             setTimeout(function() {$('#divSaved').hide(750);}, 5000);
+            afterRaceQuery(true);
         }
     );
 
@@ -897,7 +905,7 @@ userRacesTemplate = {
     'sort': null
 }
 
-const CURRENT_VERSION = "0.1.2";
+const CURRENT_VERSION = "0.1.3";
 const FULL_DASH_ARRAY = 283;
 const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
 const ROOT_API_URL = 'https://api.worldoffreight.xyz';

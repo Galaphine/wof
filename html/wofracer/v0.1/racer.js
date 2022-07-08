@@ -114,7 +114,6 @@ function UnjoinedRacesVM(unjoineRaces)
 function UserInfoVM(username)
 {
     var self = this;
-    self.PermutationsEnabled = ko.pureComputed(function() { alert(mySettings.enable_permutations()); return mySettings.enable_permutations(); } );
     self.ParticipationThreshold = ko.pureComputed(function() { return mySettings.participation_threshold() });
     self.Username = ko.observable(username);
     self.UserVehiclesCount = ko.observable();
@@ -165,7 +164,7 @@ function getLocalData()
             mySettings.participation_threshold(data.participation_threshold);
             mySettings.refresh_rate_seconds(data.refresh_rate_seconds);
             mySettings.race_query_result_limit((data.race_query_result_limit) ? data.race_query_result_limit : 50);
-            mySettings.enable_permutations(data.enable_permutations ? data.enable_permutations : true);
+            mySettings.enable_permutations( (data.enable_permutations == null) ? true : data.enable_permutations);
             joinTemplate.address = mySettings.wallet_address();
             userRacesTemplate.address = mySettings.wallet_address();
 
@@ -308,10 +307,10 @@ function getServerData()
             ).done( 
                 function() 
                 { 
-                    Log('getServerData() - call setupUpgradePermutations()', 'severity-info', 'Info');
-                    setupUpgradePermutations();
                     Log('getServerData() - Call setupSettings()', 'severity-info', 'Info')
                     setupSettings();
+                    Log('getServerData() - call setupUpgradePermutations()', 'severity-info', 'Info');
+                    setupUpgradePermutations();
                     Log('getServerData() - Call afterRaceQuery()', 'severity-info', 'Info')
                     afterRaceQuery(true);
                 } 
@@ -409,10 +408,10 @@ function assignUserVehicles()
                 }
             );
 
+            vehiclePermutationFinalTimes = [];
             if (availableVehiclesInClass.length > 0)
             {
                 vehiclePermutationFinalTime = {};
-                vehiclePermutationFinalTimes = [];
                 availableVehiclesInClass.forEach(availableVehicle =>
                     {
                         var alreadyJoinedRace = joinedRaces.filter(joinedRace => { return joinedRace.participants.filter(participant => { return participant.vehicle.token_id === availableVehicle.token_id() }).length > 0} );
@@ -525,14 +524,14 @@ function assignUserVehicles()
 
                 var vehiclePermutationIdWithShortestTime = vehiclePermutationFinalTimes[0].key;
                 var selectedVehicle = availableVehiclesInClass.find(vehicle => { return vehicle.token_id() == vehiclePermutationIdWithShortestTime.split('_')[0]; });
-                selectedVehicle.SelectedPermutation = selectedVehicle.StatsPermutations.find(permutation => { return permutation.PermutationId == vehiclePermutationIdWithShortestTime; });
-                selectedVehicle.SelectedPermutation.max_capacity_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_capacity)).toLocaleString();
-                selectedVehicle.SelectedPermutation.max_range_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_range)).toLocaleString();
-                selectedVehicle.SelectedPermutation.max_speed_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_speed)).toLocaleString();
-                selectedVehicle.numberOfTrips = selectedVehicle.SelectedPermutation.numberOfTrips;
-                selectedVehicle.numberOfRefuels = selectedVehicle.SelectedPermutation.numberOfRefuels;
+                selectedVehicle.SelectedPermutation = (selectedVehicle.StatsPermutations == null) ? null : selectedVehicle.StatsPermutations.find(permutation => { return permutation.PermutationId == vehiclePermutationIdWithShortestTime; });
                 if (selectedVehicle.SelectedPermutation != null)
                 {
+                    selectedVehicle.SelectedPermutation.max_capacity_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_capacity)).toLocaleString();
+                    selectedVehicle.SelectedPermutation.max_range_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_range)).toLocaleString();
+                    selectedVehicle.SelectedPermutation.max_speed_display = Number(parseFloat(selectedVehicle.SelectedPermutation.max_speed)).toLocaleString();
+                    selectedVehicle.numberOfTrips = selectedVehicle.SelectedPermutation.numberOfTrips;
+                    selectedVehicle.numberOfRefuels = selectedVehicle.SelectedPermutation.numberOfRefuels;
                     ko.mapping.fromJS(selectedVehicle.SelectedPermutation.comboUpgrades, {}, unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades);
                     ko.mapping.fromJS(selectedVehicle.SelectedPermutation, {}, unjoinedRace.selectedVehicle.SelectedPermutation);
                     ko.mapping.fromJS(selectedVehicle, {}, unjoinedRace.selectedVehicle);
@@ -970,23 +969,6 @@ function setupUpcomingRaces()
 
 }
 
-function startTimer() {
-    timePassed = 0;
-    timeLeft = mySettings.refreshRateSeconds();
-    timerIntervalId = setInterval(() => 
-    {
-      // The amount of time passed increments by one
-      timePassed = timePassed += 1;
-      timeLeft = mySettings.refreshRateSeconds() - timePassed;
-      if (timeLeft < 0) timeLeft = 0;
-      
-      // The time left label is updated
-      $('#spnTimeLeft').html(updateTimer_FormatTimeLeft(timeLeft)); 
-      updateTimer_SetCircleDasharray();
-      updateTimer_SetRemainingPathColor(timeLeft);
-    }, 1000);
-}
-
 function setupUpgradePermutations()
 {
     if ($('#chkEnablePermutations').is(':checked'))
@@ -1105,6 +1087,23 @@ function setupUpgradePermutations()
             }
         }
     );
+}
+
+function startTimer() {
+    timePassed = 0;
+    timeLeft = mySettings.refreshRateSeconds();
+    timerIntervalId = setInterval(() => 
+    {
+      // The amount of time passed increments by one
+      timePassed = timePassed += 1;
+      timeLeft = mySettings.refreshRateSeconds() - timePassed;
+      if (timeLeft < 0) timeLeft = 0;
+      
+      // The time left label is updated
+      $('#spnTimeLeft').html(updateTimer_FormatTimeLeft(timeLeft)); 
+      updateTimer_SetCircleDasharray();
+      updateTimer_SetRemainingPathColor(timeLeft);
+    }, 1000);
 }
 
 function updateTimer()
@@ -1318,7 +1317,7 @@ const upgradeAbbreviations = {
     'Dark Matter Thrusters': 'P:DMT'
 }
 
-const CURRENT_VERSION = "0.1.5";
+const CURRENT_VERSION = "0.1.6";
 const FULL_DASH_ARRAY = 283;
 const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
 const ROOT_API_URL = 'https://api.worldoffreight.xyz';

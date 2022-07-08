@@ -1,10 +1,14 @@
-WOF Racer 0.1.5
+WOF Racer 0.1.6
 
 Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.1
 
 Read the included Instructions.txt file for details on how to set up and run the script.
 
 Version history:
+
+    0.1.6 (2022-07-08):
+        * Fixed an issue with enable_permutations - it would always load with Permutations enabled even when saved as false (disabled).
+        * Fixed an issue with StatsPermutations - in some cases this would be nonexistent.
 
     0.1.5 (2022-07-07):
         * Added permutations!  Now the script will go through all possible permutations, select the best one, and automagically hot-swap to the 

@@ -441,7 +441,7 @@ body, table
 }
 
 .panel-header
-{
+{   
     border-collapse: collapse;
     flex: 0 0 auto;
     padding: 10px;

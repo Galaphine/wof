@@ -2,7 +2,6 @@
     "vehicleAdjustables":
     [
         {
-            "vehicleType": "aa-9 coruscant freighter",
             "adjustables": 
             {
                 "delays":
@@ -10,6 +9,16 @@
                     "accelerationDelay": 0,
                     "decelerationDelay": 0,
                     "refuelingDelay": 0
+                },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
                 },
                 "terrain": 
                 {
@@ -31,10 +40,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 400,
+            "vehicleType": "aa-9 coruscant freighter"
         },
         {
-            "vehicleType": "airship / zeppelin",
             "adjustables": 
             {
                 "delays":
@@ -43,6 +59,16 @@
                     "decelerationDelay": 900,
                     "refuelingDelay": 300
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -63,10 +89,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.3,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 200
+            },
+            "maxSpeed": 175,
+            "vehicleType": "airship / zeppelin"
         },
         {
-            "vehicleType": "box truck",
             "adjustables": 
             {
                 "delays":
@@ -75,6 +108,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 180
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -95,10 +138,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 100
+            },
+            "maxSpeed": 150,
+            "vehicleType": "box truck"
         },
         {
-            "vehicleType": "cargo ship",
             "adjustables": 
             {
                 "delays":
@@ -107,6 +157,16 @@
                     "decelerationDelay": 55800,
                     "refuelingDelay": 3600
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -127,10 +187,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 75,
+            "vehicleType": "cargo ship"
         },
         {
-            "vehicleType": "delivery robot",
             "adjustables": 
             {
                 "delays":
@@ -139,6 +206,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 0
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -159,10 +236,66 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.0001,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 8
+            },
+            "maxSpeed": 8,
+            "vehicleType": "delivery robot"
         },
         {
-            "vehicleType": "drone",
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 27785,
+            "vehicleType": "dragon assault launcher"
+        },
+        {
             "adjustables": 
             {
                 "delays":
@@ -171,6 +304,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 3600
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -191,10 +334,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.35,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 150
+            },
+            "maxSpeed": 260,
+            "vehicleType": "drone"
         },
         {
-            "vehicleType": "flying saucer (ufo)",
             "adjustables": {
                 "delays":
                 {
@@ -202,6 +352,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 0
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -222,10 +382,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 4200,
+            "vehicleType": "flying saucer (ufo)"
         },
         {
-            "vehicleType": "freight aircraft",
             "adjustables": {
                 "delays":
                 {
@@ -233,6 +400,16 @@
                     "decelerationDelay": 1800,
                     "refuelingDelay": 1800
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -253,17 +430,34 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.8,
+                "rangeLimitLower": 250,
+                "rangeLimitUpper": 25000
+            },
+            "maxSpeed": 1750,
+            "vehicleType": "freight aircraft"
         },
         {
-            "vehicleType": "hot-air balloon",
             "adjustables": 
             {
                 "delays":
                 {
-                    "accelerationDelay": 900,
-                    "decelerationDelay": 900,
-                    "refuelingDelay": 120
+                    "accelerationDelay": 60,
+                    "decelerationDelay": 60,
+                    "refuelingDelay": 60
+                },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
                 },
                 "terrain": 
                 {
@@ -285,10 +479,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.25,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 200
+            },
+            "maxSpeed": 650,
+            "vehicleType": "hot-air balloon"
         },
         {
-            "vehicleType": "locomotive / train",
             "adjustables": 
             {
                 "delays":
@@ -297,7 +498,7 @@
                     "decelerationDelay": 900,
                     "refuelingDelay": 1800
                 },
-                "terrain": 
+                "terrainSpeedFactor": 
                 {
                     "N_A": 1,
                     "Asphalt": 1,
@@ -306,6 +507,16 @@
                     "Ice": 1,
                     "Sand": 1,
                     "Snow": 1
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1.5,
+                    "Sand": 1,
+                    "Snow": 1.5
                 },
                 "weather": 
                 {
@@ -317,10 +528,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 2,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 100
+            },
+            "maxSpeed": 500,
+            "vehicleType": "locomotive / train"
         },
         {
-            "vehicleType": "semi truck",
             "adjustables": 
             {
                 "delays":
@@ -329,6 +547,16 @@
                     "decelerationDelay": 300,
                     "refuelingDelay": 600
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -349,10 +577,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-        }
+            },
+            "boosts":
+            {
+                "boostFactor": 0.15,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 200
+            },
+            "maxSpeed": 210,
+            "vehicleType": "semi truck"
         },
         {
-            "vehicleType": "space launcher",
             "adjustables": 
             {
                 "delays":
@@ -361,6 +596,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 0
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -381,10 +626,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 27785,
+            "vehicleType": "space launcher"
         },
         {
-            "vehicleType": "van",
             "adjustables": 
             {
                 "delays":
@@ -393,6 +645,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 120
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 0.65,
+                    "Sand": 1,
+                    "Snow": 0.65
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -413,10 +675,17 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 400,
+            "vehicleType": "van"
         },
         {
-            "vehicleType": "x-wing",
             "adjustables": 
             {
                 "delays":
@@ -425,6 +694,16 @@
                     "decelerationDelay": 0,
                     "refuelingDelay": 0
                 },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
                 "terrain": 
                 {
                     "N_A": 1,
@@ -445,7 +724,15 @@
                     "Sunny": 1,
                     "Windy": 1
                 }
-            }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "maxSpeed": 27785,
+            "vehicleType": "x-wing"
         }
     ]
 }

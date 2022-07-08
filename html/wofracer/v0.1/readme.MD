@@ -1,10 +1,28 @@
-WOF Racer 0.1.3
+WOF Racer 0.1.5
 
 Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.1
 
 Read the included Instructions.txt file for details on how to set up and run the script.
 
 Version history:
+
+    0.1.5 (2022-07-07):
+        * Added permutations!  Now the script will go through all possible permutations, select the best one, and automagically hot-swap to the 
+            correct set of upgrades that gives the best time for your vehicle!
+        * Fixed some rounding issues
+        * Added Enable Permutations to settings, along with warnings about effects on applied upgrades in the fleet.
+
+    0.1.4 (2022-06-26):
+        * Added Upgraded Vehicles count
+        * Factored in Emission Rate and Fuel Efficiency indirectly into sorting by adding a small time factor based on stats
+        * Added Promo/Sponsor with link
+        * Expanded terrain to 2 characters
+        * Retrieving upgrade list (with owned state) and applied upgrades across fleet
+        * Added in terrain as a function of speed (Ice/Snow/Sand will require slower vehicles)
+            - Added maxSpeed to adjustables to use in speed limiter function
+        * Added boost factor for some vehicles (box trucks, delivery robot)
+            - Applied a "boost factor" modifier to some vehicles to adjust up or down estimated completion times relative to other vehicle classes
+        * Minor UI updates
 
     0.1.3 (2022-06-11):
         * Added counts to the Free Races, Paid Races, Joined, and Next To Race tabs.

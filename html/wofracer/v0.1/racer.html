@@ -8,6 +8,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 		<script src="./jquery.infinite.tabs/jquery.infinite.tabs.min.js"></script>
+		<script src="./combinations.js"></script>
 		<script src="./racer.js"></script>
 	</head>
 	<body>
@@ -21,11 +22,15 @@
 								<div><br />WOF Racer v<span class="wof-version" /></div>
 								<div id="userInfo">
 									<p />
-									<div>User Name: <span data-bind="text: username" /></div>
+									<div>User Name: <span data-bind="text: Username" /></div>
 									<div />
-									<div>Participation Threshold: <span data-bind="text: participationThreshold" /></div>
+									<div>Participation Threshold: <span data-bind="text: ParticipationThreshold" /></div>
 									<div />
-									<div>Refreshed: <span id="lastUpdated"></span></div>
+									<div class="item-text">Upgraded Vehicles: <span data-bind="text: UserVehiclesUpgradedCount"></span> / <span data-bind="text: UserVehiclesCount"></span></div>
+									<div />
+									<div>Permutations Enabled: <span data-bind="text: mySettings.enable_permutations"></span></div>
+									<div />
+									<div>Last Refreshed: <span id="lastUpdated"></span></div>
 								</div>
 							</td>
 							<td style="vertical-align: bottom;">
@@ -83,6 +88,15 @@
 										</td>
 									</tr>
 								</table>
+							</td>
+						</tr>
+					</table>
+]					<table id="tblPermutationWarning" style="display: none;">
+						<tr>
+							<td colspan="8" style="color: pink; width: 100%;">
+								WARNING:  You have Permutations enabled.  This will alter the upgrades set on your vehicles.  Be sure you
+								have recorded the original values before your vehicles enter races so you can manually return to those values
+								if you stop using this script.
 							</td>
 						</tr>
 					</table>
@@ -146,31 +160,61 @@
 													<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
 														<table class="item-text item-unjoined-race item-unjoined-race-details">
 															<tr>
-																<td class="cell-race-class">
-																	<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+																<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																	<div style="width: 100%; text-align: center;">
+																		<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br />FREE</div>
+																		<br />
+																		<span class="cell-race-terrain">
+																			<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																		</span>
+																		<span class="cell-race-weather">
+																			<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																		</span>
+																		<br />
+																		<div class="cell-race-image" style="width: 100%;">
+																			<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																				<br />
+																				<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																				<br />
+																				<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																			<!-- /ko -->
+																		</div>
+																	</div>
 																</td>
+																<td style="width: 10px; white-space: nowrap;"></td>
 																<td class="cell-race-title">
-																	<div data-bind="text: name"></div>
-																	<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
-																	<div>Your Best: 
+																	<div data-bind="text: name" style="font-weight: bold;"></div>
+																	<div><span title="Distance">D: <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</span>, <span title="Cargo">C: <span data-bind="text: Number($data.weight).toLocaleString()"></span>kg</span></div>
+																	<div>
+																		<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																		Your Best: 
 																		<!-- ko if: $data.selectedVehicle -->
-																			<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+																			<span>
+																				<span data-bind="text: $data.selectedVehicle.vehicleName()"></span><br />
+																				<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																					<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
+																					<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
+																					<span title="Emission Rate">ER: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.emission_rate"></span></span><br />
+																					<span title="Max Range">MR: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_range_display"></span>km</span>,
+																					<span title="Max Speed">MS: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_speed_display"></span>km/hr</span>
+																				<!-- /ko -->
+																			</span>
+																			<br />
+																			<!-- ko foreach: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																				<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																				<!-- ko if: $index < $parent.length -->
+																				&nbsp;-&nbsp;
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		<!-- /ko -->
+																		<br />
+																		<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																	</div>
+																	<div>
+																		<!-- ko if: $data.promo_link -->
+																			Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
 																		<!-- /ko -->
 																	</div>
-																	<div>Entry Fee: FREE</div>
-																</td>
-																<td class="cell-race-image">
-																	<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
-																		<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
-																		<br />
-																		<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
-																	<!-- /ko -->
-																</td>
-																<td class="cell-race-terrain">
-																	<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-																</td>
-																<td class="cell-race-weather">
-																	<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
 																</td>
 															</tr>
 														</table>
@@ -195,31 +239,61 @@
 														<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}, click: $parent.selectRace">
 															<table class="item-text item-unjoined-race item-unjoined-race-details">
 																<tr>
-																	<td class="cell-race-class">
-																		<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+																	<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																		<div style="width: 100%; text-align: center;">
+																			<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: $data.entry_fee"></span></div>
+																			<br />
+																			<span class="cell-race-terrain">
+																				<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																			</span>
+																			<span class="cell-race-weather">
+																				<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																			</span>
+																			<br />
+																			<div class="cell-race-image" style="width: 100%;">
+																				<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																					<br />
+																					<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																					<br />
+																					<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																				<!-- /ko -->
+																			</div>
+																		</div>
 																	</td>
+																	<td style="width: 10px; white-space: nowrap;"></td>
 																	<td class="cell-race-title">
-																		<div data-bind="text: name"></div>
-																		<div><span data-bind="text: $data.participants.length"></span> Participant(s), <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km</div>
-																		<div>Your Best: 
+																		<div data-bind="text: name" style="font-weight: bold;"></div>
+																		<div>D: <span data-bind="text: Number($data.raceDistance).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.weight).toLocaleString()"></span>kg</div>
+																		<div>
+																			<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																			Your Best: 
 																			<!-- ko if: $data.selectedVehicle -->
-																				<span data-bind="text: $data.selectedVehicle.vehicleName()"></span>
+																				<span>
+																					<span data-bind="text: $data.selectedVehicle.vehicleName()"></span><br />
+																					<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																						<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
+																						<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
+																						<span title="Emission Rate">ER: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.emission_rate"></span></span><br />
+																						<span title="Max Range">MR: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_range_display"></span>km</span>,
+																						<span title="Max Speed">MS: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_speed_display"></span>km/hr</span>
+																					<!-- /ko -->
+																				</span>
+																				<br />
+																				<!-- ko foreach: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																					<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																					<!-- ko if: $index < $parent.length -->
+																					&nbsp;-&nbsp;
+																					<!-- /ko -->
+																				<!-- /ko -->
+																			<!-- /ko -->
+																			<br />
+																			<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																		</div>
+																		<div>
+																			<!-- ko if: $data.promo_link -->
+																				Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
 																			<!-- /ko -->
 																		</div>
-																		<div>Entry Fee: <span data-bind="text: $data.entry_fee"></div>
-																	</td>
-																	<td class="cell-race-image">
-																		<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
-																			<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
-																			<br />
-																			<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
-																		<!-- /ko -->
-																	</td>
-																	<td class="cell-race-terrain">
-																		<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-																	</td>
-																	<td class="cell-race-weather">
-																		<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
 																	</td>
 																</tr>
 															</table>
@@ -287,26 +361,61 @@
 													<div data-bind="attr: {class: 'item-joined-race-' + $data.class}">
 														<table class="item-text item-joined-race item-joined-race-details">
 															<tr>
-																<td class="cell-race-class">
-																	<span data-bind="attr: {class: 'race-image-class-' + $data.class}" />
+																<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																	<div style="width: 100%; text-align: center;">
+																		<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: (($data.entry_fee > 0) ? $data.entry_fee : 'FREE')"></span></div>
+																		<br />
+																		<span class="cell-race-terrain">
+																			<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																		</span>
+																		<span class="cell-race-weather">
+																			<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																		</span>
+																		<br />
+																		<div class="cell-race-image" style="width: 100%;">
+																				<br />
+																				<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" />
+																				<br />
+																				<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																		</div>
+																	</div>
 																</td>
+																<td style="width: 10px; white-space: nowrap;"></td>
 																<td class="cell-race-title">
-																	<div data-bind="text: name"></div>
-																	<div><span data-bind="text: $data.participants.length"></span> Participants, <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km</div>
-																	<div>Your Entry: <span data-bind="text: $data.enteredVehicle.name"></span></div>
-																	<div>Entry Fee: <span data-bind="text: (($data.entry_fee > 0) ? $data.entry_fee : 'FREE')"></div>
-																</td>
-																<td class="cell-race-image" style="white-space: nowrap; text-align: center;">
-																	<img class="image-vehicle-thumbnail" data-bind="attr: {title: '{0} (ID #{1})'.replace('{0}', $data.enteredVehicle.name).replace('{1}', $data.enteredVehicle.id), src: $data.enteredVehicle.image}" />
+																	<div data-bind="text: name" style="font-weight: bold;"></div>
+																	<div>D: <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.enteredVehicle.weight).toLocaleString()"></span>kg</div>
+																	<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																	<div>
+																		Your Entry: 
+																		<!-- ko if: $data.enteredVehicle -->
+																			<span>
+																				<span data-bind="text: $data.enteredVehicle.name"></span><br />
+																				<!-- ko if: $data.enteredVehicle -->
+																					<span title="Max Capacity">MC: <span data-bind="text: $data.enteredVehicle.max_capacity_display"></span>kg</span>,
+																					<span title="Fuel Efficiency">FE: <span data-bind="text: $data.enteredVehicle.fuel_efficiency"></span></span>,
+																					<span title="Emission Rate">ER: <span data-bind="text: $data.enteredVehicle.emission_rate"></span></span><br />
+																					<span title="Max Range">MR: <span data-bind="text: $data.enteredVehicle.max_range_display"></span>km</span>,
+																					<span title="Max Speed">MS: <span data-bind="text: $data.enteredVehicle.max_speed_display"></span>km/hr</span>
+																				<!-- /ko -->
+																			</span>
+																			<br />
+																			<!-- ko foreach: $data.enteredVehicle.SelectedPermutation.comboUpgrades -->
+																				<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																				<!-- ko if: $index < $parent.length -->
+																				&nbsp;-&nbsp;
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		<!-- /ko -->
+																		<br />
+																	</div>
 																	<br />
-																	<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Refuels"></span>
-																</td>
-																<td class="cell-race-terrain">
-																	<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-																</td>
-																<td class="cell-race-weather">
-																	<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
-																</td>
+																	<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																	<!-- ko if: $data.promo_link -->
+																		<div>
+																			Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																		</div>
+																	<!-- /ko -->
+															</td>
 															</tr>
 														</table>
 													</div>
@@ -322,24 +431,61 @@
 														<div data-bind="attr: {class: 'item-joined-race-' + $data.class}">
 															<table class="item-text item-joined-race item-joined-race-details">
 																<tr>
-																	<td class="cell-race-class">
-																		<span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>
+																	<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																		<div style="width: 100%; text-align: center;">
+																			<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: (($data.entry_fee > 0) ? $data.entry_fee : 'FREE')"></span></div>
+																			<br />
+																			<span class="cell-race-terrain">
+																				<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																			</span>
+																			<span class="cell-race-weather">
+																				<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																			</span>
+																			<br />
+																			<!-- ko if: $data.enteredVehicle.id -->
+																				<div class="cell-race-image" style="width: 100%;">
+																					<br />
+																					<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" />
+																					<br />
+																					<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																				</div>
+																			<!-- /ko -->
+																		</div>
 																	</td>
+																	<td style="width: 10px; white-space: nowrap;"></td>
 																	<td class="cell-race-title">
-																		<div data-bind="text: name"></div>
-																		<div><span data-bind="text: $data.participants.length"></span> Participants, <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km</div>
-																		<div>Your Entry: <span data-bind="text: ($data.enteredVehicle.name.length > 0) ? $data.enteredVehicle.name : 'N/A'" /></div>
-																	</td>
-																	<td class="cell-race-image" style="white-space: nowrap; text-align: center;">
-																		<!-- ko if: ($data.enteredVehicle.name.length > 0) -->
-																			<img class="image-vehicle-thumbnail" data-bind="attr: {title: '{0} (ID #{1})'.replace('{0}', $data.enteredVehicle.name).replace('{1}', $data.enteredVehicle.id), src: $data.enteredVehicle.image}" />
+																		<div data-bind="text: name" style="font-weight: bold;"></div>
+																		<div>D: <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.enteredVehicle.weight).toLocaleString()"></span>kg</div>
+																		<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																		<div>
+																			Your Entry: 
+																			<!-- ko if: $data.enteredVehicle -->
+																				<span>
+																					<span data-bind="text: $data.enteredVehicle.name"></span><br />
+																					<!-- ko if: $data.enteredVehicle.id -->
+																						<span title="Max Capacity">MC: <span data-bind="text: $data.enteredVehicle.max_capacity_display"></span>kg</span>,
+																						<span title="Fuel Efficiency">FE: <span data-bind="text: $data.enteredVehicle.fuel_efficiency"></span></span>,
+																						<span title="Emission Rate">ER: <span data-bind="text: $data.enteredVehicle.emission_rate"></span></span><br />
+																						<span title="Max Range">MR: <span data-bind="text: $data.enteredVehicle.max_range_display"></span>km</span>,
+																						<span title="Max Speed">MS: <span data-bind="text: $data.enteredVehicle.max_speed_display"></span>km/hr</span>
+																					<!-- /ko -->
+																				</span>
+																				<br />
+																				<!-- ko foreach: $data.enteredVehicle.SelectedPermutation.comboUpgrades -->
+																					<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																					<!-- ko if: $index < $parent.length -->
+																					&nbsp;-&nbsp;
+																					<!-- /ko -->
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		</div>
+																		<br />
+																		<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																		<!-- ko if: $data.promo_link -->
+																			<div>
+																				Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																			</div>
 																		<!-- /ko -->
-																	</td>
-																	<td class="cell-race-terrain">
-																		<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
-																	</td>
-																	<td class="cell-race-weather">
-																		<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}"></span>
 																	</td>
 																</tr>
 															</table>
@@ -393,6 +539,14 @@
 						<tr>
 							<td class="settings-panel settings-item settings-link" for="tdSettingAuthKey" id="tdLinkAuthKey">
 								<div style="vertical-align: middle;">Authorization Key</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingEnablePermutations" id="tdLinkEnablePermutations">
+								<div style="vertical-align: middle;">Enable Permutations</div>
 							</td>
 						</tr>
 						<tr>
@@ -459,6 +613,23 @@
 								</table>
 							</td>
 						</tr>
+						<tr class="settings-detail" id="tdSettingEnablePermutations">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Enable Permutations</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="white-space: nowrap; width: 50px;">Enabled:</td>
+										<td class="settings-item">
+											<input id="chkEnablePermutations" data-bind="checked: enable_permutations" name="enablePermutations" type="checkbox" value="true" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
 						<tr class="settings-detail" id="tdSettingExcludedVehicles">
 							<td>
 								<table style="width: 100%;">
@@ -506,22 +677,7 @@
 								<table style="width: 100%;">
 									<tr>
 										<td class="settings-panel settings-item" colspan="2">
-											<div style="vertical-align: middle;">Entry Fee Sort Direction</div>
-										</td>
-									</tr>
-									<tr>
-										<td class="settings-item" colspan="2">
-											<div>
-												<input class="item-text" data-bind="checked: race_query_entry_fee_sort_direction" type="radio" value="asc">Ascending (Preference for Free Races)
-												&nbsp;&nbsp;&nbsp;&nbsp;
-												<input class="item-text" data-bind="checked: race_query_entry_fee_sort_direction" type="radio" value="desc">Descending (Preference for Paid Races)
-											</div>
-										</td>
-									</tr>
-									<tr><td colspan="2"><div>&nbsp;</div></td></tr>
-									<tr>
-										<td class="settings-panel settings-item" colspan="2">
-											<div style="vertical-align: middle;">Limit Total Results (Free + Paid Race) to:</div>
+											<div style="vertical-align: middle;">Limit Total Results (Free + Paid + Joined Races) to:</div>
 										</td>
 									</tr>
 									<tr>

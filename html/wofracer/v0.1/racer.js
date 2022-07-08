@@ -617,18 +617,24 @@ function joinRace()
         if ((participantCount >= modifiedParticipationThreshold) && (unjoinedRace.selectedVehicle.vehicleTokenId()) && (unjoinedRace.entry_fee === 0))
         {
             Log('joinApiData: Unapplying all hot-swap upgrades...', 'severity-info', 'Info');
-            unjoinedRace.selectedVehicle.ownedUpgrades().forEach(ownedUpgrade =>
-                {
-                    applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), ownedUpgrade.upgrade.id(), 'un');
-                }
-            );
-            unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades().forEach(upgradeToApply =>
-                {
-                    applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), upgradeToApply.upgrade.id(), '');
-                }
-            );
+            if (unjoinedRace.selectedVehicle.ownedUpgrades != null)
+            {
+                unjoinedRace.selectedVehicle.ownedUpgrades().forEach(ownedUpgrade =>
+                    {
+                        applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), ownedUpgrade.upgrade.id(), 'un');
+                    }
+                );
+            }
+            if ((unjoinedRace.selectedVehicle.SelectedPermutation != null) && (unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades != null))
+            {
+                unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades().forEach(upgradeToApply =>
+                    {
+                        applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), upgradeToApply.upgrade.id(), '');
+                    }
+                );
+            }
             var userVehicle = userVehiclesVM().find(vehicle => { return vehicle.token_id() == unjoinedRace.selectedVehicle.vehicleTokenId()});
-            userVehicle.LastAppliedUpgrades = unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades();
+            userVehicle.LastAppliedUpgrades = ((unjoinedRace.selectedVehicle.SelectedPermutation != null) && (unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades != null)) ? unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades() : null;
 
             joined = true;
             joinApiData = structuredClone(joinTemplate);

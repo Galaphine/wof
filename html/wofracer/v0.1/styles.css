@@ -90,6 +90,12 @@ body, table
     transform: scaleX(-1);
 }
 
+.body-main
+{
+    height: 86vh;
+    overflow: hidden;
+}
+
 .button-save
 {
     border-radius: 8px;
@@ -347,6 +353,20 @@ body, table
     z-index: 99;
 }
 
+.middle-content
+{
+    border: 0px;
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+.middle-panel-text
+{
+    height: 99%; 
+    overflow-y: scroll;
+    white-space: pre-wrap; 
+}
+
 .nav-icon
 {
     text-align: center;
@@ -488,6 +508,7 @@ body, table
 {
     border: 1px solid #444;
     height: 100%;
+    overflow-y: auto;
 }
 
 .settings-detail
@@ -550,6 +571,9 @@ body, table
     border: 1px solid white;
     border-collapse: collapse;
     color: white;
+    white-space: normal;
+    word-break: break-all;
+    word-wrap: break-word;
     width: 56%;
 }
 
@@ -596,7 +620,9 @@ body, table
 
 .status-table
 {
+    height: 100%;
     width: 100%;
+    overflow: auto;
 }
 
 .tab 

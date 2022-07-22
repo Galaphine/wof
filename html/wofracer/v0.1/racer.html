@@ -11,8 +11,7 @@
 		<script src="./combinations.js"></script>
 		<script src="./racer.js"></script>
 	</head>
-	<body>
-
+	<body class="body-main">
 		<table class="header-panel">
 			<tr>
 				<td class="panel header-panel-left">
@@ -24,7 +23,7 @@
 									<p />
 									<div>User Name: <span data-bind="text: Username" /></div>
 									<div />
-									<div>Participation Threshold: <span data-bind="text: ParticipationThreshold" /></div>
+									<div>Participation Thresholds:  Free: <span data-bind="text: ParticipationThresholds().Free"></span>, Paid: <span data-bind="text: ParticipationThresholds().Paid"></span></div>
 									<div />
 									<div class="item-text">Upgraded Vehicles: <span data-bind="text: UserVehiclesUpgradedCount"></span> / <span data-bind="text: UserVehiclesCount"></span></div>
 									<div />
@@ -146,8 +145,8 @@
 							</table>
 							<div id="unjoinedRaces">
 								<ul class="infinite-tabs" id="tabsLeft">
-									<li class="active locked tab" id="freeRacesTab"><a href="#freeRacesContent">Free Races (<span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0}).length"></span>)</a></li>
-									<li class="locked tab" id="paidRacesTab"><a href="#paidRacesContent">Paid Races (<span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0}).length"></span>)</a></li>
+									<li class="active locked tab" id="freeRacesTab"><a href="#freeRacesContent">Free Races (<span data-bind="text: $data.CountAtOrAboveThresholds().Free"></span> / <span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0}).length"></span>)</a></li>
+									<li class="locked tab" id="paidRacesTab"><a href="#paidRacesContent">Paid Races (<span data-bind="text: $data.CountAtOrAboveThresholds().Paid"></span> / <span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0}).length"></span>)</a></li>
 								</ul>
 								<div class="tab-content" id="freeRacesContent">
 									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0 }).length === 0 -->
@@ -174,9 +173,19 @@
 																		<div class="cell-race-image" style="width: 100%;">
 																			<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
 																				<br />
-																				<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.selectedVehicle.vehicleTokenId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" /></a>
+																			<!-- /ko -->
+																			<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																				&nbsp;
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.selectedVehicle.vehicleFreightPunkId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleFreightPunkUrl(), title: 'Freight Punk ID #{id}'.replace('{id}', $data.selectedVehicle.vehicleFreightPunkId())}" /></a>
+																			<!-- /ko -->
+																			<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
 																				<br />
 																				<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																				<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																					&nbsp;::&nbsp;
+																					<span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																				<!-- /ko -->
 																			<!-- /ko -->
 																		</div>
 																	</div>
@@ -190,7 +199,7 @@
 																		Your Best: 
 																		<!-- ko if: $data.selectedVehicle -->
 																			<span>
-																				<span data-bind="text: $data.selectedVehicle.vehicleName()"></span><br />
+																				<a class="item-text" data-bind="attr: {href: garageUrl.replace('{id}', $data.selectedVehicle.vehicleId()) }" target="_new"><span data-bind="text: $data.selectedVehicle.vehicleName()"></span></a><br />
 																				<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
 																					<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
 																					<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
@@ -253,9 +262,19 @@
 																			<div class="cell-race-image" style="width: 100%;">
 																				<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
 																					<br />
-																					<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" />
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.selectedVehicle.vehicleTokenId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" /></a>
+																				<!-- /ko -->
+																				<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																					&nbsp;
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.selectedVehicle.vehicleFreightPunkId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleFreightPunkUrl(), title: 'Freight Punk ID #{id}'.replace('{id}', $data.selectedVehicle.vehicleFreightPunkId())}" /></a>
+																				<!-- /ko -->
+																				<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
 																					<br />
 																					<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																					<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																						&nbsp;::&nbsp;
+																						<span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																					<!-- /ko -->
 																				<!-- /ko -->
 																			</div>
 																		</div>
@@ -269,7 +288,7 @@
 																			Your Best: 
 																			<!-- ko if: $data.selectedVehicle -->
 																				<span>
-																					<span data-bind="text: $data.selectedVehicle.vehicleName()"></span><br />
+																					<a class="item-text" data-bind="attr: {href: garageUrl.replace('{id}', $data.selectedVehicle.vehicleId()) }" target="_new"><span data-bind="text: $data.selectedVehicle.vehicleName()"></span></a><br />
 																					<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
 																						<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
 																						<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
@@ -310,40 +329,36 @@
 							<div class="tab-inner-container">
 								<ul class="infinite-tabs" id="tabsMiddle">
 									<li class="active locked tab" id="adjustablesTab"><a href="#adjustablesContent">Adjustables</a></li>
-									<li class="locked tab" id="statusTab"><a href="#statusContent">Status Log</a></li>
 									<li class="locked tab" id="instructionsTab"><a href="#instructionsContent">Instructions</a></li>
+									<li class="locked tab" id="versionHistoryTab"><a href="#versionHistoryContent">Version History</a></li>
+									<li class="locked tab" id="statusTab"><a href="#statusContent">Status Log</a></li>
 								</ul>
-								<div class="tab-content" id="adjustablesContent">
+								<div class="middle-content tab-content" id="adjustablesContent">
 									Adjustables View Coming Soon!
 								</div>
-								<div class="tab-content" id="statusContent">
-									Status Log View Coming Soon!
-									<!--
-									<table class="status-table">
-										<thead>
-											<tr>
-												<th class="status-header-time">Time</th>
-												<th class="status-header-severity">Severity</th>
-												<th class="status-header-message">Message</th>
-											</tr>
-										</thead>
-										<tbody id="statusTable">
-											<tr>
-												<td class="severity-info status-content-time" id="logStart"></td>
-												<td class="severity-info status-content-severity">Info</td>
-												<td class="severity-info status-content-message">Start of log</td>
-											</tr>
-										</tbody>
-									</table>
-									-->
+								<div class="middle-content tab-content" id="statusContent">
+									<br />
+									<!-- ko if:LogEnabled() -->
+										The log currently has <span data-bind="text: $data.StatusLogLength" style="font-weight: bold;"></span> entries logged out of a max <span data-bind="text: $data.MaxLogEntries" style="font-weight: bold;"></span> entries allowed.
+										<br /><br />
+										<button class="button-save" id="btnSaveLog">
+											&nbsp;&nbsp;Save and Clear Log&nbsp;&nbsp;
+										</button>
+										<div class="item-text" id="divSaved" style="display: none;">Saved. Unless otherwise specified, the file was saved to your Downloads folder.</div>
+									<!-- /ko -->
+
+									<!-- ko if: !LogEnabled() -->
+										Logging is currently disabled.
+									<!-- /ko -->
 								</div>
-								<div class="tab-content" id="instructionsContent">
-									<div class="panel">
-										<div class="item-title item-text">
-											Instructions View Coming Soon!
-										</div>
+								<div class="middle-content tab-content" id="instructionsContent">
+									<div class="item-title item-text middle-panel-text" id="divInstructions">
 									</div>
 								</div>	
+								<div class="middle-content tab-content" id="versionHistoryContent">
+									<div class="item-title item-text middle-panel-text" id="divVersionHistory">
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="panel panel-right" id="tab-container">
@@ -374,9 +389,17 @@
 																		<br />
 																		<div class="cell-race-image" style="width: 100%;">
 																				<br />
-																				<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" />
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.enteredVehicle.id}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" /></a>
+																				<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																					&nbsp;
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.enteredVehicle.vehicleFreightPunkId}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.vehicleFreightPunkUrl, title: 'Freight Punk ID #{id}'.replace('{id}', $data.enteredVehicle.vehicleFreightPunkId)}" /></a>
+																				<!-- /ko -->
 																				<br />
 																				<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																				<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																					&nbsp;::&nbsp;
+																					<span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																				<!-- /ko -->
 																		</div>
 																	</div>
 																</td>
@@ -445,9 +468,17 @@
 																			<!-- ko if: $data.enteredVehicle.id -->
 																				<div class="cell-race-image" style="width: 100%;">
 																					<br />
-																					<img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" />
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.enteredVehicle.id}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" /></a>
+																					<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																						&nbsp;
+																						<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.enteredVehicle.vehicleFreightPunkId}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.vehicleFreightPunkUrl, title: 'Freight Punk ID #{id}'.replace('{id}', $data.enteredVehicle.vehicleFreightPunkId)}" /></a>
+																					<!-- /ko -->
 																					<br />
 																					<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Fuelings"></span>
+																					<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																						&nbsp;::&nbsp;
+																						<span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																					<!-- /ko -->
 																				</div>
 																			<!-- /ko -->
 																		</div>
@@ -533,7 +564,7 @@
 										&nbsp;Save&nbsp;&nbsp;
 									</button>
 								</span>
-								<div class="item-text" id="divSaved" style="display: none;">Saved to your Downloads folder; be sure to copy to your racer.html folder.</div>
+								<div class="item-text" id="divSaved" style="display: none;">Saved. Unless otherwise specified, the file was saved to your Downloads folder; be sure to copy it to your racer.html folder.</div>
 							</td>
 						</tr>
 						<tr>
@@ -561,24 +592,8 @@
 							<td class="settings-spacer">&nbsp;</td>
 						</tr>
 						<tr>
-							<td class="settings-panel settings-item settings-link" for="tdSettingParticipationThreshold" id="tdLinkParticipationThreshold">
-								<div style="vertical-align: middle;">Participation Threshold</div>
-							</td>
-						</tr>
-						<tr>
-							<td class="settings-spacer">&nbsp;</td>
-						</tr>
-						<tr>
-							<td class="settings-panel settings-item settings-link" for="tdSettingRaceQuery" id="tdLinkRaceQuery">
-								<div style="vertical-align: middle;">Race Query</div>
-							</td>
-						</tr>
-						<tr>
-							<td class="settings-spacer">&nbsp;</td>
-						</tr>
-						<tr>
-							<td class="settings-panel settings-item settings-link" for="tdSettingRefreshRate" id="tdLinkRefreshRate">
-								<div style="vertical-align: middle;">Refresh Rate (Min 30 seconds)</div>
+							<td class="settings-panel settings-item settings-link" for="tdSettingParticipationThresholds" id="tdLinkParticipationThresholds">
+								<div style="vertical-align: middle;">Participation Thresholds</div>
 							</td>
 						</tr>
 						<tr>
@@ -587,6 +602,14 @@
 						<tr>
 							<td class="settings-panel settings-item settings-link" for="tdSettingWalletAddress" id="tdLinkWalletAddress">
 								<div style="vertical-align: middle;">Wallet Address</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer"><hr style="color: lightyellow;" /></td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingMisc" id="tdLinkMisc">
+								<div style="vertical-align: middle;">Miscellaneous</div>
 							</td>
 						</tr>
 					</table>
@@ -653,57 +676,27 @@
 								</table>
 							</td>
 						</tr>
-						<tr class="settings-detail" id="tdSettingParticipationThreshold">
+						<tr class="settings-detail" id="tdSettingParticipationThresholds">
 							<td>
 								<table style="width: 100%;">
 									<tr>
 										<td class="settings-panel settings-item" colspan="2">
-											<div style="vertical-align: middle;">Participation Threshold</div>
+											<div style="vertical-align: middle;">Participation Thresholds</div>
 										</td>
 									</tr>
 									<tr>
-										<td class="settings-item" style="width: 40px;">Value:</td>
+										<td class="settings-item" style="width: 100px;">Free Races:</td>
 										<td class="settings-item">
 											<div>
-												<input class="settings-input-numeric" data-bind="value: participation_threshold" type="text" />
+												<input class="settings-input-numeric" data-bind="value: participation_thresholds().free" type="text" />
 											</div>
 										</td>
 									</tr>
-								</table>
-							</td>
-						</tr>
-						<tr class="settings-detail" id="tdSettingRaceQuery">
-							<td>
-								<table style="width: 100%;">
 									<tr>
-										<td class="settings-panel settings-item" colspan="2">
-											<div style="vertical-align: middle;">Limit Total Results (Free + Paid + Joined Races) to:</div>
-										</td>
-									</tr>
-									<tr>
-										<td class="settings-item" style="width: 40px;">Value:</td>
+										<td class="settings-item" style="width: 100px;">Paid Races:</td>
 										<td class="settings-item">
 											<div>
-												<input class="settings-input-numeric" data-bind="value: race_query_result_limit" type="text" />
-											</div>
-										</td>
-									</tr>
-								</table>
-							</td>
-						</tr>
-						<tr class="settings-detail" id="tdSettingRefreshRate">
-							<td>
-								<table style="width: 100%;">
-									<tr>
-										<td class="settings-panel settings-item" colspan="2">
-											<div style="vertical-align: middle;">Refresh Rate (Min 30 seconds)</div>
-										</td>
-									</tr>
-									<tr>
-										<td class="settings-item" style="width: 40px;">Value:</td>
-										<td class="settings-item">
-											<div>
-												<input class="settings-input-numeric" data-bind="value: refresh_rate_seconds" type="text" />
+												<input class="settings-input-numeric" data-bind="value: participation_thresholds().paid" type="text" />
 											</div>
 										</td>
 									</tr>
@@ -723,6 +716,51 @@
 										<td class="settings-item">
 											<div>
 												<input class="settings-input-string" data-bind="value: wallet_address" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingMisc">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Miscellaneous Settings:</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 300px;">Limit Total Results (Free + Paid + Joined Races) to:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: race_query_result_limit" type="text" />
+											</div>
+										</td>
+									</tr>
+									<!--
+									<tr>
+										<td class="settings-item">Log Enabled:</td>
+										<td class="settings-item">
+											<div>
+												<input id="chkEnableLogging" data-bind="checked: enable_logging" name="enableLogging" type="checkbox" value="true" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item">Max Log Entries:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: max_log_entries" type="text" />
+											</div>
+										</td>
+									</tr>
+									-->
+									<tr>
+										<td class="settings-item">Refresh Rate (Min 30 seconds):</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: refresh_rate_seconds" type="text" />
 											</div>
 										</td>
 									</tr>

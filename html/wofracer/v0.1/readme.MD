@@ -1,10 +1,19 @@
-WOF Racer 0.1.6
+WOF Racer v0.1.7
 
 Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.1
 
 Read the included Instructions.txt file for details on how to set up and run the script.
 
-Version history:
+Version History:
+
+    0.1.7 (2022-07-22):
+        * Moved (Original) Base Stats to separate file and added mechanism for pulling new-vehicle original/starting base stats from LooksRare
+        * Optimized the permutation loop in assigning vehicles to handle max permutations of 2^16 (32768).
+            When the # of permutations is greater than a predefined max allowed, logging is disabled in the loop.
+        * Added Freight Punk images with XP + Level + Skill Points to Unjoined Free/Paid, Joined, and Next to Race
+        * Fixed some panel formatting/scrolling
+        * Added code for log saving (currently disabled this iteration)
+        * Added instructions to the Instructions tab and Readme.MD to a Version History tab.
 
     0.1.6 (2022-07-08):
         * Fixed an issue with enable_permutations - it would always load with Permutations enabled even when saved as false (disabled).

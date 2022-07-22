@@ -67,9 +67,12 @@ function MySettingsVM()
     var self = this;
 
     self.authorization_key = ko.observable();
+    self.enable_logging = ko.observable();
     self.enable_permutations = ko.observable();
     self.excluded_vehicles = ko.observableArray();
+    self.max_log_entries = ko.observable();
     self.participation_threshold = ko.observable();
+    self.participation_thresholds = ko.observable( {free: null, paid: null} );
     self.race_query_result_limit = ko.observable();
     self.refreshRateMilliseconds = ko.pureComputed(function() {return self.refreshRateSeconds()*1000;});
     self.refresh_rate_seconds = ko.observable();
@@ -91,13 +94,47 @@ function NextToRaceRacesVM(nextToRaceRaces)
     self.joinedRaceList = ko.observableArray(nextToRaceRaces);
 }
 
+function StatusLogVM()
+{
+    var self = this;
+
+    self.LogEnabled = ko.pureComputed(function() { return mySettings.enable_logging(); } );
+    self.MaxLogEntries = ko.pureComputed(function() { return mySettings.max_log_entries(); } );
+    self.StatusLogLength = ko.pureComputed(function() { return messageLog.length; } );
+}
+
 function UnjoinedRacesVM(unjoineRaces)
 {
     if (unjoinedRaces == null) return;
     
     var self = this;
 
-    self.raceDistance = ko.observable();
+    self.CountAtOrAboveThresholds = ko.observable();
+    self.CountAtOrAboveThresholds(
+        {
+            Free: ko.pureComputed(function()
+                {
+                    return self.unjoinedRaceList().filter( race => { return ((race.entry_fee === 0) && (race.participants.length >= mySettings.participation_thresholds().free)) } ).length;
+                }
+            ),
+            Paid: ko.pureComputed(function()
+                {
+                    return self.unjoinedRaceList().filter( race => { return ((race.entry_fee > 0) && (race.participants.length >= mySettings.participation_thresholds().paid)) } ).length;
+                }
+            )
+        }
+    );
+
+    self.ParticipationThreshold = ko.observable();
+    self.ParticipationThresholds = ko.observable();
+    self.ParticipationThresholds(
+        {
+            Free: ko.pureComputed(function() { return mySettings.participation_thresholds().free }),
+            Paid: ko.pureComputed(function() { return mySettings.participation_thresholds().paid })
+        }
+    );
+    
+    //self.raceDistance = ko.observable();
 
     self.selectRace = function(data, event)
     {
@@ -115,6 +152,13 @@ function UserInfoVM(username)
 {
     var self = this;
     self.ParticipationThreshold = ko.pureComputed(function() { return mySettings.participation_threshold() });
+    self.ParticipationThresholds = ko.observable();
+    self.ParticipationThresholds(
+        {
+            Free: ko.pureComputed(function() { return mySettings.participation_thresholds().free }),
+            Paid: ko.pureComputed(function() { return mySettings.participation_thresholds().paid })
+        }
+    );
     self.Username = ko.observable(username);
     self.UserVehiclesCount = ko.observable();
     self.UserVehiclesUpgradedCount = ko.observable();
@@ -159,17 +203,39 @@ function getLocalData()
             }
 
             mySettings.authorization_key(data.authorization_key);
-            mySettings.excluded_vehicles(data.excluded_vehicles);
-            mySettings.wallet_address(data.wallet_address);
-            mySettings.participation_threshold(data.participation_threshold);
-            mySettings.refresh_rate_seconds(data.refresh_rate_seconds);
-            mySettings.race_query_result_limit((data.race_query_result_limit) ? data.race_query_result_limit : 50);
+            mySettings.enable_logging( (data.enable_logging == null) ? false : data.enable_logging);
             mySettings.enable_permutations( (data.enable_permutations == null) ? true : data.enable_permutations);
+            mySettings.excluded_vehicles(data.excluded_vehicles);
+            mySettings.max_log_entries((data.max_log_entries) ? data.max_log_entries : DEFAULT_MAX_LOG_ENTRIES);
+            mySettings.participation_threshold(data.participation_threshold);
+            mySettings.participation_thresholds( {free: (data.participation_thresholds) ? data.participation_thresholds.free : data.participation_threshold, paid: (data.participation_thresholds) ? data.participation_thresholds.paid : data.participation_threshold} );
+            mySettings.race_query_result_limit((data.race_query_result_limit) ? data.race_query_result_limit : 50);
+            mySettings.refresh_rate_seconds(data.refresh_rate_seconds);
+            mySettings.wallet_address(data.wallet_address);
             joinTemplate.address = mySettings.wallet_address();
             userRacesTemplate.address = mySettings.wallet_address();
 
+            if (!bound['statusLogVM'])
+            {
+                statusLogVM = new StatusLogVM();
+                ko.applyBindings(statusLogVM, $('#statusContent').get(0));
+                bound['statusLogVM'] = true;
+            }
+
             Log('getLocalData() - End mysettings.json getJSON()', 'severity-info', 'Info');
         }, 'json'),
+        $.getJSON('VehicleBaseStats.json', function(data) 
+        {
+            vehicleBaseStats = data;
+        }, 'json'),
+        $.get('instructions.txt', function(data) 
+        {
+            $('#divInstructions').html(data.replace('WOF Racer', 'WOF Racer v' + CURRENT_VERSION));
+        }, 'text'),
+        $.get('readme.MD', function(data) 
+        {
+            $('#divVersionHistory').html(data);
+        }, 'text'),
         $.getJSON('postqueries.json', function(data) 
         {
             Log('getLocalData() - Begin postqueries.json getJSON()', 'severity-info', 'Info');
@@ -229,6 +295,8 @@ function getServerData()
                 if (!bound['userVehiclesVM'])
                 {
                     userVehiclesVM = ko.mapping.fromJS(data.data.token_metadata);
+                    maxVehcileBaseStatsTokenId = Math.max(...vehicleBaseStats.map(x => x.id).flat(1));
+                    getRemainingFleetStats();
                     ko.applyBindings(userVehiclesVM, $('#divUserVehicles').get(0));
                     $('#divUserVehicles').children().appendTo('#divExcludedUserVehicles');
                     bound['userVehiclesVM'] = true;
@@ -380,14 +448,7 @@ function assignUserVehicles()
             cargoWeight = unjoinedRace.weight;
        
             Log(
-                'Class: {0}\nDistance: {1}\nName: {2}\nWeather: {3}\nTerrain: {4}\nParticipant Count: {5}\nCargo Weight: {6}'
-                .replace('{0}', raceClass)
-                .replace('{1}', raceDistance)
-                .replace('{2}', raceName)
-                .replace('{3}', raceWeather)
-                .replace('{4}', raceTerrain)
-                .replace('{5}', participantCount)
-                .replace('{6}', cargoWeight)
+                `Class: ${raceClass}\nDistance: ${raceDistance}\nName: ${raceName}\nWeather: ${raceWeather}\nTerrain: ${raceTerrain}\nParticipant Count: ${participantCount}\nCargo Weight: ${cargoWeight}`
                 , 'severity-info', 'Info'
             );
             
@@ -400,9 +461,6 @@ function assignUserVehicles()
                 {
                     if ((userVehicle.staticAttributes.transportation_mode().toLowerCase() == raceClass) && (mySettings.excluded_vehicles.indexOf(userVehicle.token_id()) == -1))
                     {
-                        userVehicle.vehicleImageUrl = userVehicle.image();
-                        userVehicle.vehicleName = userVehicle.name();
-                        userVehicle.vehicleTokenId = userVehicle.token_id();
                         availableVehiclesInClass.push(userVehicle);
                     }
                 }
@@ -430,49 +488,44 @@ function assignUserVehicles()
                         {
                             vehicleType = availableVehicle.staticAttributes.vehicle_type();
                             vehicleClass = availableVehicle.staticAttributes.transportation_mode();
+                            vehicleAdjustable = vehicleAdjustables.filter(function(vehicleAdjustable) {return vehicleAdjustable.vehicleType.toLowerCase() === vehicleType.toLowerCase()})[0];
+                            vehicleRefuelingDelay = vehicleAdjustable.adjustables.delays.refuelingDelay;
+                            vehicleTypeMaxSpeed = vehicleAdjustable.maxSpeed;
                             availableVehicle.StatsPermutations.forEach(permutation =>
                                 {
+                                    vehicleStatMaxRange = permutation.max_range;
                                     vehicleMaxCapacity = permutation.max_capacity;
-                                    vehicleMaxRange = permutation.max_range;
-                                    vehicleStatMaxSpeed = permutation.max_speed;
-                                    vehicleEmissionRate = permutation.emission_rate;
-                                    vehicleFuelEfficiency = permutation.fuel_efficiency;
                                     numberOfTrips = Math.ceil(cargoWeight / vehicleMaxCapacity);
-                                    vehicleAdjustedRaceDistance = raceDistance + ((numberOfTrips-1)*raceDistance*2);
-                                    numberOfRefuels = Math.ceil(vehicleAdjustedRaceDistance / vehicleMaxRange);
-                                    vehicleAdjustable = vehicleAdjustables.filter(function(vehicleAdjustable) {return vehicleAdjustable.vehicleType.toLowerCase() === vehicleType.toLowerCase()})[0];
-                                    boostFactor = ((raceDistance >= vehicleAdjustable.boosts.rangeLimitLower) && (raceDistance <= vehicleAdjustable.boosts.rangeLimitUpper)) ? vehicleAdjustable.boosts.boostFactor : 1;
-                                    vehicleMaxSpeed = vehicleAdjustable.maxSpeed;
-                                    vehicleAccelerationDelay = vehicleAdjustable.adjustables.delays.accelerationDelay * numberOfRefuels * (1 + (Math.abs(5 - vehicleEmissionRate)/100));
-                                    vehicleDecelerationDelay = vehicleAdjustable.adjustables.delays.decelerationDelay * numberOfRefuels * (1 + (Math.abs(5 - vehicleEmissionRate)/100));
-                                    vehicleRefuelingDelay = vehicleAdjustable.adjustables.delays.refuelingDelay;
+                                    numberOfRefuels = Math.ceil( (raceDistance + ((numberOfTrips-1)*raceDistance*2)) / vehicleStatMaxRange);
                                     permutation.numberOfTrips = numberOfTrips;
                                     permutation.numberOfRefuels = numberOfRefuels;
-                                    permutation.allowed = true;
 
-                                    exclusionReasonShort = (numberOfTrips > 5) ? 'trips' : ( (numberOfRefuels > 5) ? 'refuels' : '' );
                                     if ((numberOfTrips > 5) || (numberOfRefuels > 5))
                                     {
-                                        exclusionReason = '{0} will need more than 5 {1} to complete the distance of {2}km for race [{3}]; eliminating.'
-                                            .replace('{0}', vehicleName)
-                                            .replace('{1}', exclusionReasonShort)
-                                            .replace('{2}', raceDistance)
-                                            .replace('{3}', raceName);
-                                        Log(exclusionReason , 'severity-info', 'Info');
-                                        permutation.allowed = false;
-                                        permutation.exclusionReason = exclusionReasonShort;
+                                        if (availableVehicle.StatsPermutations.length <= MAX_ALLOWED_PERMUTATIONS)
+                                        {
+                                            tripsOrRefuels = (numberOfTrips > 5) ? 'trips' : ( (numberOfRefuels > 5) ? 'refuels' : '' );
+                                            Log(
+                                                `${vehicleName} with permutations [{${ko.mapping.toJS(permutation).comboUpgrades.map(x => x.upgrade.id).flat(1)}}] will need more than 5 ${tripsOrRefuels} to complete the distance of ${raceDistance}km for race [${raceName}]; eliminating.`
+                                                , 'severity-info', 'Info');
+                                        }
                                         permutation.finalAdjustedTime = 0;
                                     }
-
-                                    if (permutation.allowed)
+                                    else
                                     {
+                                        vehicleStatMaxSpeed = permutation.max_speed;
+                                        vehicleFuelEfficiency = permutation.fuel_efficiency;
+                                        vehicleEmissionRate = permutation.emission_rate;
+                                        vehicleAdjustedRaceDistance = raceDistance + ((numberOfTrips-1)*raceDistance*2);
+                                        boostFactor = ((raceDistance >= vehicleAdjustable.boosts.rangeLimitLower) && (raceDistance <= vehicleAdjustable.boosts.rangeLimitUpper)) ? vehicleAdjustable.boosts.boostFactor : 1;
+                                        vehicleAccelerationDelay = vehicleAdjustable.adjustables.delays.accelerationDelay * numberOfRefuels * (1 + (Math.abs(5 - vehicleEmissionRate)/100));
+                                        vehicleDecelerationDelay = vehicleAdjustable.adjustables.delays.decelerationDelay * numberOfRefuels * (1 + (Math.abs(5 - vehicleEmissionRate)/100));
                                         terrainSpeedFactor = (vehicleAdjustable.adjustables.terrainSpeedFactor && raceTerrain.length > 0) ? vehicleAdjustable.adjustables.terrainSpeedFactor[raceTerrain] : 1;
-                                        vehicleAdjustedSpeed = vehicleStatMaxSpeed;
-                                        if (vehicleStatMaxSpeed > (vehicleMaxSpeed*terrainSpeedFactor))
+                                        if (vehicleStatMaxSpeed > (vehicleTypeMaxSpeed*terrainSpeedFactor))
                                         {
-                                            vehicleAdjustedSpeed = 0
+                                            vehicleStatMaxSpeed = 0
                                         }
-                                        estimatedTimeToComplete = (vehicleAdjustedRaceDistance / vehicleAdjustedSpeed)*3600 + (vehicleAccelerationDelay + vehicleDecelerationDelay)*(numberOfRefuels + 1); // Extra accel/decel delay for start and stop
+                                        estimatedTimeToComplete = (vehicleAdjustedRaceDistance / vehicleStatMaxSpeed)*3600 + (vehicleAccelerationDelay + vehicleDecelerationDelay)*(numberOfRefuels + 1); // Extra accel/decel delay for start and stop
                                         terrainAdjustment = (vehicleAdjustable.adjustables.terrain && raceTerrain.length > 0) ? vehicleAdjustable.adjustables.terrain[raceTerrain] : 1;
                                         weatherAdjustment = (vehicleAdjustable.adjustables.weather && raceWeather.length > 0) ? vehicleAdjustable.adjustables.weather[raceWeather] : 1;
                                         terrainAndWeatherAdjustedTime = estimatedTimeToComplete * terrainAdjustment * weatherAdjustment;
@@ -481,26 +534,33 @@ function assignUserVehicles()
                                         permutation.finalAdjustedTime = finalAdjustedTime;
                                         vehicleNameLong = availableVehicle.name() + ' (' + availableVehicle.staticAttributes.vehicle_type() + ', ID_Permutation = '  + permutation.PermutationId + ')'
                                         vehiclePermutationFinalTimes.push({'key': permutation.PermutationId, 'val': {'longName': vehicleNameLong, 'time': permutation.finalAdjustedTime, 'comboUpgrades': permutation.comboUpgrades}});
-                                        Log(
-                                            'vehicle: ' + vehicleNameLong
-                                            + '\nnumberOfTrips: ' + numberOfTrips 
-                                            + '\nnumberOfRefuels: ' + numberOfRefuels 
-                                            + '\nvehicleMaxCapacity: ' + vehicleMaxCapacity
-                                            + '\nvehicleMaxSpeed: ' + vehicleMaxSpeed
-                                            + '\nvehicleAdjustedRaceDistance: ' + vehicleAdjustedRaceDistance 
-                                            + '\nvehicleAdjustedSpeed: ' + vehicleAdjustedSpeed
-                                            + '\nvehicleAccelerationDelay: ' + vehicleAccelerationDelay
-                                            + '\nvehicleDecelerationDelay: ' + vehicleDecelerationDelay
-                                            + '\nterrainSpeedFactor: ' + terrainSpeedFactor
-                                            + '\nterrainAdjustment: ' + terrainAdjustment
-                                            + '\nweatherAdjustment: ' + weatherAdjustment
-                                            + '\nboostFactor: ' + boostFactor
-                                            + '\nestimatedTimeToComplete: ' + estimatedTimeToComplete
-                                            + '\nfinalAdjustedTime: ' + finalAdjustedTime
-                                            + '\nraceTerrain, adjustable.terrain: ' + raceTerrain + ', ' + vehicleAdjustable.adjustables.terrain[raceTerrain]
-                                            + '\nraceWeather, adjustable.weather: ' + raceWeather + ', ' + vehicleAdjustable.adjustables.weather[raceWeather]
-                                            , 'severity-info', 'Info'
-                                        );
+                                        if (availableVehicle.StatsPermutations.length <= MAX_ALLOWED_PERMUTATIONS)
+                                        {
+                                            Log(
+                                                `vehicle: ${vehicleNameLong}
+    numberOfTrips: ${numberOfTrips}
+    numberOfRefuels: ${numberOfRefuels}
+    vehicleMaxCapacity: ${vehicleMaxCapacity}
+    vehicleTypeMaxSpeed: ${vehicleTypeMaxSpeed}
+    vehicleStatMaxSpeed: ${vehicleStatMaxSpeed}
+    vehicleAdjustedRaceDistance: ${vehicleAdjustedRaceDistance}
+    vehicleStatMaxRange: ${vehicleStatMaxRange}
+    vehicleAccelerationDelay: ${vehicleAccelerationDelay}
+    vehicleDecelerationDelay: ${vehicleDecelerationDelay}
+    vehicleRefuelingDelay: ${vehicleRefuelingDelay}
+    vehicleFuelEfficiency: ${vehicleFuelEfficiency}
+    vehicleEmissionRate: ${vehicleEmissionRate}
+    terrainSpeedFactor: ${terrainSpeedFactor}
+    terrainAdjustment: ${terrainAdjustment}
+    weatherAdjustment: ${weatherAdjustment}
+    boostFactor: ${boostFactor}
+    estimatedTimeToComplete: ${estimatedTimeToComplete}
+    finalAdjustedTime: ${finalAdjustedTime}
+    raceTerrain, adjustable.terrain: ${raceTerrain}, ${vehicleAdjustable.adjustables.terrain[raceTerrain]}
+    raceWeather, adjustable.weather: ${raceWeather}, ${vehicleAdjustable.adjustables.weather[raceWeather]}`
+                                                , 'severity-info', 'Info'
+                                            );
+                                        }
                                     }
                                 }
                             );
@@ -524,6 +584,7 @@ function assignUserVehicles()
 
                 var vehiclePermutationIdWithShortestTime = vehiclePermutationFinalTimes[0].key;
                 var selectedVehicle = availableVehiclesInClass.find(vehicle => { return vehicle.token_id() == vehiclePermutationIdWithShortestTime.split('_')[0]; });
+                selectedVehicle.vehicleId = ko.observable(selectedVehicle.token_id());
                 selectedVehicle.SelectedPermutation = (selectedVehicle.StatsPermutations == null) ? null : selectedVehicle.StatsPermutations.find(permutation => { return permutation.PermutationId == vehiclePermutationIdWithShortestTime; });
                 if (selectedVehicle.SelectedPermutation != null)
                 {
@@ -540,20 +601,30 @@ function assignUserVehicles()
                 {
                     unjoinedRace.selectedVehicle.numberOfRefuels(0);
                     unjoinedRace.selectedVehicle.numberOfTrips(0);
+                    unjoinedRace.selectedVehicle.vehicleFreightPunkId(0);
+                    unjoinedRace.selectedVehicle.vehicleFreightPunkLevel(0);
+                    unjoinedRace.selectedVehicle.vehicleFreightPunkSkillPoints(0);
+                    unjoinedRace.selectedVehicle.vehicleFreightPunkUrl('');
+                    unjoinedRace.selectedVehicle.vehicleFreightPunkXp(0);
                     unjoinedRace.selectedVehicle.vehicleId('');
                     unjoinedRace.selectedVehicle.vehicleImageUrl('');
-                    unjoinedRace.selectedVehicle.vehicleTokenId('');
                     unjoinedRace.selectedVehicle.vehicleName("No suitable {0} WOFs.".replace('{0}', raceClass));
+                    unjoinedRace.selectedVehicle.vehicleTokenId('');
                 }
             }
             else
             {
                 unjoinedRace.selectedVehicle.numberOfRefuels(0);
                 unjoinedRace.selectedVehicle.numberOfTrips(0);
+                unjoinedRace.selectedVehicle.vehicleFreightPunkId(0);
+                unjoinedRace.selectedVehicle.vehicleFreightPunkLevel(0);
+                unjoinedRace.selectedVehicle.vehicleFreightPunkSkillPoints(0);
+                unjoinedRace.selectedVehicle.vehicleFreightPunkUrl('');
+                unjoinedRace.selectedVehicle.vehicleFreightPunkXp(0);
                 unjoinedRace.selectedVehicle.vehicleId('');
                 unjoinedRace.selectedVehicle.vehicleImageUrl('');
-                unjoinedRace.selectedVehicle.vehicleTokenId('');
                 unjoinedRace.selectedVehicle.vehicleName("No available {0} WOFs in fleet.".replace('{0}', raceClass));
+                unjoinedRace.selectedVehicle.vehicleTokenId('');
             }
             Log('assignUserVehicles() - End Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
         }
@@ -614,7 +685,8 @@ function joinRace()
         participantCount = unjoinedRace.participants.length;
         i++;
         modifiedParticipationThreshold = (unjoinedRace.class.toLowerCase() == 'space') ? Math.round(userInfoVM.ParticipationThreshold()*.7, 0) : userInfoVM.ParticipationThreshold();
-        if ((participantCount >= modifiedParticipationThreshold) && (unjoinedRace.selectedVehicle.vehicleTokenId()) && (unjoinedRace.entry_fee === 0))
+        raceClass = unjoinedRace.class.toLowerCase();
+        if ((participantCount >= modifiedParticipationThreshold) && (unjoinedRace.selectedVehicle.vehicleTokenId()) && (unjoinedRace.entry_fee === 0) && (participantCount < maxParticipants[raceClass]))
         {
             Log('joinApiData: Unapplying all hot-swap upgrades...', 'severity-info', 'Info');
             if (unjoinedRace.selectedVehicle.ownedUpgrades != null)
@@ -734,6 +806,24 @@ function roundTo(n, digits)
     return Math.round(n) / multiplicator;
 }
 
+function saveFile(fileName, fileContent)
+{
+    var a = document.createElement("a");
+    var file = new Blob([fileContent], {endings: 'native', type: 'text/plain'});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
+
+function saveLog()
+{
+    if ((!mySettings) || (!mySettings.enable_logging) || (!mySettings.enable_logging())) return;
+    
+    var formattedDate = moment(new Date()).format('YYYYMMDD-HHmmss');
+    saveFile(`wofracer-log-${formattedDate}`, [messageLog.join('\n')])
+    messageLog = [];
+}
+
 function setupNavPages()
 {
     Log('setupNavPages() - Begin', 'severity-info', 'Info');
@@ -789,10 +879,10 @@ function setupNextToRaceRaces()
                 numberOfRefuels = Math.ceil(vehicleAdjustedRaceDistance / vehicleMaxRange);
                 nextToRace.enteredVehicle = 
                 {
-                    id:  (enteredVehicle) ? enteredVehicle.vehicle.token_id : 0,
-                    image: (enteredVehicle) ? enteredVehicle.vehicle.image : null,
                     emission_rate: (enteredVehicle) ? enteredVehicle.vehicle.stats.emission_rate : '',
                     fuel_efficiency: (enteredVehicle) ? enteredVehicle.vehicle.stats.fuel_efficiency : '',
+                    id:  (enteredVehicle) ? enteredVehicle.vehicle.token_id : 0,
+                    image: (enteredVehicle) ? enteredVehicle.vehicle.image : null,
                     max_capacity_display: (enteredVehicle) ? Number(parseFloat(enteredVehicle.vehicle.stats.max_capacity)).toLocaleString() : '',
                     max_range_display: (enteredVehicle) ? Number(parseFloat(enteredVehicle.vehicle.stats.max_range)).toLocaleString() : '',
                     max_speed_display: (enteredVehicle) ? Number(parseFloat(enteredVehicle.vehicle.stats.max_speed)).toLocaleString() : '',
@@ -801,6 +891,11 @@ function setupNextToRaceRaces()
                     numberOfTrips: numberOfTrips,
                     raceDistance: roundTo(nextToRace.distance, decimalPlaces),
                     SelectedPermutation: { comboUpgrades: userVehicle.LastAppliedUpgrades },
+                    vehicleFreightPunkId: userVehicle.vehicleFreightPunkId(),
+                    vehicleFreightPunkLevel: userVehicle.vehicleFreightPunkLevel(),
+                    vehicleFreightPunkSkillPoints: userVehicle.vehicleFreightPunkSkillPoints(),
+                    vehicleFreightPunkUrl: userVehicle.vehicleFreightPunkUrl(),
+                    vehicleFreightPunkXp: userVehicle.vehicleFreightPunkXp(),
                     weight: cargoWeight
                 }
             }
@@ -820,6 +915,11 @@ function setupNextToRaceRaces()
                     numberOfTrips: null,
                     raceDistance: roundTo(nextToRace.distance, decimalPlaces),
                     SelectedPermutation: { comboUpgrades: [] },
+                    vehicleFreightPunkId: 0,
+                    vehicleFreightPunkLevel: 0,
+                    vehicleFreightPunkSkillPoints: 0,
+                    vehicleFreightPunkUrl: '',
+                    vehicleFreightPunkXp: 0,
                     weight: cargoWeight
                 }
             }
@@ -893,9 +993,14 @@ function setupUpcomingRaces()
                 {
                     numberOfRefuels: 0, 
                     numberOfTrips: 0, 
+                    vehicleFreightPunkId: null, 
+                    vehicleFreightPunkLevel: null,
+                    vehicleFreightPunkSkillPoints: null,
+                    vehicleFreightPunkUrl: null, 
+                    vehicleFreightPunkXp: null,
                     vehicleId: null, 
-                    vehicleName: '(TBD)', 
                     vehicleImageUrl: null, 
+                    vehicleName: '(TBD)', 
                     vehicleTokenId: null, 
                     SelectedPermutation: 
                     {
@@ -943,14 +1048,13 @@ function setupUpcomingRaces()
                 numberOfTrips: numberOfTrips,
                 raceDistance: roundTo(joinedRace.distance, decimalPlaces),
                 SelectedPermutation: { comboUpgrades: userVehicle.LastAppliedUpgrades },
+                vehicleFreightPunkId: userVehicle.vehicleFreightPunkId(),
+                vehicleFreightPunkLevel: userVehicle.vehicleFreightPunkLevel(),
+                vehicleFreightPunkSkillPoints: userVehicle.vehicleFreightPunkSkillPoints(),
+                vehicleFreightPunkUrl: userVehicle.vehicleFreightPunkUrl(),
+                vehicleFreightPunkXp: userVehicle.vehicleFreightPunkXp(),
                 weight: cargoWeight
             }
-
-            //var vehicle = userVehiclesVM().find(vehicle => { return vehicle.token_id() === enteredVehicle.vehicle.token_id });
-            //alert(ko.mapping.toJSON(vehicle.StatsPermutations));
-            //alert(ko.mapping.toJSON(userVehiclesVM()[0].token_id));
-            //alert(JSON.stringify(vehicle))
-
         }
     );
     $('#spnJoinedRacesCount').html(joinedRaces.length);
@@ -987,56 +1091,81 @@ function setupUpgradePermutations()
     }
     userVehiclesVM().forEach(userVehicle =>
         {
+            baseStatsVehicle = vehicleBaseStats.find(x => x.id == userVehicle.token_id());
+
+            userVehicle.vehicleFreightPunkId = ko.observable(((userVehicle.freightPunk != null) && (userVehicle.freightPunk.punk != null) && (userVehicle.freightPunk.punk.id != null)) ? userVehicle.freightPunk.punk.id() : 0);
+            userVehicle.vehicleFreightPunkLevel = ko.observable((userVehicle.vehicleFreightPunkId() > 0) ? userVehicle.freightPunk.punk.level() : '');
+            userVehicle.vehicleFreightPunkSkillPoints = ko.observable((userVehicle.vehicleFreightPunkId() > 0) ? userVehicle.freightPunk.punk.skill_points() : '');
+            userVehicle.vehicleFreightPunkUrl = ko.observable((userVehicle.vehicleFreightPunkId() > 0) ? userVehicle.freightPunk.punk.image() : '');
+            userVehicle.vehicleFreightPunkXp = ko.observable((userVehicle.vehicleFreightPunkId() > 0) ? userVehicle.freightPunk.punk.xp_earned() : '');
+            userVehicle.vehicleImageUrl = userVehicle.image();
+            userVehicle.vehicleName = userVehicle.name();
+            userVehicle.vehicleTokenId = userVehicle.token_id();
             userVehicle.BaseStats = 
+            {
+                emission_rate: baseStatsVehicle.emission_rate,
+                fuel_efficiency: baseStatsVehicle.fuel_efficiency,
+                max_capacity: baseStatsVehicle.max_capacity,
+                max_range: baseStatsVehicle.max_range,
+                max_speed: baseStatsVehicle.max_speed
+            }
+
+            userVehicle.StatsPermutations = [];
+            
+            /* Add current applied permutation as first permutation (in case stats aren't enabled) */
+            StatsPermutation = 
             {
                 emission_rate: userVehicle.dynamicStats.emission_rate(),
                 fuel_efficiency: userVehicle.dynamicStats.fuel_efficiency(),
                 max_capacity: userVehicle.dynamicStats.max_capacity(),
                 max_range: userVehicle.dynamicStats.max_range(),
-                max_speed: userVehicle.dynamicStats.max_speed()
-            }
-
-            userVehicle.StatsPermutations = [];
-            
-            /* Add base vehicle as first permutation */
-            StatsPermutation = 
-            {
-                emission_rate: userVehicle.BaseStats.emission_rate,
-                fuel_efficiency: userVehicle.BaseStats.fuel_efficiency,
-                max_capacity: userVehicle.BaseStats.max_capacity,
-                max_range: userVehicle.BaseStats.max_range,
-                max_speed: userVehicle.BaseStats.max_speed,
+                max_speed: userVehicle.dynamicStats.max_speed(),
                 comboUpgrades: []
             }
-            StatsPermutation.PermutationId = userVehicle.token_id() + '_00';
+
+            StatsPermutation.PermutationId = userVehicle.token_id() + '_Starting';
+
+            var ownedUpgradeIds = [];
+            userVehicle.ownedUpgrades = userVehicle.UpgradedStats().filter( stat => { return stat.owned(); });
+            var appliedUpgradeIds = ko.mapping.toJS(userVehicle.UpgradesApplied).map(x => x.upgrade_id).flat(1);
+            userVehicle.LastAppliedUpgrades = [];
+
+            vehicleType = userVehicle.staticAttributes.vehicle_type();
+            vehicleClass = userVehicle.staticAttributes.transportation_mode();
+            vehicleAdjustable = vehicleAdjustables.filter(function(vehicleAdjustable) {return vehicleAdjustable.vehicleType.toLowerCase() === vehicleType.toLowerCase()})[0];
+
+            userVehicle.ownedUpgrades.forEach( ownedUpgrade =>
+                {
+                    if (appliedUpgradeIds.includes(ownedUpgrade.upgrade.id()))
+                    {
+                        userVehicle.LastAppliedUpgrades.push(ownedUpgrade);
+                        StatsPermutation.comboUpgrades.push(ownedUpgrade);
+                    }
+                }
+            );
             userVehicle.StatsPermutations.push(StatsPermutation);
 
             /* Add all upgrade permutations */
             if (mySettings.enable_permutations())
             {
-                var ownedUpgradeIds = [];
-                userVehicle.ownedUpgrades = userVehicle.UpgradedStats().filter( stat => { return stat.owned(); });
-                var appliedUpgradeIds = ko.mapping.toJS(userVehicle.UpgradesApplied).map(x => x.upgrade_id).flat(1);
-                userVehicle.LastAppliedUpgrades = [];
-                userVehicle.ownedUpgrades.forEach( ownedUpgrade =>
-                    {
-                        ownedUpgradeIds.push(ownedUpgrade.upgrade.id());
-                        if (appliedUpgradeIds.includes(ownedUpgrade.upgrade.id()))
-                        {
-                            userVehicle.LastAppliedUpgrades.push(ownedUpgrade);
-                            Log('Subtracting out ownedUpgrade stats:\n' + ko.mapping.toJSON(ownedUpgrade), 'severity-info', 'Info');
-                            userVehicle.BaseStats.emission_rate -= ownedUpgrade.emission_rate();
-                            userVehicle.BaseStats.fuel_efficiency -= ownedUpgrade.fuel_efficiency();
-                            userVehicle.BaseStats.max_capacity -= ownedUpgrade.max_capacity();
-                            userVehicle.BaseStats.max_range -= ownedUpgrade.max_range();
-                            userVehicle.BaseStats.max_speed -= ownedUpgrade.max_speed();
-                        }
-                    }
-                );
-    
+                // Add BaseStats as initial permutation with permutations enabled
+                StatsPermutation = 
+                {
+                    emission_rate: baseStatsVehicle.emission_rate,
+                    fuel_efficiency: baseStatsVehicle.fuel_efficiency,
+                    max_capacity: baseStatsVehicle.max_capacity,
+                    max_range: baseStatsVehicle.max_range,
+                    max_speed: baseStatsVehicle.max_speed,
+                    comboUpgrades: []
+                }
+                StatsPermutation.PermutationId = userVehicle.token_id() + '_00';
+                Log('StatsPermutation.comboUpgrades.length: ' + StatsPermutation.comboUpgrades.length + '\nStatsPermutation (content):\n' + JSON.stringify(StatsPermutation), 'severity-info', 'Info');
+                userVehicle.StatsPermutations.push(StatsPermutation);
+
                 Log('userVehicle.BaseStats:\n' + ko.mapping.toJSON(userVehicle.BaseStats), 'severity-info', 'Info');
                 i = 1;
                 j = 1;
+                ownedUpgradeIds = userVehicle.ownedUpgrades.map(x => x.upgrade.id()).flat(1);
                 while (i<=ownedUpgradeIds.length)
                 {
                     var combos = k_combinations(ownedUpgradeIds, i);
@@ -1044,11 +1173,11 @@ function setupUpgradePermutations()
                         {
                             StatsPermutation = 
                             {
-                                emission_rate: userVehicle.BaseStats.emission_rate,
-                                fuel_efficiency: userVehicle.BaseStats.fuel_efficiency,
-                                max_capacity: userVehicle.BaseStats.max_capacity,
-                                max_range: userVehicle.BaseStats.max_range,
-                                max_speed: userVehicle.BaseStats.max_speed,
+                                emission_rate: baseStatsVehicle.emission_rate,
+                                fuel_efficiency: baseStatsVehicle.fuel_efficiency,
+                                max_capacity: baseStatsVehicle.max_capacity,
+                                max_range: baseStatsVehicle.max_range,
+                                max_speed: baseStatsVehicle.max_speed,
                                 comboUpgrades: []
                             }
                             hasEcuHp = false;
@@ -1067,14 +1196,21 @@ function setupUpgradePermutations()
                                     StatsPermutation.max_speed += ownedUpgrade.max_speed();
                                 }
                             );
+
+                            StatsPermutation.emission_rate = (StatsPermutation.emission_rate > vehicleAdjustable.statBoundaries.emission_rate.max) ? vehicleAdjustable.statBoundaries.emission_rate.max : StatsPermutation.emission_rate;
+                            StatsPermutation.fuel_efficiency = (StatsPermutation.fuel_efficiency > vehicleAdjustable.statBoundaries.fuel_efficiency.max) ? vehicleAdjustable.statBoundaries.fuel_efficiency.max : StatsPermutation.fuel_efficiency;
+                            StatsPermutation.max_capacity = (StatsPermutation.max_capacity > vehicleAdjustable.statBoundaries.max_capacity.max) ? vehicleAdjustable.statBoundaries.max_capacity.max : StatsPermutation.max_capacity;
+                            StatsPermutation.max_range = (StatsPermutation.max_range > vehicleAdjustable.statBoundaries.max_range.max) ? vehicleAdjustable.statBoundaries.max_range.max : StatsPermutation.max_range;
+                            StatsPermutation.max_speed = (StatsPermutation.max_speed > vehicleAdjustable.statBoundaries.max_speed.max) ? vehicleAdjustable.statBoundaries.max_speed.max : StatsPermutation.max_speed;
+
                             StatsPermutation.PermutationId = userVehicle.token_id() + '_' + j;
                             if ((hasEcuHp) && (hasEcuHe))
                             {
-                                Log('This permutation has both ECU-HP and ECU-HE; eliminating.', 'severity-info', 'Info')
+                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': This permutation has both ECU-HP and ECU-HE; eliminating.', 'severity-info', 'Info')
                             }
-                            else if ((StatsPermutation.emission_rate < 1) || (StatsPermutation.emission_rate > 10) || (StatsPermutation.fuel_efficiency < 1) || (StatsPermutation.fuel_efficiency > 10) || (StatsPermutation.max_capacity < 1) || (StatsPermutation.max_range < 1) || (StatsPermutation.max_speed < 1))
+                            else if ((StatsPermutation.emission_rate < 1) || (StatsPermutation.fuel_efficiency < 1) || (StatsPermutation.max_capacity < 1) || (StatsPermutation.max_range < 1) || (StatsPermutation.max_speed < 1))
                             {
-                                Log('One or more stat is less than 0 or outside normal bounds; eliminating this permutation: ' + JSON.stringify(StatsPermutation), 'severity-info', 'Info')
+                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': One or more stat is less than 1; eliminating this permutation: ' + JSON.stringify(StatsPermutation), 'severity-info', 'Info')
                             }
                             else
                             {
@@ -1086,6 +1222,27 @@ function setupUpgradePermutations()
                     );
                     i++;
                 }
+                /*
+                if (userVehicle.StatsPermutations.length > MAX_ALLOWED_PERMUTATIONS)
+                {
+                    if (userVehicle.StatsPermutations.length > MAX_ALLOWED_PERMUTATIONS)
+                    {
+                        userVehicle.StatsPermutations.sort(function(a, b) {
+                            if (a.max_speed > b.max_speed) return 1;
+                            if (a.max_speed < b.max_speed) return -1;
+                            if (a.max_capacity > b.max_capacity) return 1;
+                            if (a.max_capacity < b.max_capacity) return -1;
+                            if (a.fuel_efficiency > b.fuel_efficiency) return 1;
+                            if (a.fuel_efficiency < b.fuel_efficiency) return -1;
+                            if (a.max_range > b.max_range) return 1;
+                            if (a.max_range < b.max_range) return -1;
+                            if (Math.abs(5 - a.emission_rate) > Math.abs(5 - b.emission_rate)) return 1;
+                            if (Math.abs(5 - a.emission_rate) < Math.abs(5 - b.emission_rate)) return -1;
+                        });
+                        //userVehicle.StatsPermutations.length = MAX_ALLOWED_PERMUTATIONS;
+                    }
+                }
+                */
             }
             else
             {
@@ -1185,15 +1342,27 @@ function updateTimer_SetRemainingPathColor(timeLeft)
   
 function Log(message, className, severity)
 {
-    var tdDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-    var trMarkup = '<tr><td class="severity-{1} status-content-time">{0}</td><td class="severity-{1} status-content-time">{1}</td><td class="severity-{1} status-content-time">{2}</td></tr>'.replace('{0}', tdDate).replace('{1}', severity).replace('{2}', message);
+    if ((!mySettings) || (!mySettings.enable_logging) || (!mySettings.enable_logging())) return;
+
+    //logCounter++;
+    var formattedDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
     console.log(message);
-    //$('#statusTable > tr:last').after(trMarkup);
+    /*
+    messageLog.push(formattedDate + '\t' + severity + '\t' + message);
+    if ((logCounter % 10000 == 0) && (messageLog.length > mySettings.max_log_entries()))
+    {
+        messageLog.splice(0, messageLog.length - mySettings.max_log_entries());
+    }
+    */
 }
 
 /* Page On Load */
 $(function() {
     Log('document.onload - Start', 'severity-info', 'Info');
+
+    $(window).on('unload', function() { saveLog(); } );
+    $('#btnSaveLog').click( function() { saveLog(); } );
+
     $('.wof-version').html(CURRENT_VERSION);
     $('#logStart').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
 
@@ -1263,6 +1432,35 @@ $(function() {
     Log('document.onload - End', 'severity-info', 'Info');
 });
 
+getRemainingFleetStats = async () =>
+{
+    vehicleBaseStatIds = vehicleBaseStats.map(x => x.id).flat(1);
+    newVehicles = userVehiclesVM().map(x => x.token_id()).flat(1).filter(x => (!vehicleBaseStatIds.includes(x)));
+    result = await Promise.all(
+        newVehicles.map(i => $.getJSON(`https://api.looksrare.org/api/v1/tokens?collection=0x1a7e29a8c5d2320a1b56735b7654139e7b2860af&tokenId=${i}`))
+    );
+    changed = false;
+    result.forEach( token =>
+        {
+            item = {
+                "id": parseInt(token.data.tokenId, 10),
+                "max_speed": parseInt(token.data.attributes.filter(x => x.traitType === 'Max Speed')[0].value, 10),
+                "max_range": parseInt(token.data.attributes.filter(x => x.traitType === 'Max Range')[0].value, 10),
+                "max_capacity": parseInt(token.data.attributes.filter(x => x.traitType === 'Max Capacity')[0].value, 10),
+                "fuel_efficiency": parseInt(token.data.attributes.filter(x => x.traitType === 'Fuel Efficiency')[0].value, 10),
+                "emission_rate": parseInt(token.data.attributes.filter(x => x.traitType === 'Emission Rate')[0].value, 10)
+            }
+            vehicleBaseStats.push(item);
+            changed = true;
+        }
+    );
+    if (changed)
+    {
+        if (confirm("The list of vehicles base stats has changed to include additional vehicles in your fleet. Do you wish to save these changes?\nNote that unless your browser is configured to let you specify where to save files,\nthis file will be saved to your Downloads folder and you will need to manually copy it to where you run this script."))
+            saveFile('VehicleBaseStats.json', JSON.stringify(vehicleBaseStats));
+    }
+}
+
 // Templates and other variables
 const applyUnapplyTemplate = {
     "address": "{walletAddress}",
@@ -1323,26 +1521,63 @@ const upgradeAbbreviations = {
     'Dark Matter Thrusters': 'P:DMT'
 }
 
-const CURRENT_VERSION = "0.1.6";
+const CURRENT_VERSION = "0.1.7";
+const DEFAULT_MAX_LOG_ENTRIES = 10000000;
 const FULL_DASH_ARRAY = 283;
-const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
+const MAX_ALLOWED_PERMUTATIONS = 255;
 const ROOT_API_URL = 'https://api.worldoffreight.xyz';
 const ROOT_GRAPH_URL = 'https://graph.worldoffreight.xyz/v1';
+const STAT_BOUNDARIES = {
+    "emission_rate": 
+    {
+        "min": 1,
+        "max": 10
+    },
+    "fuel_efficiency": 
+    {
+        "min": 1,
+        "max": 10
+    },
+    "max_capacity": 
+    {
+        "min": 1,
+        "max": 519843277
+    },
+    "max_range": 
+    {
+        "min": 1,
+        "max": 1000000
+    },
+    "max_speed": 
+    {
+        "min": 1,
+        "max": 27785
+    }
+}
+
+const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
+
+const garageUrl = WOF_WEBSITE + '/garage?id={id}';
 
 var adjustablesVM = null;
 var bound = [];
-var timerIntervalId = null;
 var joinedRaces = [];
+var logCounter = 0;
+var messageLog = [];
+var statusLogVM = null;
 var mySettings = null;
 var nextToRaceRaces = [];
+var maxVehcileBaseStatsTokenId = null;
 var postQueries = {};
 var timeoutId = null;
+var timerIntervalId = null;
 var unjoinedRacesVM = null;
 var upcomingFreeRaces = [];
 var upcomingPaidRaces = [];
 var userInfoVM = null;
 var userVehiclesVM  = [];
-var vehicleAdjustables = []
+var vehicleAdjustables = [];
+var vehicleBaseStats = [];
 
 var timerThresholds = {alert: 10, warning: 5}
 

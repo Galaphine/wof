@@ -47,6 +47,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 0
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 519843277
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1000000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 27785
+                }
+            },
             "maxSpeed": 400,
             "vehicleType": "aa-9 coruscant freighter"
         },
@@ -96,6 +124,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 200
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 50000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 12000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 175
+                }
+            },
             "maxSpeed": 175,
             "vehicleType": "airship / zeppelin"
         },
@@ -144,6 +200,34 @@
                 "boostFactor": 0.1,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 100
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 6500
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1600
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 150
+                }
             },
             "maxSpeed": 150,
             "vehicleType": "box truck"
@@ -195,6 +279,34 @@
                 "rangeLimitUpper": 0
             },
             "maxSpeed": 75,
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 680000000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 30000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 75
+                }
+            },
             "vehicleType": "cargo ship"
         },
         {
@@ -244,6 +356,34 @@
                 "rangeLimitUpper": 8
             },
             "maxSpeed": 8,
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 15
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 8
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 8
+                }
+            },
             "vehicleType": "delivery robot"
         },
         {
@@ -293,6 +433,34 @@
                 "rangeLimitUpper": 0
             },
             "maxSpeed": 27785,
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 519843277
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1000000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 27785
+                }
+            },
             "vehicleType": "dragon assault launcher"
         },
         {
@@ -340,6 +508,34 @@
                 "boostFactor": 0.35,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 150
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 2200
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 250
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 260
+                }
             },
             "maxSpeed": 260,
             "vehicleType": "drone"
@@ -389,6 +585,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 0
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 18000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1800000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 4200
+                }
+            },
             "maxSpeed": 4200,
             "vehicleType": "flying saucer (ufo)"
         },
@@ -436,6 +660,34 @@
                 "boostFactor": 0.8,
                 "rangeLimitLower": 250,
                 "rangeLimitUpper": 25000
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 190000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 12000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 1750
+                }
             },
             "maxSpeed": 1750,
             "vehicleType": "freight aircraft"
@@ -486,6 +738,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 200
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 850
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 12500
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 650
+                }
+            },
             "maxSpeed": 650,
             "vehicleType": "hot-air balloon"
         },
@@ -534,6 +814,34 @@
                 "boostFactor": 2,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 100
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 5000000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 500
+                }
             },
             "maxSpeed": 500,
             "vehicleType": "locomotive / train"
@@ -584,6 +892,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 200
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 45000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 6000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 210
+                }
+            },
             "maxSpeed": 210,
             "vehicleType": "semi truck"
         },
@@ -632,6 +968,34 @@
                 "boostFactor": 1,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 0
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 519843277
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1000000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 27785
+                }
             },
             "maxSpeed": 27785,
             "vehicleType": "space launcher"
@@ -682,6 +1046,34 @@
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 0
             },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 1500
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 250
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 400
+                }
+            },
             "maxSpeed": 400,
             "vehicleType": "van"
         },
@@ -730,6 +1122,34 @@
                 "boostFactor": 1,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 0
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 110
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 1800000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 1800
+                }
             },
             "maxSpeed": 27785,
             "vehicleType": "x-wing"

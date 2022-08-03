@@ -197,7 +197,7 @@
             },
             "boosts":
             {
-                "boostFactor": 0.1,
+                "boostFactor": 0.12,
                 "rangeLimitLower": 0,
                 "rangeLimitUpper": 100
             },

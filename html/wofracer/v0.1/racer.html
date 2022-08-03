@@ -1,39 +1,64 @@
 <html>
 	<head>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" />
 		<link rel="stylesheet" href="./jquery.infinite.tabs/css/infinite.tabs.min.css" />
 		<link rel="stylesheet" href="./styles.css" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 		<script src="./jquery.infinite.tabs/jquery.infinite.tabs.min.js"></script>
 		<script src="./combinations.js"></script>
-		<script src="./racer.js"></script>
+		<script src="./helpers.js"></script>
+		<script src="./localdata.js"></script>
+		<script src="./main.js"></script>
+		<script src="./pageinit.js"></script>
+		<script src="./racejoiner.js"></script>
+		<script src="./serverdata.js"></script>
+		<script src="./settings.js"></script>
+		<script src="./timer.js"></script>
+		<script src="./viewmodels.js"></script>
+		<script src="./vmrefreshers.js"></script>
 	</head>
 	<body class="body-main">
 		<table class="header-panel">
 			<tr>
 				<td class="panel header-panel-left">
-					<table>
+					<table style="width: 100%;">
 						<tr>
-							<td class="item-text">
-								<div><br />WOF Racer v<span class="wof-version" /></div>
+							<td class="item-text" style="border-bottom: 1px solid lightyellow; width: 100%;">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text" style="width: 95%;">
+											<div ><br />WOF Racer Utility v<span class="wof-version"></span>&nbsp;&nbsp;(Auto-Join <span id="spnPaused">Enabled</span>)</div>
+										</td>
+										<td style="vertical-align: top;" style="width: 40px;">
+											<img id="imgPlayPause" src="./images/pause.png" style="cursor: pointer; vertical-align: middle; width: 35px;" title value="Enabled" />
+										</td>
+										<td style="vertical-align: top;" style="width: 40px;">
+											<div id="divTimer" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="item-text" colspan="2" style="width: 100%;">
 								<div id="userInfo">
 									<p />
 									<div>User Name: <span data-bind="text: Username" /></div>
-									<div />
-									<div>Participation Thresholds:  Free: <span data-bind="text: ParticipationThresholds().Free"></span>, Paid: <span data-bind="text: ParticipationThresholds().Paid"></span></div>
 									<div />
 									<div class="item-text">Upgraded Vehicles: <span data-bind="text: UserVehiclesUpgradedCount"></span> / <span data-bind="text: UserVehiclesCount"></span></div>
 									<div />
 									<div>Permutations Enabled: <span data-bind="text: mySettings.enable_permutations"></span></div>
 									<div />
-									<div>Last Refreshed: <span id="lastUpdated"></span></div>
+									<div>
+										Participation Thresholds: Free: <span data-bind="text: ParticipationThresholds().Free"></span><a class="wof-website-link" href="#" target="_new"><img class="info-participation-thresholds" src="./images/info.png" style="cursor: pointer; vertical-align: bottom; width: 15px;" title /></a>, Paid: <span data-bind="text: ParticipationThresholds().Paid"></span><br />
+									</div>
+									<div />
+									<div>Data Last Refreshed: <span id="lastUpdated"></span></div>
 								</div>
-							</td>
-							<td style="vertical-align: bottom;">
-								<div id="divTimer" />
 							</td>
 						</tr>
 					</table>
@@ -45,16 +70,9 @@
 							<td class="nav-icon nav-image-outer" for="divNavRace" id="linkRaces" tabindex="1">
 								<table style="width: 100%;">
 									<tr>
-										<td class="nav-image" id="td_icon_ground" style="text-align: right;"></td>
-										<td class="nav-image" id="td_icon_air" style="text-align: left;"></td>
-									</tr>
-									<tr>
-										<td class="nav-image" id="td_icon_water" style="text-align: right;"></td>
-										<td class="nav-image" id="td_icon_space" style="text-align: left;"></td>
-									</tr>
-									<tr>
 										<td class="item-text nav-title" colspan="2">
-											<br />
+											<img src="./images/racing-flags.png" style="width: 80px;" />
+											<br /><br />
 											Races
 										</td>
 									</tr>
@@ -64,12 +82,10 @@
 							<td class="nav-icon" for="divNavFleet" id="linkFleet" tabindex="2">
 								<table style="width: 100%;">
 									<tr>
-										<td class="nav-image" id="td_icon_fleet"></td>
-									</tr>
-									<tr>
-										<td class="item-text nav-title" colspan="2">
-											<br />
-											My Fleet
+										<td class="item-text nav-title" colspan="2" style="white-space: nowrap; width: 200px;">
+											<img src="./images/fleet-and-fp.png" style="width: 40px;" />
+											<br /><br />
+											Fleet &amp; Punks
 										</td>
 									</tr>
 								</table>
@@ -241,7 +257,7 @@
 									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0 }).length > 0 -->
 										<div>
 											Note - This script will not automatically enter you into Paid races.<br />
-											You must use the <a href="#" id="aWofWebsite" target="_new">World of Freight Website</a> to enter these.
+											You must use the <a class="wof-website-link" href="#" id="aWofWebsite" target="_new">World of Freight Website</a> to enter these.
 											<div data-bind='foreach: unjoinedRaceList'>
 												<!-- ko if: $data.entry_fee > 0 -->
 													<div class="item-unjoined-race">
@@ -688,7 +704,7 @@
 										<td class="settings-item" style="width: 100px;">Free Races:</td>
 										<td class="settings-item">
 											<div>
-												<input class="settings-input-numeric" data-bind="value: participation_thresholds().free" type="text" />
+												<input class="settings-input-numeric" data-bind="numeric, value: participation_thresholds().free" type="text" />
 											</div>
 										</td>
 									</tr>
@@ -696,7 +712,7 @@
 										<td class="settings-item" style="width: 100px;">Paid Races:</td>
 										<td class="settings-item">
 											<div>
-												<input class="settings-input-numeric" data-bind="value: participation_thresholds().paid" type="text" />
+												<input class="settings-input-numeric" data-bind="numeric, value: participation_thresholds().paid" type="text" />
 											</div>
 										</td>
 									</tr>
@@ -738,7 +754,6 @@
 											</div>
 										</td>
 									</tr>
-									<!--
 									<tr>
 										<td class="settings-item">Log Enabled:</td>
 										<td class="settings-item">
@@ -755,7 +770,6 @@
 											</div>
 										</td>
 									</tr>
-									-->
 									<tr>
 										<td class="settings-item">Refresh Rate (Min 30 seconds):</td>
 										<td class="settings-item">

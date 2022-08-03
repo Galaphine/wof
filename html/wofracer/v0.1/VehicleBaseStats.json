@@ -33078,5 +33078,597 @@
         "max_capacity": 658,
         "max_range": 93,
         "max_speed": 264
+    },
+    {
+        "id": 4136,
+        "emission_rate": 9,
+        "fuel_efficiency": 5,
+        "max_capacity": 27768,
+        "max_range": 2985,
+        "max_speed": 103
+    },
+    {
+        "id": 4137,
+        "emission_rate": 4,
+        "fuel_efficiency": 8,
+        "max_capacity": 408137744,
+        "max_range": 14653,
+        "max_speed": 36
+    },
+    {
+        "id": 4138,
+        "emission_rate": 5,
+        "fuel_efficiency": 6,
+        "max_capacity": 843,
+        "max_range": 133,
+        "max_speed": 250
+    },
+    {
+        "id": 4139,
+        "emission_rate": 3,
+        "fuel_efficiency": 8,
+        "max_capacity": 476,
+        "max_range": 6315,
+        "max_speed": 266
+    },
+    {
+        "id": 4140,
+        "emission_rate": 6,
+        "fuel_efficiency": 5,
+        "max_capacity": 3437681,
+        "max_range": 605,
+        "max_speed": 339
+    },
+    {
+        "id": 4141,
+        "emission_rate": 5,
+        "fuel_efficiency": 7,
+        "max_capacity": 730,
+        "max_range": 125,
+        "max_speed": 263
+    },
+    {
+        "id": 4142,
+        "emission_rate": 6,
+        "fuel_efficiency": 6,
+        "max_capacity": 2215151,
+        "max_range": 762,
+        "max_speed": 244
+    },
+    {
+        "id": 4143,
+        "emission_rate": 4,
+        "fuel_efficiency": 7,
+        "max_capacity": 211,
+        "max_range": 135,
+        "max_speed": 108
+    },
+    {
+        "id": 4144,
+        "emission_rate": 2,
+        "fuel_efficiency": 6,
+        "max_capacity": 9,
+        "max_range": 2,
+        "max_speed": 2
+    },
+    {
+        "id": 4145,
+        "emission_rate": 6,
+        "fuel_efficiency": 5,
+        "max_capacity": 631,
+        "max_range": 140,
+        "max_speed": 306
+    },
+    {
+        "id": 4146,
+        "emission_rate": 8,
+        "fuel_efficiency": 5,
+        "max_capacity": 3501,
+        "max_range": 958,
+        "max_speed": 67
+    },
+    {
+        "id": 4147,
+        "emission_rate": 5,
+        "fuel_efficiency": 4,
+        "max_capacity": 2236,
+        "max_range": 688,
+        "max_speed": 53
+    },
+    {
+        "id": 4148,
+        "emission_rate": 3,
+        "fuel_efficiency": 8,
+        "max_capacity": 7,
+        "max_range": 5,
+        "max_speed": 6
+    },
+    {
+        "id": 4149,
+        "emission_rate": 7,
+        "fuel_efficiency": 7,
+        "max_capacity": 3844,
+        "max_range": 840,
+        "max_speed": 88
+    },
+    {
+        "id": 4150,
+        "emission_rate": 4,
+        "fuel_efficiency": 7,
+        "max_capacity": 8838,
+        "max_range": 541166,
+        "max_speed": 2328
+    },
+    {
+        "id": 4151,
+        "emission_rate": 2,
+        "fuel_efficiency": 7,
+        "max_capacity": 5,
+        "max_range": 4,
+        "max_speed": 6
+    },
+    {
+        "id": 4152,
+        "emission_rate": 7,
+        "fuel_efficiency": 7,
+        "max_capacity": 725,
+        "max_range": 140,
+        "max_speed": 258
+    },
+    {
+        "id": 4153,
+        "emission_rate": 7,
+        "fuel_efficiency": 9,
+        "max_capacity": 354578167,
+        "max_range": 15709,
+        "max_speed": 46
+    },
+    {
+        "id": 4154,
+        "emission_rate": 4,
+        "fuel_efficiency": 8,
+        "max_capacity": 206900496,
+        "max_range": 18169,
+        "max_speed": 31
+    },
+    {
+        "id": 4155,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 30344,
+        "max_range": 3291,
+        "max_speed": 113
+    },
+    {
+        "id": 4156,
+        "emission_rate": 3,
+        "fuel_efficiency": 5,
+        "max_capacity": 9,
+        "max_range": 6,
+        "max_speed": 3
+    },
+    {
+        "id": 4157,
+        "emission_rate": 1,
+        "fuel_efficiency": 6,
+        "max_capacity": 353,
+        "max_range": 134,
+        "max_speed": 123
+    },
+    {
+        "id": 4158,
+        "emission_rate": 1,
+        "fuel_efficiency": 7,
+        "max_capacity": 243,
+        "max_range": 117,
+        "max_speed": 98
+    },
+    {
+        "id": 4159,
+        "emission_rate": 5,
+        "fuel_efficiency": 5,
+        "max_capacity": 612,
+        "max_range": 94,
+        "max_speed": 277
+    },
+    {
+        "id": 4160,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 612,
+        "max_range": 142,
+        "max_speed": 309
+    },
+    {
+        "id": 4161,
+        "emission_rate": 5,
+        "fuel_efficiency": 10,
+        "max_capacity": 304436437,
+        "max_range": 18247,
+        "max_speed": 38
+    },
+    {
+        "id": 4162,
+        "emission_rate": 6,
+        "fuel_efficiency": 5,
+        "max_capacity": 26322,
+        "max_range": 3202,
+        "max_speed": 100
+    },
+    {
+        "id": 4163,
+        "emission_rate": 6,
+        "fuel_efficiency": 6,
+        "max_capacity": 787,
+        "max_range": 146,
+        "max_speed": 310
+    },
+    {
+        "id": 4164,
+        "emission_rate": 8,
+        "fuel_efficiency": 4,
+        "max_capacity": 1344336,
+        "max_range": 587,
+        "max_speed": 259
+    },
+    {
+        "id": 4165,
+        "emission_rate": 2,
+        "fuel_efficiency": 10,
+        "max_capacity": 39774,
+        "max_range": 5350,
+        "max_speed": 101
+    },
+    {
+        "id": 4166,
+        "emission_rate": 7,
+        "fuel_efficiency": 10,
+        "max_capacity": 296939546,
+        "max_range": 12059,
+        "max_speed": 44
+    },
+    {
+        "id": 4167,
+        "emission_rate": 5,
+        "fuel_efficiency": 7,
+        "max_capacity": 171472420,
+        "max_range": 18365,
+        "max_speed": 33
+    },
+    {
+        "id": 4168,
+        "emission_rate": 9,
+        "fuel_efficiency": 6,
+        "max_capacity": 1892492,
+        "max_range": 569,
+        "max_speed": 336
+    },
+    {
+        "id": 4169,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 3337490,
+        "max_range": 552,
+        "max_speed": 216
+    },
+    {
+        "id": 4170,
+        "emission_rate": 5,
+        "fuel_efficiency": 7,
+        "max_capacity": 707,
+        "max_range": 145,
+        "max_speed": 292
+    },
+    {
+        "id": 4171,
+        "emission_rate": 5,
+        "fuel_efficiency": 7,
+        "max_capacity": 899,
+        "max_range": 123,
+        "max_speed": 245
+    },
+    {
+        "id": 4172,
+        "emission_rate": 2,
+        "fuel_efficiency": 7,
+        "max_capacity": 500,
+        "max_range": 4634,
+        "max_speed": 341
+    },
+    {
+        "id": 4173,
+        "emission_rate": 3,
+        "fuel_efficiency": 5,
+        "max_capacity": 6,
+        "max_range": 2,
+        "max_speed": 4
+    },
+    {
+        "id": 4174,
+        "emission_rate": 3,
+        "fuel_efficiency": 6,
+        "max_capacity": 6,
+        "max_range": 6,
+        "max_speed": 3
+    },
+    {
+        "id": 4175,
+        "emission_rate": 9,
+        "fuel_efficiency": 3,
+        "max_capacity": 2035790,
+        "max_range": 596,
+        "max_speed": 329
+    },
+    {
+        "id": 4176,
+        "emission_rate": 4,
+        "fuel_efficiency": 9,
+        "max_capacity": 396122033,
+        "max_range": 13550,
+        "max_speed": 42
+    },
+    {
+        "id": 4177,
+        "emission_rate": 7,
+        "fuel_efficiency": 8,
+        "max_capacity": 345324292,
+        "max_range": 17827,
+        "max_speed": 40
+    },
+    {
+        "id": 4178,
+        "emission_rate": 7,
+        "fuel_efficiency": 3,
+        "max_capacity": 3115778,
+        "max_range": 695,
+        "max_speed": 239
+    },
+    {
+        "id": 4179,
+        "emission_rate": 7,
+        "fuel_efficiency": 7,
+        "max_capacity": 358020170,
+        "max_range": 17253,
+        "max_speed": 32
+    },
+    {
+        "id": 4180,
+        "emission_rate": 8,
+        "fuel_efficiency": 6,
+        "max_capacity": 694,
+        "max_range": 125,
+        "max_speed": 263
+    },
+    {
+        "id": 4181,
+        "emission_rate": 1,
+        "fuel_efficiency": 7,
+        "max_capacity": 744,
+        "max_range": 121,
+        "max_speed": 107
+    },
+    {
+        "id": 4182,
+        "emission_rate": 2,
+        "fuel_efficiency": 6,
+        "max_capacity": 301,
+        "max_range": 90,
+        "max_speed": 121
+    },
+    {
+        "id": 4183,
+        "emission_rate": 9,
+        "fuel_efficiency": 6,
+        "max_capacity": 2498553,
+        "max_range": 625,
+        "max_speed": 340
+    },
+    {
+        "id": 4184,
+        "emission_rate": 8,
+        "fuel_efficiency": 6,
+        "max_capacity": 4078,
+        "max_range": 798,
+        "max_speed": 64
+    },
+    {
+        "id": 4185,
+        "emission_rate": 8,
+        "fuel_efficiency": 5,
+        "max_capacity": 2943,
+        "max_range": 705,
+        "max_speed": 57
+    },
+    {
+        "id": 4186,
+        "emission_rate": 6,
+        "fuel_efficiency": 3,
+        "max_capacity": 1281978,
+        "max_range": 756,
+        "max_speed": 345
+    },
+    {
+        "id": 4187,
+        "emission_rate": 7,
+        "fuel_efficiency": 7,
+        "max_capacity": 411920359,
+        "max_range": 13094,
+        "max_speed": 35
+    },
+    {
+        "id": 4188,
+        "emission_rate": 6,
+        "fuel_efficiency": 3,
+        "max_capacity": 3249799,
+        "max_range": 779,
+        "max_speed": 270
+    },
+    {
+        "id": 4189,
+        "emission_rate": 8,
+        "fuel_efficiency": 7,
+        "max_capacity": 9703,
+        "max_range": 2628,
+        "max_speed": 105
+    },
+    {
+        "id": 4190,
+        "emission_rate": 8,
+        "fuel_efficiency": 7,
+        "max_capacity": 890,
+        "max_range": 114,
+        "max_speed": 307
+    },
+    {
+        "id": 4191,
+        "emission_rate": 7,
+        "fuel_efficiency": 8,
+        "max_capacity": 698,
+        "max_range": 130,
+        "max_speed": 250
+    },
+    {
+        "id": 4192,
+        "emission_rate": 8,
+        "fuel_efficiency": 5,
+        "max_capacity": 28398,
+        "max_range": 2751,
+        "max_speed": 97
+    },
+    {
+        "id": 4193,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 847,
+        "max_range": 124,
+        "max_speed": 255
+    },
+    {
+        "id": 4194,
+        "emission_rate": 1,
+        "fuel_efficiency": 5,
+        "max_capacity": 8,
+        "max_range": 3,
+        "max_speed": 6
+    },
+    {
+        "id": 4195,
+        "emission_rate": 7,
+        "fuel_efficiency": 4,
+        "max_capacity": 35413,
+        "max_range": 3203,
+        "max_speed": 84
+    },
+    {
+        "id": 4196,
+        "emission_rate": 7,
+        "fuel_efficiency": 8,
+        "max_capacity": 384030576,
+        "max_range": 14969,
+        "max_speed": 32
+    },
+    {
+        "id": 4197,
+        "emission_rate": 5,
+        "fuel_efficiency": 7,
+        "max_capacity": 758,
+        "max_range": 102,
+        "max_speed": 264
+    },
+    {
+        "id": 4198,
+        "emission_rate": 9,
+        "fuel_efficiency": 6,
+        "max_capacity": 24321,
+        "max_range": 2605,
+        "max_speed": 133
+    },
+    {
+        "id": 4199,
+        "emission_rate": 6,
+        "fuel_efficiency": 7,
+        "max_capacity": 879,
+        "max_range": 120,
+        "max_speed": 243
+    },
+    {
+        "id": 4200,
+        "emission_rate": 9,
+        "fuel_efficiency": 3,
+        "max_capacity": 82346,
+        "max_range": 279,
+        "max_speed": 13795
+    },
+    {
+        "id": 4201,
+        "emission_rate": 6,
+        "fuel_efficiency": 3,
+        "max_capacity": 3209894,
+        "max_range": 636,
+        "max_speed": 321
+    },
+    {
+        "id": 4202,
+        "emission_rate": 3,
+        "fuel_efficiency": 6,
+        "max_capacity": 4,
+        "max_range": 5,
+        "max_speed": 6
+    },
+    {
+        "id": 4203,
+        "emission_rate": 6,
+        "fuel_efficiency": 9,
+        "max_capacity": 381978106,
+        "max_range": 13116,
+        "max_speed": 37
+    },
+    {
+        "id": 4204,
+        "emission_rate": 2,
+        "fuel_efficiency": 9,
+        "max_capacity": 1270,
+        "max_range": 146,
+        "max_speed": 126
+    },
+    {
+        "id": 4205,
+        "emission_rate": 9,
+        "fuel_efficiency": 4,
+        "max_capacity": 95763,
+        "max_range": 6504,
+        "max_speed": 750
+    },
+    {
+        "id": 4206,
+        "emission_rate": 7,
+        "fuel_efficiency": 9,
+        "max_capacity": 210282683,
+        "max_range": 15609,
+        "max_speed": 44
+    },
+    {
+        "id": 4207,
+        "emission_rate": 1,
+        "fuel_efficiency": 8,
+        "max_capacity": 380,
+        "max_range": 7309,
+        "max_speed": 267
+    },
+    {
+        "id": 4208,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 664,
+        "max_range": 109,
+        "max_speed": 262
+    },
+    {
+        "id": 4209,
+        "emission_rate": 7,
+        "fuel_efficiency": 6,
+        "max_capacity": 22764,
+        "max_range": 3014,
+        "max_speed": 100
     }
 ]

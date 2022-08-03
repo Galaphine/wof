@@ -272,6 +272,11 @@ body, table
     width: 40px;
 }
 
+.info-participation-thresholds
+{
+    display: inline;
+}
+
 .item-joined-race, .item-unjoined-race
 {
     cursor: pointer;
@@ -645,3 +650,7 @@ body, table
     width: 100%;
 }
 
+.wof-version
+{
+    font-weight: bold;
+}

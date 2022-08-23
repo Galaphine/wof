@@ -1,12 +1,40 @@
-WOF Racer v0.1.8
+WOF Racer v0.1.9
 
 Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.1
 
 Read the included Instructions.txt file for details on how to set up and run the script.
 
+TODOs (Priority):
+    - (High) Clean up the logging
+    - (High) Identify 1-on-1 and exclude them automagically from racing
+    - (Med-High) Create/Save Upgrade Profiles to apply en-masse
+    - (Med-High) Refresh Upgrade Count, Fleet + Punk stats either on each race refresh or on manual click
+    - (Med-High) Make adjustables UI and modify Utility algorithm and adjustables JSON to have more granular control.
+    - (Med) Filtering on Free and Paid race list
+    - (Med) Results and Analysis
+    - (Med) Fleet and Punk Management Utilities (TBD)
+    - (Med) Fleet Perspective of Race-Joining ("I want my WOF #666 to enter first race of this kind/stats to hit N participants, with this Upgrade Profile.")
+
 Version History:
 
-    0.1.8 (2022-08-02):
+    0.1.9 (2022-08-23):
+        * Decreased the refresh timer to 20 seconds
+        * Removed auto-join race (commented out the line that joins the race and removed the reference to racejoiner.js in the racer.html file)
+        * Fixed all the issues with "Apply Upgrades Now".
+        * Added missing Impulse Thrusters to list of upgrades
+        * Added submarine 1-on-1 to adjustables
+        * Fixed a rather tricky bug with the Upgraded Vehicles that also impacted permutations:
+            If a user's fleet was larger than about 60 vehicles, the remaining vehicles would not show up as upgraded, 
+            causing the Upgraded Vehicles count to be lower than it should, but worse, causing the vehicles later in the list
+            to never get any permutations.  This is because GraphQL is limiting resultsets to 1000 records, and each upgrade
+            (owned or not) is considered 1 record.  So with 70 vehicles in a fleet, there are potentially 16 upgrades each,
+            giving over 1000 records.  This means the query had to be split into multiple calls.
+            This was a difficult bug to fix because of the way jQuery's $.when() routines work - 
+            the solution was rather involved in using $.Deferred/promise.resolve and $.when.apply().
+        * Added an "Apply Upgrades Now" link to Free and Paid races
+
+    0.1.8 (2022-08-03):
+        * Updated the initialization to avoid auto-joining the race in the first 30-second interval.
         * Added a Pause/Resume button.
         * Reorganized the top left info panel content.
         * Removed an extraneous slash (/) in the WOF Website URL in each race.

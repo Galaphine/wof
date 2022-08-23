@@ -279,7 +279,7 @@ body, table
 
 .item-joined-race, .item-unjoined-race
 {
-    cursor: pointer;
+    display: block;
 }
 
 .item-joined-race-air, .item-unjoined-race-air
@@ -334,6 +334,12 @@ body, table
 .item-title
 {
     border-bottom: 1px dotted #888;
+}
+
+.link-apply-upgrades
+{
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .menu-filter-class td

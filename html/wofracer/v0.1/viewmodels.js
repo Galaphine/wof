@@ -55,16 +55,17 @@ function MySettingsVM()
     var self = this;
 
     self.authorization_key = ko.observable();
-    self.enable_logging = ko.observable();
     self.enable_permutations = ko.observable();
     self.excluded_vehicles = ko.observableArray();
+    self.log_level = ko.pureComputed( function() { return LogLevel[self.log_level_text()] } );
+    self.log_level_text = ko.observable();
     self.max_log_entries = ko.observable();
     self.participation_threshold = ko.observable();
     self.participation_thresholds = ko.observable( {free: null, paid: null} );
     self.race_query_result_limit = ko.observable();
     self.refreshRateMilliseconds = ko.pureComputed(function() {return self.refreshRateSeconds()*1000;});
     self.refresh_rate_seconds = ko.observable();
-    self.refreshRateSeconds = ko.pureComputed(function() {return (!isNaN(self.refresh_rate_seconds()) && (self.refresh_rate_seconds() >= 30) ) ? self.refresh_rate_seconds() : 30; });
+    self.refreshRateSeconds = ko.pureComputed(function() {return (!isNaN(self.refresh_rate_seconds()) && (self.refresh_rate_seconds() >= MAX_REFRESH_RATE) ) ? self.refresh_rate_seconds() : MAX_REFRESH_RATE; });
     self.wallet_address = ko.observable();
 }
 
@@ -86,7 +87,18 @@ function StatusLogVM()
 {
     var self = this;
 
-    self.LogEnabled = ko.pureComputed(function() { return mySettings.enable_logging(); } );
+    self.LogLevelText = ko.pureComputed(function() 
+        { 
+            return getKeyByValue(LogLevel, mySettings.log_level());
+        } 
+    );
+
+    self.LogLevelValue = ko.pureComputed(function() 
+        { 
+            return mySettings.log_level();
+        } 
+    );
+
     self.MaxLogEntries = ko.pureComputed(function() { return mySettings.max_log_entries(); } );
     self.StatusLogLength = ko.pureComputed(function() { return messageLog.length; } );
 }
@@ -138,6 +150,12 @@ function UnjoinedRacesVM(unjoineRaces)
 function UserInfoVM(username)
 {
     var self = this;
+
+    self.LogLevelText = ko.pureComputed(function() 
+        { 
+            return getKeyByValue(LogLevel, mySettings.log_level());
+        } 
+    );
     self.ParticipationThresholds = ko.observable(
         {
             Free: ko.observable(mySettings.participation_thresholds().free),

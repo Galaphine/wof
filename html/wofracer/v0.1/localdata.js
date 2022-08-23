@@ -1,11 +1,11 @@
 function getLocalData()
 {
-    Log('getLocalData() - Start Function', 'severity-info', 'Info');
+    Log('getLocalData() - Start Function', 'severity-info', LogLevel.Debug);
 
     $.when(
         $.getJSON('mysettings.json', function(data) 
         {
-            Log('getLocalData() - Begin mysettings.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - Begin mysettings.json getJSON()', 'severity-info', LogLevel.Debug);
 
             if (!bound['mySettingsVM'])
             {
@@ -15,7 +15,7 @@ function getLocalData()
             }
 
             mySettings.authorization_key(data.authorization_key);
-            mySettings.enable_logging( (data.enable_logging == null) ? false : data.enable_logging);
+            mySettings.log_level_text( (data.log_level == null) ? "None" : data.log_level_text);
             mySettings.enable_permutations( (data.enable_permutations == null) ? true : data.enable_permutations);
             mySettings.excluded_vehicles(data.excluded_vehicles);
             mySettings.max_log_entries((data.max_log_entries) ? data.max_log_entries : DEFAULT_MAX_LOG_ENTRIES);
@@ -34,7 +34,7 @@ function getLocalData()
                 bound['statusLogVM'] = true;
             }
 
-            Log('getLocalData() - End mysettings.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - End mysettings.json getJSON()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.getJSON('VehicleBaseStats.json', function(data) 
         {
@@ -50,20 +50,20 @@ function getLocalData()
         }, 'text'),
         $.getJSON('postqueries.json', function(data) 
         {
-            Log('getLocalData() - Begin postqueries.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - Begin postqueries.json getJSON()', 'severity-info', LogLevel.Debug);
             postQueries = data.postQueries;
-            Log('getLocalData() - End postqueries.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - End postqueries.json getJSON()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.getJSON('adjustables.json', function(data) 
         {
-            Log('getLocalData() - Begin adjustables.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - Begin adjustables.json getJSON()', 'severity-info', LogLevel.Debug);
             vehicleAdjustables = data.vehicleAdjustables;
-            Log('getLocalData() - End adjustables.json getJSON()', 'severity-info', 'Info');
+            Log('getLocalData() - End adjustables.json getJSON()', 'severity-info', LogLevel.Debug);
         }, 'json')
     ).done(
         function()
         {
-            Log('getLocalData() - Begin done() ', 'severity-info', 'Info');
+            Log('getLocalData() - Begin done() ', 'severity-info', LogLevel.Debug);
 
             $.ajaxSetup(
                 {
@@ -74,10 +74,10 @@ function getLocalData()
                 }
             );
 
-            Log('getLocalData() - Call getServerData()', 'severity-info', 'Info');
+            Log('getLocalData() - Call getServerData()', 'severity-info', LogLevel.Debug);
             getServerData();
 
-            Log('getLocalData() - End done() ', 'severity-info', 'Info');
+            Log('getLocalData() - End done() ', 'severity-info', LogLevel.Debug);
         }
     ).fail(function(jqxhr, textStatus, err) {
         console.log(err);

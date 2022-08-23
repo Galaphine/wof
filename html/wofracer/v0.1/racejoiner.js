@@ -1,28 +1,28 @@
 joinRace = async (joinApiData) =>
 {
-    await $.when(
+    $.when(
         $.post(joinApi, JSON.stringify(joinApiData), function(data) 
             {
-                Log('joinFreeRace() - Begin post()', 'severity-info', 'Info');
-                Log('joinFreeRace() - status: ', 'severity-info', 'Info');
-                Log('       ' + JSON.stringify(data), 'severity-info', 'Info');
+                Log('joinFreeRace() - Begin post()', 'severity-info', LogLevel.Info);
+                Log('joinFreeRace() - status: ', 'severity-info', LogLevel.Info);
+                Log('       ' + JSON.stringify(data), 'severity-info', LogLevel.Info);
                 if (!data.error) 
                 {
-                    Log('       Congratulations, your WOF # {0} is now in the race!'.replace('{0}', joinApiData.tokenId), 'severity-info', 'Info');
+                    Log('       Congratulations, your WOF # {0} is now in the race!'.replace('{0}', joinApiData.tokenId), 'severity-info', LogLevel.Info);
                     if (timeoutId)
                     {
                         clearTimeout(timeoutId);
                     }
                     refreshData(true, true);
                 }
-                Log('joinFreeRace() - End post()', 'severity-info', 'Info');
+                Log('joinFreeRace() - End post()', 'severity-info', LogLevel.Info);
             }
         , 'json')
     ).done(
         function() 
         { 
-            Log('joinFreeRace() - Begin done()', 'severity-info', 'Info');
-            Log('joinFreeRace() - End done()', 'severity-info', 'Info'); 
+            Log('joinFreeRace() - Begin done()', 'severity-info', LogLevel.Info);
+            Log('joinFreeRace() - End done()', 'severity-info', LogLevel.Info); 
         }
     ).fail(function(jqxhr, textStatus, err) {
         console.log(err);
@@ -31,7 +31,7 @@ joinRace = async (joinApiData) =>
 
 function joinFreeRace()
 {
-    Log('joinFreeRace() - Start function', 'severity-info', 'Info');
+    Log('joinFreeRace() - Start function', 'severity-info', LogLevel.Info);
 
     if (unjoinedRacesVM.unjoinedRaceList().length == 0) return;
 
@@ -54,40 +54,35 @@ function joinFreeRace()
                 && (participantCount < maxParticipants[raceClass])
             )
             {
-                Log('joinApiData: Unapplying all hot-swap upgrades...', 'severity-info', 'Info');
-                if (unjoinedRace.selectedVehicle.ownedUpgrades != null)
-                {
-                    unjoinedRace.selectedVehicle.ownedUpgrades().forEach(ownedUpgrade =>
+                var callArray = getUnapplyUpgrades(unjoinedRace.selectedVehicle);
+                $.when.apply($, callArray)
+                    .done( function()
                         {
-                            applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), ownedUpgrade.upgrade.id(), 'un');
+                            callArray = getApplyUpgrades(unjoinedRace.selectedVehicle)
+                            $.when.apply($, callArray)
+                                .done( function()
+                                    {
+                                        var userVehicle = userVehiclesVM().find(vehicle => { return vehicle.token_id() == unjoinedRace.selectedVehicle.vehicleTokenId()});
+                                        userVehicle.LastAppliedUpgrades = ((unjoinedRace.selectedVehicle.SelectedPermutation != null) && (unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades != null)) ? unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades() : null;
+                        
+                                        joinApiData = structuredClone(joinTemplate);
+                                        joinApiData.address = mySettings.wallet_address();
+                                        joinApiData.raceId = unjoinedRace.id;
+                                        joinApiData.tokenId = unjoinedRace.selectedVehicle.vehicleTokenId();
+                                        Log('walletAddress: ' + mySettings.wallet_address() + '\nselectedRaceId: ' + joinApiData.raceId + '\nselectedVehicleId: ' + joinApiData.tokenId, 'severity-info', LogLevel.Info);
+                                        Log('joinApiData:\n' + JSON.stringify(joinApiData), 'severity-info', LogLevel.Info);
+                                        joinRace(joinApiData);
+                                    }
+                                );
                         }
                     );
-                }
-                if ((unjoinedRace.selectedVehicle.SelectedPermutation != null) && (unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades != null))
-                {
-                    unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades().forEach(upgradeToApply =>
-                        {
-                            applyUnapplyUpgrade(unjoinedRace.selectedVehicle.vehicleTokenId(), upgradeToApply.upgrade.id(), '');
-                        }
-                    );
-                }
-                var userVehicle = userVehiclesVM().find(vehicle => { return vehicle.token_id() == unjoinedRace.selectedVehicle.vehicleTokenId()});
-                userVehicle.LastAppliedUpgrades = ((unjoinedRace.selectedVehicle.SelectedPermutation != null) && (unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades != null)) ? unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades() : null;
-
-                joinApiData = structuredClone(joinTemplate);
-                joinApiData.address = mySettings.wallet_address();
-                joinApiData.raceId = unjoinedRace.id;
-                joinApiData.tokenId = unjoinedRace.selectedVehicle.vehicleTokenId();
-                Log('walletAddress: ' + mySettings.wallet_address(), '\nselectedRaceId: ' + joinApiData.raceId + '\nselectedVehicleId: ' + joinApiData.tokenId, 'severity-info', 'Info');
-                Log('joinApiData:\n' + JSON.stringify(joinApiData), 'severity-info', 'Info');
-                joinRace(joinApiData);
                 break;
             }
         }
         i++;
     }
     
-    Log('joinFreeRace() - End function', 'severity-info', 'Info');
+    Log('joinFreeRace() - End function', 'severity-info', LogLevel.Info);
 }
 
 var joinApi = `${ROOT_API_URL}/racing-arena/join`;

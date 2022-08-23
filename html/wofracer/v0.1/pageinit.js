@@ -4,7 +4,6 @@ function setupContent()
     $('#logStart').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
 
     $('.wof-website-link').attr('href', WOF_WEBSITE + '/racing-arena/upcoming');
-
 }
 
 function setupControlEvents()
@@ -13,7 +12,7 @@ function setupControlEvents()
         {
             var mySettingsJson = ko.mapping.toJSON(mySettings);
             saveFile('mysettings.json', mySettingsJson);
-            Log('getServerData() - Call updateSettings()', 'severity-info', 'Info')
+            Log('getServerData() - Call updateSettings()', 'severity-info', LogLevel.Info);
             updateSettings();
             $('#divSaved').show(500);
             setTimeout(function() {$('#divSaved').hide(750);}, 5000);
@@ -78,11 +77,11 @@ function setupImages()
 
 function setupNavPages()
 {
-    Log('setupNavPages() - Begin', 'severity-info', 'Info');
+    Log('setupNavPages() - Begin', 'severity-info', LogLevel.Info);
 
     $('.nav-icon').click(function()
         {
-            Log('setupNavPages() - Begin nav-icon onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - Begin nav-icon onclick', 'severity-info', LogLevel.Info);
 
             $('.nav-page').hide();
             var targetNavPage = '#' + $(this).attr('for');
@@ -91,25 +90,25 @@ function setupNavPages()
             $('.nav-icon').removeClass('nav-icon-border');
             $(this).addClass('nav-icon-border');
 
-            Log('setupNavPages() - End nav-icon onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - End nav-icon onclick', 'severity-info', LogLevel.Info);
         }
     );
     $('#linkRaces').click();
 
     $('.settings-link').click(function()
         {
-            Log('setupNavPages() - Begin settings-item onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - Begin settings-item onclick', 'severity-info', LogLevel.Info);
 
             $('.settings-detail').hide();
             var targetSettingsDetail = '#' + $(this).attr('for');
             $(targetSettingsDetail).show();
 
-            Log('setupNavPages() - End settings-item onclick', 'severity-info', 'Info');
+            Log('setupNavPages() - End settings-item onclick', 'severity-info', LogLevel.Info);
         }
     );
     $('#tdLinkAuthKey').click();
 
-    Log('setupNavPages() - End', 'severity-info', 'Info');
+    Log('setupNavPages() - End', 'severity-info', LogLevel.Info);
 }
 
 function setupStyles()
@@ -147,8 +146,8 @@ function setupTooltips()
             To allow for fairer community involvement, this Utility caps the auto-join participation in Free races as follows:
             <p />
             <ul>
-                <li style="list-style-position: outside;">Space Races are capped at 5 (you will auto-join as the 6th but not 7th or higher).</li>
-                <li style="list-style-position: outside;">All others are capped at 9 (you will auto-join as the 10th but not 11th or higher).</li>
+                <li style="list-style-position: outside;">Space Races are capped at 5 (you will auto-join as the 6th but will not auto-join if there are already 6 or more).</li>
+                <li style="list-style-position: outside;">All others are capped at 9 (you will auto-join as the 10th but will not auto-join if there are already 10 or more).</li>
             </ul>
             <p />
             You can still manually enter a Free race if a race is above its target participation by using the WOF Website 

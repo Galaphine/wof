@@ -1,5 +1,7 @@
 function applyUnapplyUpgrade(tokenId, upgradeId, unOrNot)
 {
+    var dfd = $.Deferred();
+
     apiData = structuredClone(applyUnapplyTemplate);
     apiData.address = mySettings.wallet_address();
     apiData.token_id = tokenId;
@@ -7,41 +9,62 @@ function applyUnapplyUpgrade(tokenId, upgradeId, unOrNot)
 
     $.post(applyUnapplyApi.replace("{un}", unOrNot), JSON.stringify(apiData), function(data) 
         {
-            Log('applyUnapplyUpgrade () - Begin post()', 'severity-info', 'Info');
-            Log('applyUnapplyUpgrade () - status: ', 'severity-info', 'Info');
-            Log('       ' + JSON.stringify(data), 'severity-info', 'Info');
+            Log('applyUnapplyUpgrade () - Begin post()', 'severity-info', LogLevel.Debug);
+            Log('applyUnapplyUpgrade () - status: ', 'severity-info', LogLevel.Debug);
+            Log('       ' + JSON.stringify(data), 'severity-info', LogLevel.Info);
             if (!data.error) 
             {
-                Log('       Token {0} - Upgrade #{1} {2}applied.'.replace('{0}', tokenId).replace('{1}', upgradeId).replace('{2}', unOrNot), 'severity-info', 'Info');
+                Log('       Token {0} - Upgrade #{1} {2}applied.'.replace('{0}', tokenId).replace('{1}', upgradeId).replace('{2}', unOrNot), 'severity-info', LogLevel.Info);
             }
-            Log('applyUnapplyUpgrade() - End post()', 'severity-info', 'Info');
+            Log('applyUnapplyUpgrade() - End post()', 'severity-info', LogLevel.Debug);
+
+            dfd.resolve();
         }
     , 'json');
+
+    return dfd.promise();
+}
+
+function getApplyUpgrades(vehicle)
+{
+    Log('getApplyUpgrades: Applying chosen permutation\'s upgrades...', 'severity-info', LogLevel.Debug);
+    callArray = []
+    if ((vehicle.SelectedPermutation != null) && (vehicle.SelectedPermutation.comboUpgrades != null))
+    {
+        vehicle.SelectedPermutation.comboUpgrades().forEach(upgradeToApply =>
+            {
+                callArray.push(applyUnapplyUpgrade(vehicle.vehicleTokenId(), upgradeToApply.upgrade.id(), ''));
+            }
+        );
+    }
+
+    return callArray;
 }
 
 function getServerData()
 {
-    Log('getServerData() - Start', 'severity-info', 'Info');
+    Log('getServerData() - Start', 'severity-info', LogLevel.Debug);
     postQueries.Racers.variables.address = mySettings.wallet_address();
     postQueries.Fleet.variables.address = mySettings.wallet_address();
 
     $.when(
         $.post(graphQlApi, JSON.stringify(postQueries.Racers), function(data) {
-            Log('getServerData() - Begin Racers post()', 'severity-info', 'Info');
+            Log('getServerData() - Begin Racers post()', 'severity-info', LogLevel.Debug);
             if (!bound['userInfoVM'])
             {
                 userInfoVM = new UserInfoVM(data.data.racers[0].username);
                 ko.applyBindings(userInfoVM, $('#userInfo').get(0));
                 bound['userInfoVM'] = true;
             }
-            Log('getServerData() - End Racers post()', 'severity-info', 'Info');
+            Log('getServerData() - End Racers post()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.Fleet), function(data) 
             {
-                Log('getServerData() - Begin Fleet post()', 'severity-info', 'Info');
+                Log('getServerData() - Begin Fleet post()', 'severity-info', LogLevel.Debug);
                 if (!bound['userVehiclesVM'])
                 {
                     userVehiclesVM = ko.mapping.fromJS(data.data.token_metadata);
+                    userInfoVM.UserVehiclesCount(userVehiclesVM().length);
                     maxVehcileBaseStatsTokenId = Math.max(...vehicleBaseStats.map(x => x.id).flat(1));
                     getRemainingFleetStats();
                     ko.applyBindings(userVehiclesVM, $('#divUserVehicles').get(0));
@@ -49,26 +72,26 @@ function getServerData()
                     bound['userVehiclesVM'] = true;
                 }
 
-                Log('getServerData() - End Fleet post()', 'severity-info', 'Info');
-                Log(JSON.stringify(userVehiclesVM), 'severity-info', 'Info');
+                Log('getServerData() - End Fleet post()', 'severity-info', LogLevel.Debug);
+                Log(JSON.stringify(userVehiclesVM), 'severity-info', LogLevel.Info);
             }
         , 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces_FreeRaces).replace('"{race_query_free_races_result_limit}"', mySettings.race_query_result_limit()), function(data) {
-            Log('getServerData() - Begin Free Races post()', 'severity-info', 'Info');
+            Log('getServerData() - Begin Free Races post()', 'severity-info', LogLevel.Debug);
 
             upcomingFreeRaces = data.data.races;
 
-            Log('getServerData() - End Paid Races post()', 'severity-info', 'Info');
+            Log('getServerData() - End Paid Races post()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces_PaidRaces).replace('"{race_query_paid_races_result_limit}"', mySettings.race_query_result_limit()), function(data) {
-            Log('getServerData() - Begin Free Races post()', 'severity-info', 'Info');
+            Log('getServerData() - Begin Free Races post()', 'severity-info', LogLevel.Debug);
 
             upcomingPaidRaces = data.data.races;
 
-            Log('getServerData() - End Paid Races post()', 'severity-info', 'Info');
+            Log('getServerData() - End Paid Races post()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.NextToRaceRaces), function(data) {
-            Log('getServerData() - Begin Next-ToRace Races post()', 'severity-info', 'Info');
+            Log('getServerData() - Begin Next-ToRace Races post()', 'severity-info', LogLevel.Debug);
 
             nextToRaceRaces = data.data.races;
             if (nextToRaceRaces.length > 0)
@@ -82,78 +105,125 @@ function getServerData()
                 $('#divNoNextToRaceRaces').show();
             }
 
-            Log('getServerData() - End Next-To-Race Races post()', 'severity-info', 'Info');
+            Log('getServerData() - End Next-To-Race Races post()', 'severity-info', LogLevel.Debug);
         }, 'json')
     ).done(
         function() 
         { 
-            Log('getServerData() - Begin done()', 'severity-info', 'Info');
-
-            var tokenIds = [];
             userVehiclesVM().forEach(userVehicle => {
                 tokenIds.push(userVehicle.token_id());
+                if (tokenIds.length % 30 == 0)
+                {
+                    tokenIdArrays.push(tokenIds);
+                    tokenIds = [];
+                }
             });
-            $.when(
-                $.post(graphQlApi, JSON.stringify(postQueries.Upgrades).replace('"{tokenIds}"', "[" + tokenIds + "]"), function(data) {
-                    Log('getServerData() - Begin Upgrade List post()', 'severity-info', 'Info');
-        
-                    userVehiclesVM().forEach(userVehicle =>
-                        {
-                            userVehicle.UpgradedStats = ko.mapping.fromJS(data.data.upgraded_stats.filter( stat => { return stat.token_id === userVehicle.token_id(); } ));
-                        }
-                    )
-         
-                    Log('getServerData() - End Upgrade List post()', 'severity-info', 'Info');
-                }, 'json'),
-                $.post(graphQlApi, JSON.stringify(postQueries.UpgradesApplied).replace('"{tokenIds}"', "[" + tokenIds + "]"), function(data) {
-                    Log('getServerData() - Begin Upgrades Applied post()', 'severity-info', 'Info');
-        
-                    userVehiclesVM().forEach(userVehicle =>
-                        {
-                            userVehicle.UpgradesApplied = ko.mapping.fromJS(data.data.upgraded_stats.filter( stat => { return stat.token_id === userVehicle.token_id(); } ));
-                        }
-                    );
+            if (tokenIds.length > 0)
+            {
+                tokenIdArrays.push(tokenIds);
+            }
 
-                    userInfoVM.UserVehiclesCount(userVehiclesVM().length);
+            callArray = [];
 
-                    Log('getServerData() - End Upgrades Applied post()', 'severity-info', 'Info');
-                }, 'json')
-            ).done( 
-                function() 
-                { 
-                    Log('getServerData() - Call refreshViewModels()', 'severity-info', 'Info')
-                    refreshViewModels(true, true);
-                } 
-            );
-
-
-            Log('getServerData() - End done()', 'severity-info', 'Info'); 
+            tokenIdArrays.map(tokenIdList => { callArray.push(getUpgrades(tokenIdList)); callArray.push(getUpgradesApplied(tokenIdList)); } );
+            $.when.apply($, callArray)
+                .done( function()
+                    {
+                        userVehiclesVM().forEach( (vehicle, index, arr) =>
+                            {
+                                arr[index].UpgradedStats = ko.mapping.fromJS(fullUpgradedStatList.filter( stat => { return stat.token_id === vehicle.token_id(); } ));
+                                arr[index].UpgradesApplied = ko.mapping.fromJS(fullUpgradesAppliedList.filter( stat => { return stat.token_id === vehicle.token_id(); } ));
+                            }
+                        );
+                        refreshViewModels(true, true);
+                    }
+                );
         }
     ).fail(function(jqxhr, textStatus, err) {
         console.log(err);
     });		
 }
 
+function getUnapplyUpgrades(vehicle)
+{
+    Log('getUnapplyUpgrades: Unapplying all upgrades...', 'severity-info', LogLevel.Debug);
+    callArray = []
+    if (vehicle.ownedUpgrades != null)
+    {
+        vehicle.ownedUpgrades().forEach(ownedUpgrade =>
+            {
+                callArray.push(applyUnapplyUpgrade(vehicle.vehicleTokenId(), ownedUpgrade.upgrade.id(), 'un'));
+            }
+        );
+    }
+
+    return callArray;
+}
+
+function getUpgrades(tokenIdList)
+{
+    var dfd = $.Deferred();
+
+    $.post(graphQlApi, JSON.stringify(postQueries.Upgrades).replace('"{tokenIds}"', "[" + tokenIdList + "]"), function(data)
+        {
+            fullUpgradedStatList = fullUpgradedStatList.concat(data.data.upgraded_stats);
+            dfd.resolve();
+        }
+    );
+
+    return dfd.promise();
+}
+
+function getUpgradesApplied(tokenIdList)
+{
+    var dfd = $.Deferred();
+
+    $.post(graphQlApi, JSON.stringify(postQueries.UpgradesApplied).replace('"{tokenIds}"', "[" + tokenIdList + "]"), function(data)
+        {
+            Log('getUpgradesApplied:\n' + JSON.stringify(data.data.upgraded_stats), 'severity-info', LogLevel.Info);
+            fullUpgradesAppliedList = fullUpgradesAppliedList.concat(data.data.upgraded_stats);
+            dfd.resolve();
+        }
+    );
+
+    return dfd.promise();
+}
+
+function getUpgradesAppliedForOne(vehicle)
+{
+    var dfd = $.Deferred();
+
+    $.post(graphQlApi, JSON.stringify(postQueries.UpgradesApplied).replace('"{tokenIds}"', "[" + vehicle.token_id() + "]"), function(data)
+        {
+            Log('getUpgradesAppliedForOne:\n' + JSON.stringify(data.data.upgraded_stats), 'severity-info', LogLevel.Info);
+            ko.mapping.fromJS(data.data.upgraded_stats, {}, vehicle.UpgradesApplied);
+            dfd.resolve();
+        }
+    );
+
+    return dfd.promise();
+}
+
 function refreshData(doSetTimeout, ignoreJoinFreeRace)
 {
-    Log('refreshData() - Start', 'severity-info', 'Info');
+    Log('refreshData() - Start', 'severity-info', LogLevel.Debug);
     $.when(
         $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces_FreeRaces).replace('"{race_query_free_races_result_limit}"', mySettings.race_query_result_limit()), function(data) {
-            Log('refreshData() - Begin Free Races post()', 'severity-info', 'Info');
+            Log('refreshData() - Begin Free Races post()', 'severity-info', LogLevel.Debug);
 
             upcomingFreeRaces = data.data.races;
 
-            Log('refreshData() - End Paid Races post()', 'severity-info', 'Info');
+            Log('refreshData() - End Paid Races post()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.UpcomingRaces_PaidRaces).replace('"{race_query_paid_races_result_limit}"', mySettings.race_query_result_limit()), function(data) {
-            Log('refreshData() - Begin Free Races post()', 'severity-info', 'Info');
+            Log('refreshData() - Begin Free Races post()', 'severity-info', LogLevel.Debug);
 
             upcomingPaidRaces = data.data.races;
 
-            Log('refreshData() - End Paid Races post()', 'severity-info', 'Info');
+            Log('refreshData() - End Paid Races post()', 'severity-info', LogLevel.Debug);
         }, 'json'),
         $.post(graphQlApi, JSON.stringify(postQueries.NextToRaceRaces), function(data) {
-            Log('refreshData() - Begin Next-ToRace Races post()', 'severity-info', 'Info');
+            Log('refreshData() - Begin Next-ToRace Races post()', 'severity-info', LogLevel.Debug);
 
             nextToRaceRaces = data.data.races;
             if (nextToRaceRaces.length > 0)
@@ -167,7 +237,7 @@ function refreshData(doSetTimeout, ignoreJoinFreeRace)
                 $('#divNoNextToRaceRaces').show();
             }
 
-            Log('refreshData() - End Next-to-Race Races post()', 'severity-info', 'Info');
+            Log('refreshData() - End Next-to-Race Races post()', 'severity-info', LogLevel.Debug);
         }, 'json')
     ).done(
         function() 
@@ -178,7 +248,7 @@ function refreshData(doSetTimeout, ignoreJoinFreeRace)
         console.log(err);
     });		
 
-    Log('refreshData() - End', 'severity-info', 'Info');
+    Log('refreshData() - End', 'severity-info', LogLevel.Debug);
 }
 
 getRemainingFleetStats = async () =>
@@ -210,6 +280,13 @@ getRemainingFleetStats = async () =>
     }
 }
 
-var graphQlApi = `${ROOT_GRAPH_URL}/graphql`;
 var applyUnapplyApi = `${ROOT_API_URL}/{un}apply-upgrade`;
+var fullUpgradedStatList = [];
+var fullUpgradesAppliedList = [];
+var graphQlApi = `${ROOT_GRAPH_URL}/graphql`;
+var tokenIds = [];
+var tokenIdArrays = [];
 
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}

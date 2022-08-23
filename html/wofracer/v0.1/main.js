@@ -1,8 +1,11 @@
+const CURRENT_VERSION = "0.1.9";
+
 /*
     WOF Racer script - see README.md for details on usage and latest features.
 
     Some code incorporated from:   
         distinct(): https://stackoverflow.com/a/58339390
+        getKeyByValue(): https://stackoverflow.com/a/28191966
         k_combinations(): https://gist.github.com/axelpale/3118596
         roundTo(): https://stackoverflow.com/questions/10015027/javascript-tofixed-not-rounding/32605063#32605063
         Tabs: https://github.com/mattheworiordan/jquery.infinite.tabs
@@ -10,9 +13,18 @@
         WorldOfFreight: https://worldoffreight.xyz/
 */
 
+const LogLevel =
+{
+    None: 0,
+    Error: 1,
+    Warning: 2,
+    Info: 4,
+    Debug: 8
+}
+
 /* Page On Load */
 $(function() {
-    Log('document.onload - Start', 'severity-info', 'Info');
+    Log('document.onload - Start', 'severity-info', LogLevel.Debug);
 
     $(window).on('unload', function() { saveLog(); } );
     $('#btnSaveLog').click( function() { saveLog(); } );
@@ -27,6 +39,8 @@ $(function() {
     setupNavPages();
 
     getLocalData();
+
+    Log('document.onload - End', 'severity-info', LogLevel.Debug);
 });
 
 // Templates and other variables
@@ -86,10 +100,10 @@ const upgradeAbbreviations = {
     'Subspace Sensor': 'P:SS',
     'Tachyon Sensor': 'P:TS',
     'Energy Distributor': 'P:ED',
+    'Impulse Thrusters': 'P:IT',
     'Dark Matter Thrusters': 'P:DMT'
 }
 
-const CURRENT_VERSION = "0.1.8";
 const DEFAULT_MAX_LOG_ENTRIES = 10000000;
 const FULL_DASH_ARRAY = 283;
 const MAX_ALLOWED_PERMUTATIONS = 255;
@@ -123,21 +137,23 @@ const STAT_BOUNDARIES = {
     }
 }
 
+const MAX_REFRESH_RATE = 20;
 const WOF_WEBSITE = 'https://www.worldoffreight.xyz/';
 
 const garageUrl = WOF_WEBSITE + 'garage?id={id}';
+
 
 var adjustablesVM = null;
 var bound = [];
 var isPaused = false;
 var joinedRaces = [];
 var logCounter = 0;
+var maxVehcileBaseStatsTokenId = null;
 var messageLog = [];
-var statusLogVM = null;
 var mySettings = null;
 var nextToRaceRaces = [];
-var maxVehcileBaseStatsTokenId = null;
 var postQueries = {};
+var statusLogVM = null;
 var timeoutId = null;
 var timerIntervalId = null;
 var unjoinedRacesVM = null;

@@ -14,7 +14,6 @@
 		<script src="./localdata.js"></script>
 		<script src="./main.js"></script>
 		<script src="./pageinit.js"></script>
-		<script src="./racejoiner.js"></script>
 		<script src="./serverdata.js"></script>
 		<script src="./settings.js"></script>
 		<script src="./timer.js"></script>
@@ -57,6 +56,10 @@
 										Participation Thresholds: Free: <span data-bind="text: ParticipationThresholds().Free"></span><a class="wof-website-link" href="#" target="_new"><img class="info-participation-thresholds" src="./images/info.png" style="cursor: pointer; vertical-align: bottom; width: 15px;" title /></a>, Paid: <span data-bind="text: ParticipationThresholds().Paid"></span><br />
 									</div>
 									<div />
+									<div>
+										Log Level: <span data-bind="text: LogLevelText"></span>
+									</div>
+									<div />
 									<div>Data Last Refreshed: <span id="lastUpdated"></span></div>
 								</div>
 							</td>
@@ -71,7 +74,7 @@
 								<table style="width: 100%;">
 									<tr>
 										<td class="item-text nav-title" colspan="2">
-											<img src="./images/racing-flags.png" style="width: 80px;" />
+											<img src="./images/racing-flags.png" style="width: 70px;" />
 											<br /><br />
 											Races
 										</td>
@@ -231,6 +234,10 @@
 																				&nbsp;-&nbsp;
 																				<!-- /ko -->
 																			<!-- /ko -->
+																			<br />
+																			<!-- ko if: $data.selectedVehicle.vehicleTokenId -->
+																				<div data-bind="attr: {class: $data.ApplyUpgradesNowClass()}, click: applyUpgradesNow, text: $data.ApplyUpgradesNowText()"></div>
+																			<!-- /ko -->
 																		<!-- /ko -->
 																		<br />
 																		<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
@@ -322,7 +329,9 @@
 																				<!-- /ko -->
 																			<!-- /ko -->
 																			<br />
-																			<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																			<!-- ko if: $data.selectedVehicle.vehicleTokenId -->
+																				<div data-bind="attr: {class: $data.ApplyUpgradesNowClass()}, click: applyUpgradesNow, text: $data.ApplyUpgradesNowText()"></div>
+																			<!-- /ko -->
 																		</div>
 																		<div>
 																			<!-- ko if: $data.promo_link -->
@@ -354,18 +363,17 @@
 								</div>
 								<div class="middle-content tab-content" id="statusContent">
 									<br />
-									<!-- ko if:LogEnabled() -->
+									<div data-bind="visible: ($data.LogLevelValue() > 0) ? 'block' : 'none'">
 										The log currently has <span data-bind="text: $data.StatusLogLength" style="font-weight: bold;"></span> entries logged out of a max <span data-bind="text: $data.MaxLogEntries" style="font-weight: bold;"></span> entries allowed.
 										<br /><br />
 										<button class="button-save" id="btnSaveLog">
 											&nbsp;&nbsp;Save and Clear Log&nbsp;&nbsp;
 										</button>
 										<div class="item-text" id="divSaved" style="display: none;">Saved. Unless otherwise specified, the file was saved to your Downloads folder.</div>
-									<!-- /ko -->
-
-									<!-- ko if: !LogEnabled() -->
+									</div>
+									<div data-bind="visible: ($data.LogLevelValue() == 0) ? 'block' : 'none'">
 										Logging is currently disabled.
-									<!-- /ko -->
+									</div>
 								</div>
 								<div class="middle-content tab-content" id="instructionsContent">
 									<div class="item-title item-text middle-panel-text" id="divInstructions">
@@ -755,10 +763,14 @@
 										</td>
 									</tr>
 									<tr>
-										<td class="settings-item">Log Enabled:</td>
+										<td class="settings-item" style="vertical-align: top;">Log Level:</td>
 										<td class="settings-item">
 											<div>
-												<input id="chkEnableLogging" data-bind="checked: enable_logging" name="enableLogging" type="checkbox" value="true" />
+												<input id="chkLogLevel0" data-bind="checked: log_level_text" name="logLevel" type="radio" value="None" /> <label for="chkLogLevel0">None</label><br />
+												<input id="chkLogLevel1" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Error" /> <label for="chkLogLevel1">Error (Minimum logging - only errors)</label><br />
+												<input id="chkLogLevel2" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Warning" /> <label for="chkLogLevel2">Warning (Mild logging - Errors and warnings)</label><br />
+												<input id="chkLogLevel4" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Info" /> <label for="chkLogLevel4">Info (Significant Logging - Details about races + permutations + upgrades, along with errors and warnings)</label><br />
+												<input id="chkLogLevel8" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Debug" /> <label for="chkLogLevel8">Debug (All Logging)</label><br />
 											</div>
 										</td>
 									</tr>
@@ -771,7 +783,7 @@
 										</td>
 									</tr>
 									<tr>
-										<td class="settings-item">Refresh Rate (Min 30 seconds):</td>
+										<td class="settings-item">Refresh Rate (Min 20 seconds):</td>
 										<td class="settings-item">
 											<div>
 												<input class="settings-input-numeric" data-bind="value: refresh_rate_seconds" type="text" />

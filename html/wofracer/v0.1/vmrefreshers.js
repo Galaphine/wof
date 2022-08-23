@@ -1,11 +1,45 @@
+function applyUpgradesNow(raceVm, e)
+{
+    const self = e.target;
+    const vehicle = raceVm.selectedVehicle;
+    const upgradedStats = null;
+
+    var callArray = getUnapplyUpgrades(vehicle);
+    raceVm.ApplyUpgradesNowClass('');
+    raceVm.ApplyUpgradesNowText('Applying upgrades...');
+
+    $.when.apply($, callArray)
+        .done( () =>
+            {
+                callArray = getApplyUpgrades(vehicle);
+                $.when.apply($, callArray)
+                    .done( () =>
+                        {
+                            var userVehicle = userVehiclesVM().find(v => { return v.token_id() == vehicle.vehicleTokenId()});
+                            callArray = [getUpgradesAppliedForOne(userVehicle)];
+                            $.when.apply($, callArray)
+                                .done( () =>
+                                    {
+                                        Log("Upgrades Applied:\n" + ko.mapping.toJSON(userVehicle.UpgradesApplied), 'severity-info', LogLevel.Info);
+                                        $(self).off('click', $(self), applyUpgradesNow);
+                                        raceVm.ApplyUpgradesNowClass('');
+                                        raceVm.ApplyUpgradesNowText('Upgrades set!');
+                                    }
+                                );
+                            }
+                    );
+            }
+        );
+}
+
 function assignUserVehicles()
 {
-    Log('assignUserVehicles() - Start Function', 'severity-info', 'Info');
+    Log('assignUserVehicles() - Start Function', 'severity-info', LogLevel.Debug);
 
     $.each(unjoinedRacesVM.unjoinedRaceList(), function(index)
         {
             var unjoinedRace = unjoinedRacesVM.unjoinedRaceList()[index];
-            Log('assignUserVehicles() - Begin Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
+            Log('assignUserVehicles() - Begin Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', LogLevel.Info);
 
             raceClass = unjoinedRace.class.toLowerCase();
             raceDistance = roundTo(unjoinedRace.distance, 4);
@@ -18,7 +52,7 @@ function assignUserVehicles()
        
             Log(
                 `Class: ${raceClass}\nDistance: ${raceDistance}\nName: ${raceName}\nWeather: ${raceWeather}\nTerrain: ${raceTerrain}\nParticipant Count: ${participantCount}\nCargo Weight: ${cargoWeight}`
-                , 'severity-info', 'Info'
+                , 'severity-info', LogLevel.Info
             );
             
             var availableVehiclesInClass = [];
@@ -47,7 +81,7 @@ function assignUserVehicles()
                         {
                             Log('{0} is already joined in a race; eliminating.'
                                 .replace('{0}', vehicleName)
-                                , 'severity-info', 'Info'
+                                , 'severity-info', LogLevel.Info
                             );
                             allowedVehicle = false;
                             alreadyJoinedRace[0].enteredVehicle.numberOfRefuels = 0;
@@ -74,9 +108,7 @@ function assignUserVehicles()
                                         if (availableVehicle.StatsPermutations.length <= MAX_ALLOWED_PERMUTATIONS)
                                         {
                                             tripsOrRefuels = (numberOfTrips > 5) ? 'trips' : ( (numberOfRefuels > 5) ? 'refuels' : '' );
-                                            Log(
-                                                `${vehicleName} with permutations [{${ko.mapping.toJS(permutation).comboUpgrades.map(x => x.upgrade.id).flat(1)}}] will need more than 5 ${tripsOrRefuels} to complete the distance of ${raceDistance}km for race [${raceName}]; eliminating.`
-                                                , 'severity-info', 'Info');
+                                            Log(`${vehicleName} with permutations [{${ko.mapping.toJS(permutation).comboUpgrades.map(x => x.upgrade.id).flat(1)}}] will need more than 5 ${tripsOrRefuels} to complete the distance of ${raceDistance}km for race [${raceName}]; eliminating.`, 'severity-warning', LogLevel.Warning);
                                         }
                                         permutation.finalAdjustedTime = 0;
                                     }
@@ -127,7 +159,7 @@ function assignUserVehicles()
     finalAdjustedTime: ${finalAdjustedTime}
     raceTerrain, adjustable.terrain: ${raceTerrain}, ${vehicleAdjustable.adjustables.terrain[raceTerrain]}
     raceWeather, adjustable.weather: ${raceWeather}, ${vehicleAdjustable.adjustables.weather[raceWeather]}`
-                                                , 'severity-info', 'Info'
+                                                , 'severity-info', LogLevel.Info
                                             );
                                         }
                                     }
@@ -147,12 +179,12 @@ function assignUserVehicles()
                         finalAdjustedTimes = finalAdjustedTimes + vehiclePermutation.val.longName + ': ' + vehiclePermutation.val.time + '\n';
                     }
                 );
-                Log('finalAdjustedTimes:\n' + finalAdjustedTimes, 'severity-info', 'Info');
+                Log('finalAdjustedTimes:\n' + finalAdjustedTimes, 'severity-info', LogLevel.Info);
                 selectedVehiclePermutationIds = ko.mapping.toJS(vehiclePermutationFinalTimes[0]).val.comboUpgrades.map(x => x.upgrade.id).flat(1);
-                Log('selectedVehiclePermutationIds:\n' + selectedVehiclePermutationIds);
+                Log('selectedVehiclePermutationIds:\n' + selectedVehiclePermutationIds, 'severity-info', LogLevel.Info);
 
-                var vehiclePermutationIdWithShortestTime = vehiclePermutationFinalTimes[0].key;
-                var selectedVehicle = availableVehiclesInClass.find(vehicle => { return vehicle.token_id() == vehiclePermutationIdWithShortestTime.split('_')[0]; });
+                const vehiclePermutationIdWithShortestTime = vehiclePermutationFinalTimes[0].key;
+                const selectedVehicle = availableVehiclesInClass.find(vehicle => { return vehicle.token_id() == vehiclePermutationIdWithShortestTime.split('_')[0]; });
                 selectedVehicle.vehicleId = ko.observable(selectedVehicle.token_id());
                 selectedVehicle.SelectedPermutation = (selectedVehicle.StatsPermutations == null) ? null : selectedVehicle.StatsPermutations.find(permutation => { return permutation.PermutationId == vehiclePermutationIdWithShortestTime; });
                 if (selectedVehicle.SelectedPermutation != null)
@@ -165,6 +197,7 @@ function assignUserVehicles()
                     ko.mapping.fromJS(selectedVehicle.SelectedPermutation.comboUpgrades, {}, unjoinedRace.selectedVehicle.SelectedPermutation.comboUpgrades);
                     ko.mapping.fromJS(selectedVehicle.SelectedPermutation, {}, unjoinedRace.selectedVehicle.SelectedPermutation);
                     ko.mapping.fromJS(selectedVehicle, {}, unjoinedRace.selectedVehicle);
+                    checkApplyUpgradesNowLink(unjoinedRace, selectedVehicle);
                 }
                 else
                 {
@@ -195,11 +228,29 @@ function assignUserVehicles()
                 unjoinedRace.selectedVehicle.vehicleName("No available {0} WOFs in fleet.".replace('{0}', raceClass));
                 unjoinedRace.selectedVehicle.vehicleTokenId('');
             }
-            Log('assignUserVehicles() - End Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', 'Info');
+            Log('assignUserVehicles() - End Selecting Best Vehicle for Race {0}:'.replace('{0}', unjoinedRace.name), 'severity-info', LogLevel.Info);
         }
     );
 
-    Log('assignUserVehicles() - End Function', 'severity-info', 'Info');
+    Log('assignUserVehicles() - End Function', 'severity-info', LogLevel.Debug);
+}
+
+function checkApplyUpgradesNowLink(selectedRace, vehicle)
+{
+    try
+    {
+        const selectedPermutationIds = vehicle.SelectedPermutation.comboUpgrades.map(x => x.upgrade.id()).flat(1);
+        const appliedUpgradeIds = ko.mapping.toJS(vehicle.UpgradesApplied).map(x => x.upgrade_id).flat(1);
+        if (selectedPermutationIds.sort().toString() === appliedUpgradeIds.sort().toString())
+        {
+            selectedRace.ApplyUpgradesNowClass('');
+            selectedRace.ApplyUpgradesNowText('Upgrades set.');
+        }
+    }
+    catch(e)
+    {
+        console.log(e);
+    }
 }
 
 function cloneImages()
@@ -336,6 +387,8 @@ function refreshUpcomingRaces()
                     }  
                 }
             );
+            unjoinedRaces[index].ApplyUpgradesNowClass = ko.observable('link-apply-upgrades');
+            unjoinedRaces[index].ApplyUpgradesNowText = ko.observable('Apply Upgrades Now');
             decimalPlaces = (unjoinedRaces[index].distance < 100) ? 2 : 0;
             unjoinedRaces[index].raceDistance = roundTo(unjoinedRaces[index].distance, decimalPlaces);
         }
@@ -482,10 +535,10 @@ function refreshUpgradePermutations()
                     comboUpgrades: []
                 }
                 StatsPermutation.PermutationId = userVehicle.token_id() + '_00';
-                Log('StatsPermutation.comboUpgrades.length: ' + StatsPermutation.comboUpgrades.length + '\nStatsPermutation (content):\n' + JSON.stringify(StatsPermutation), 'severity-info', 'Info');
+                Log('StatsPermutation.comboUpgrades.length: ' + StatsPermutation.comboUpgrades.length + '\nStatsPermutation (content):\n' + JSON.stringify(StatsPermutation), 'severity-info', LogLevel.Info);
                 userVehicle.StatsPermutations.push(StatsPermutation);
 
-                Log('userVehicle.BaseStats:\n' + ko.mapping.toJSON(userVehicle.BaseStats), 'severity-info', 'Info');
+                Log('userVehicle.BaseStats:\n' + ko.mapping.toJSON(userVehicle.BaseStats), 'severity-info', LogLevel.Info);
                 i = 1;
                 j = 1;
                 ownedUpgradeIds = userVehicle.ownedUpgrades.map(x => x.upgrade.id()).flat(1);
@@ -529,15 +582,15 @@ function refreshUpgradePermutations()
                             StatsPermutation.PermutationId = userVehicle.token_id() + '_' + j;
                             if ((hasEcuHp) && (hasEcuHe))
                             {
-                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': This permutation has both ECU-HP and ECU-HE; eliminating.', 'severity-info', 'Info')
+                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': This permutation has both ECU-HP and ECU-HE; eliminating.', 'severity-info', LogLevel.Info);
                             }
                             else if ((StatsPermutation.emission_rate < 1) || (StatsPermutation.fuel_efficiency < 1) || (StatsPermutation.max_capacity < 1) || (StatsPermutation.max_range < 1) || (StatsPermutation.max_speed < 1))
                             {
-                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': One or more stat is less than 1; eliminating this permutation: ' + JSON.stringify(StatsPermutation), 'severity-info', 'Info')
+                                Log('Token #' + StatsPermutation.TokenId + ', ID #' + StatsPermutation.PermutationId + ': One or more stat is less than 1; eliminating this permutation: ' + JSON.stringify(StatsPermutation), 'severity-info', LogLevel.Info);
                             }
                             else
                             {
-                                Log('StatsPermutation.comboUpgrades.length: ' + StatsPermutation.comboUpgrades.length + '\nStatsPermutation (content):\n' + JSON.stringify(StatsPermutation), 'severity-info', 'Info');
+                                Log('StatsPermutation.comboUpgrades.length: ' + StatsPermutation.comboUpgrades.length + '\nStatsPermutation (content):\n' + JSON.stringify(StatsPermutation), 'severity-info', LogLevel.Info);
                                 userVehicle.StatsPermutations.push(StatsPermutation);
                             }
 
@@ -570,47 +623,49 @@ function refreshUpgradePermutations()
             }
             else
             {
-                Log("Permutations are disabled in your settings; Update your settings to enable permutations.")
+                Log('Permutations are disabled in your settings; Update your settings to enable permutations.', 'severity-warning', LogLevel.Warning)
             }
         }
     );
-    userInfoVM.UserVehiclesUpgradedCount(userVehiclesVM().filter(uv => { return uv.UpgradedStats().filter( stat => { return stat.owned(); }).length > 0 }).length);
+
+    userInfoVM.UserVehiclesUpgradedCount(userVehiclesVM().filter(uv => { return  uv.UpgradedStats().filter( stat => { return stat.owned(); }).length > 0 }).length);
 }
 
 function refreshViewModels(doSetTimeout, ignoreJoinFreeRace)
 {
-    Log('refreshViewModels() - Begin', 'severity-info', 'Info');
+    Log('refreshViewModels() - Begin', 'severity-info', LogLevel.Debug);
 
-    Log('refreshViewModels() - Update Last Updated()', 'severity-info', 'Info')
+    Log('refreshViewModels() - Update Last Updated()', 'severity-info', LogLevel.Debug);
     $('#lastUpdated').html(moment(new Date()).format('YYYY-MM-DD HH:mm:ss'));
     updateTimer();
     if (timerIntervalId) clearInterval(timerIntervalId);
     startTimer();
 
-    Log('getServerData() - call refreshUpgradePermutations()', 'severity-info', 'Info');
+    Log('getServerData() - call refreshUpgradePermutations()', 'severity-info', LogLevel.Debug);
     refreshUpgradePermutations();
     
-    Log('refreshViewModels() - Call refreshNextToRaceRaces()', 'severity-info', 'Info')
+    Log('refreshViewModels() - Call refreshNextToRaceRaces()', 'severity-info', LogLevel.Debug);
     refreshNextToRaceRaces();
 
-    Log('refreshViewModels() - Call refreshUpcomingRaces()', 'severity-info', 'Info')
+    Log('refreshViewModels() - Call refreshUpcomingRaces()', 'severity-info', LogLevel.Debug);
     refreshUpcomingRaces();
 
-    Log('refreshViewModels() - Call assignUserVehicles()', 'severity-info', 'Info')
+    Log('refreshViewModels() - Call assignUserVehicles()', 'severity-info', LogLevel.Debug);
     assignUserVehicles();
 
-    if (!ignoreJoinFreeRace)
-    {
-        Log('refreshViewModels() - Call joinFreeRace()', 'severity-info', 'Info')
-        joinFreeRace();
-    }
+    // Only commenting out for now - there may come a point in the future where this becomes useful.
+    // if (!ignoreJoinFreeRace)
+    // {
+    //     Log('refreshViewModels() - Call joinFreeRace()', 'severity-info', LogLevel.Debug);
+    //     joinFreeRace();
+    // }
 
     if (doSetTimeout)
     {
         updateTimeout(true, mySettings.refreshRateMilliseconds());
     }
 
-    Log('refreshViewModels() - End', 'severity-info', 'Info'); 
+    Log('refreshViewModels() - End', 'severity-info', LogLevel.Debug); 
 }
 
 function updateTimeout(doSetTimeout, timeoutAmount)

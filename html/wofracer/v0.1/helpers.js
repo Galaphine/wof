@@ -12,6 +12,32 @@ function distinct(arr, propName)
     return result;
 }
 
+function getKeyByValue(object, value) 
+{
+    return Object.keys(object).find(key => object[key] === value);
+}
+
+function Log(message, className, severity)
+{
+    //console.log("mySettings.log_level(): " + ((mySettings) ? mySettings.log_level() : ' (not set)') + "; SEVERITY: " + severity);
+    if (
+        (!mySettings)
+        || (!mySettings.log_level_text)
+        || (mySettings.log_level() < severity)
+    ) return;
+
+    //logCounter++;
+    var formattedDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
+    console.log(message);
+    /*
+    messageLog.push(formattedDate + '\t' + severity + '\t' + message);
+    if ((logCounter % 10000 == 0) && (messageLog.length > mySettings.max_log_entries()))
+    {
+        messageLog.splice(0, messageLog.length - mySettings.max_log_entries());
+    }
+    */
+}
+
 function roundTo(n, digits) 
 {
     if (digits === undefined) {
@@ -34,26 +60,10 @@ function saveFile(fileName, fileContent)
 
 function saveLog()
 {
-    if ((!mySettings) || (!mySettings.enable_logging) || (!mySettings.enable_logging())) return;
+    if ((!mySettings) || (!mySettings.log_level_text) || (mySettings.log_level_text() == "None")) return;
     
     var formattedDate = moment(new Date()).format('YYYYMMDD-HHmmss');
     saveFile(`wofracer-log-${formattedDate}`, [messageLog.join('\n')])
     messageLog = [];
-}
-
-function Log(message, className, severity)
-{
-    if ((!mySettings) || (!mySettings.enable_logging) || (!mySettings.enable_logging())) return;
-
-    //logCounter++;
-    var formattedDate = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-    console.log(message);
-    /*
-    messageLog.push(formattedDate + '\t' + severity + '\t' + message);
-    if ((logCounter % 10000 == 0) && (messageLog.length > mySettings.max_log_entries()))
-    {
-        messageLog.splice(0, messageLog.length - mySettings.max_log_entries());
-    }
-    */
 }
 

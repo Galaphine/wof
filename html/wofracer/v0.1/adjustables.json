@@ -1007,6 +1007,83 @@
                 {
                     "accelerationDelay": 0,
                     "decelerationDelay": 0,
+                    "refuelingDelay": 0
+                },
+                "terrainSpeedFactor": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "terrain": 
+                {
+                    "N_A": 1,
+                    "Asphalt": 1,
+                    "Clay": 1,
+                    "Gravel": 1,
+                    "Ice": 1,
+                    "Sand": 1,
+                    "Snow": 1
+                },
+                "weather": 
+                {
+                    "Foggy": 1,
+                    "Icy": 1,
+                    "Rainy": 1,
+                    "Snowy": 1,
+                    "Stormy": 1,
+                    "Sunny": 1,
+                    "Windy": 1
+                }
+            },
+            "boosts":
+            {
+                "boostFactor": 1,
+                "rangeLimitLower": 0,
+                "rangeLimitUpper": 0
+            },
+            "statBoundaries":
+            {
+                "emission_rate": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "fuel_efficiency": 
+                {
+                    "min": 1,
+                    "max": 10
+                },
+                "max_capacity": 
+                {
+                    "min": 1,
+                    "max": 100000
+                },
+                "max_range": 
+                {
+                    "min": 1,
+                    "max": 25000
+                },
+                "max_speed": 
+                {
+                    "min": 1,
+                    "max": 75
+                }
+            },
+            "maxSpeed": 75,
+            "vehicleType": "submarine"
+        },
+        {
+            "adjustables": 
+            {
+                "delays":
+                {
+                    "accelerationDelay": 0,
+                    "decelerationDelay": 0,
                     "refuelingDelay": 120
                 },
                 "terrainSpeedFactor": 

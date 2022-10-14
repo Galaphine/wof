@@ -1,0 +1,1062 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" />
+		<link rel="stylesheet" href="./jquery.infinite.tabs/css/infinite.tabs.min.css" />
+		<link rel="stylesheet" href="./styles/styles.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+		<script src="./jquery.infinite.tabs/jquery.infinite.tabs.min.js"></script>
+		<script src="./js/adjustables.js"></script>
+		<script src="./js/combinations.js"></script>
+		<script src="./js/helpers.js"></script>
+		<script src="./js/localdata.js"></script>
+		<script src="./js/main.js"></script>
+		<script src="./js/pageinit.js"></script>
+		<script src="./js/racecalcs.js"></script>
+		<script src="./js/serverdata.js"></script>
+		<script src="./js/settings.js"></script>
+		<script src="./js/timer.js"></script>
+		<script src="./js/viewmodels.js"></script>
+		<script src="./js/vmrefreshers.js"></script>
+	</head>
+	<body class="body-main">
+		<table class="header-panel">
+			<tr>
+				<td class="play-enabled panel header-panel-left" id="tdPanelInfo">
+					<table style="width: 100%;">
+						<tr>
+							<td class="item-text" style="width: 100%;">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text" style="width: 95%;">
+											<div >WOF Racer Utility v<span class="wof-version"></span>&nbsp;&nbsp;(Refresh <span id="spnPaused">Enabled</span>)</div>
+										</td>
+										<td class="permutation-warning" style="vertical-align: top;" style="display: none; width: 40px;">
+											<img src="./images/warning-triangle.png" style="width: 35px; height: 35px;" title="WARNING:  You have Permutations enabled.  This will alter the upgrades set on your vehicles.  Be sure you have recorded the original values before your vehicles enter races so you can manually return to those values if you stop using this script." />
+										</td>
+										<td style="vertical-align: top;" style="width: 40px;">
+											<img id="imgPlayPause" src="./images/pause.png" style="cursor: pointer; vertical-align: middle; width: 35px;" title value="Enabled" />
+										</td>
+										<td style="vertical-align: top;" style="width: 40px;">
+											<div id="divTimer" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="item-text" colspan="2" style="border-bottom: 1px solid lightyellow; width: 100%;">
+								<div id="userInfo">
+									<p />
+									<div>
+										Data Last Refreshed: <span id="lastUpdated"></span>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td class="header-panel-right">
+					<table id="tblNavIcons">
+						<tr>
+							<td class="nav-spacer">&nbsp;</td>
+							<td class="nav-icon nav-image-outer" for="divNavRace" id="linkRaces" tabindex="1">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text nav-title">
+											<img src="./images/racing-flags.png" style="width: 70px;" />
+											<br /><br />
+											Races
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td class="nav-spacer">&nbsp;</td>
+							<td class="nav-icon" for="divNavFleet" id="linkFleet" tabindex="2">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text nav-title" style="white-space: nowrap; width: 200px;">
+											<img src="./images/fleet-and-fp.png" style="width: 40px;" />
+											<br /><br />
+											Fleet &amp; Punks
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td class="nav-spacer">&nbsp;</td>
+							<td class="nav-icon" for="divNavSettings" id="linkSettings" tabindex="3">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text nav-title" id="td_icon_settings" style="white-space: nowrap; width: 200px;">
+											<img src="./images/settings.svg" style="height: 40px;" />
+											<br /><br />
+											My Settings
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td class="nav-spacer">&nbsp;</td>
+							<td class="nav-icon" for="divNavInfo" id="linkInfo" tabindex="4">
+								<table style="width: 100%;">
+									<tr>
+										<td class="item-text nav-title" id="td_icon_settings" style="white-space: nowrap; width: 200px;">
+											<img src="./images/info.png" style="height: 40px;" />
+											<br /><br />
+											Info
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<div class="nav-page" id="divNavRace">
+			<div class="panel panel-container-vertical">
+				<div class="panel panel-body">
+					<div class="panel panel-container-horizontal">
+						<div class="panel panel-left">
+							<table class="item-title" id="unjoinedRacesFilter" style="display: none;">
+								<tr>
+									<td class="icon-container icon-filter-title">Filters:</td>
+									<td class="icon-container icon-filter-group-class">
+										<table>
+											<tr>
+												<td class="icon-padder"> </td>
+												<td id="tdClass" class="icon-filter icon-filter-class-all"><span id="spnClassAll" title="All Vehicle Classes">ALL</span></td>
+												<td class="icon-padder"> </td>
+												<td id="tdTerrain" class="icon-filter icon-filter-terrain-all"><span id="spnTerrainAll" title="All Terrains">ALL</span></td>
+												<td class="icon-padder"> </td>
+												<td id="tdWeather" class="icon-filter icon-filter-weather-all"><span id="spnWeatherAll" title="All Weather Types">ALL</span></td>
+												<td class="icon-padder"> </td>
+											</tr>
+										</table>
+										<table class="menu-filter-class" style="position: absolute; visibility: hidden;">
+											<tr>
+												<td class="icon-filter icon-filter-class-all" data-bind="click: filterClass.bind($data, 'All')"><span id="spnClassAllTemplate" title="All Vehicle Classes">ALL</span></td>
+											</tr>
+											<tr>
+												<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Ground')"><span id="spnGroundTemplate" title="Ground"></span></td>
+											</tr>
+											<tr>
+												<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Water')"><span id="spnWaterTemplate" title="Water"></span></td>
+											</tr>
+											<tr>
+												<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Air')"><span id="spnAirTemplate" title="Air"></span></td>
+											</tr>
+											<tr>
+												<td class="icon-filter" data-bind="click: filterClass.bind($data, 'Space')"><span id="spnSpaceTemplate" title="Space"></span></td>
+											</tr>
+										</table>
+									</td>
+									<td class="icon-container icon-filter-group-weather"> </td>
+								</tr>
+							</table>
+							<div id="unjoinedRaces">
+								<ul class="infinite-tabs" id="tabsLeft">
+									<li class="active locked tab" data-bind="click: function() { refreshAdjustables(); }" id="paidRacesTab"><a href="#paidRacesContent">Paid Races (<span data-bind="text: $data.CountAtOrAboveThresholds().Paid"></span> / <span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0}).length"></span>)</a></li>
+									<li class="locked tab" data-bind="click: function() { refreshAdjustables(); }" id="freeRacesTab"><a href="#freeRacesContent">Free Races (<span data-bind="text: $data.CountAtOrAboveThresholds().Free"></span> / <span data-bind="text: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0}).length"></span>)</a></li>
+								</ul>
+								<div class="left-panel-content tab-content" id="freeRacesContent">
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0 }).length === 0 -->
+									<div> Sorry, there are currently no free races.</div>
+									<!-- /ko -->
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee === 0 }).length > 0 -->
+										<div data-bind='foreach: unjoinedRaceList'>
+											<!-- ko if: $data.entry_fee === 0 -->
+												<div class="item-unjoined-race">
+													<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}">
+														<table class="item-text item-unjoined-race item-unjoined-race-details">
+															<tr>
+																<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																	<div style="width: 100%; text-align: center;">
+																		<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants().length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br />FREE</div>
+																		<br />
+																		<span class="cell-race-terrain">
+																			<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																		</span>
+																		<span class="cell-race-weather">
+																			<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																		</span>
+																		<br />
+																		<div class="cell-race-image" style="width: 100%;">
+																			<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																				<br />
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.selectedVehicle.vehicleTokenId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" /></a>
+																			<!-- /ko -->
+																			<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																				&nbsp;
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.selectedVehicle.vehicleFreightPunkId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleFreightPunkUrl(), title: 'Freight Punk ID #{id}'.replace('{id}', $data.selectedVehicle.vehicleFreightPunkId())}" /></a>
+																			<!-- /ko -->
+																			<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																				<br />
+																				<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
+																				<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																					&nbsp;::&nbsp;
+																					<span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		</div>
+																	</div>
+																</td>
+																<td style="width: 10px; white-space: nowrap;"></td>
+																<td class="cell-race-title">
+																	<div class="race-selector" data-bind="text: name, click: $parent.selectRace"></div>
+																	<div><span title="Distance">D: <span data-bind="text: Number($data.raceDistance()).toLocaleString()"></span>km</span>, <span title="Cargo">C: <span data-bind="text: Number($data.weight).toLocaleString()"></span>kg</span></div>
+																	<div>
+																		<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																		Your Best: 
+																		<!-- ko if: $data.selectedVehicle -->
+																			<span>
+																				<a class="item-text" data-bind="attr: {href: garageUrl.replace('{id}', $data.selectedVehicle.vehicleId()) }" target="_new"><span data-bind="text: $data.selectedVehicle.vehicleName()"></span></a><br />
+																				<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																					<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
+																					<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
+																					<span title="Emission Rate">ER: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.emission_rate"></span></span><br />
+																					<span title="Max Range">MR: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_range_display"></span>km</span>,
+																					<span title="Max Speed">MS: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_speed_display"></span>km/hr</span>
+																				<!-- /ko -->
+																			</span>
+																			<br />
+																			<!-- ko if: $data.selectedVehicle.SelectedPermutation.finalAdjustedTime -->
+																				<span title="FinalEta">ETA: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.finalAdjustedTime"></span>s</span>
+																				<br />
+																			<!-- /ko -->
+																			<!-- ko foreach: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																				<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																				<!-- ko if: $index < $parent.length -->
+																				&nbsp;-&nbsp;
+																				<!-- /ko -->
+																			<!-- /ko -->
+																			<br />
+																			<!-- ko if: $data.selectedVehicle.vehicleTokenId -->
+																				<div data-bind="attr: {class: $data.ApplyUpgradesNowClass()}, click: applyUpgradesNow, text: $data.ApplyUpgradesNowText()"></div>
+																			<!-- /ko -->
+																		<!-- /ko -->
+																		<br />
+																		<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																	</div>
+																	<div>
+																		<!-- ko if: $data.promo_link -->
+																			Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																		<!-- /ko -->
+																	</div>
+																</td>
+															</tr>
+														</table>
+													</div>
+												</div>
+											<!-- /ko -->
+										</div>
+									<!-- /ko -->
+								</div>
+								<div class="left-panel-content tab-content" id="paidRacesContent">
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0 }).length === 0 -->
+									<div> Sorry, there are currently no paid races.</div>
+									<!-- /ko -->
+
+									<!-- ko if: $data.unjoinedRaceList().filter(race => { return race.entry_fee > 0 }).length > 0 -->
+										<div>
+											<div data-bind='foreach: unjoinedRaceList'>
+												<!-- ko if: $data.entry_fee > 0 -->
+													<div class="item-unjoined-race">
+														<div data-bind="attr: {class: 'item-unjoined-race-' + $data.class}">
+															<table class="item-text item-unjoined-race item-unjoined-race-details">
+																<tr>
+																	<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																		<div style="width: 100%; text-align: center;">
+																			<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants().length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: $data.entry_fee"></span></div>
+																			<br />
+																			<span class="cell-race-terrain">
+																				<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																			</span>
+																			<span class="cell-race-weather">
+																				<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																			</span>
+																			<br />
+																			<div class="cell-race-image" style="width: 100%;">
+																				<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																					<br />
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.selectedVehicle.vehicleTokenId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleImageUrl(), title: '{name} (ID #{id})'.replace('{name}', $data.selectedVehicle.vehicleName()).replace('{id}', $data.selectedVehicle.vehicleTokenId())}" /></a>
+																				<!-- /ko -->
+																				<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																					&nbsp;
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.selectedVehicle.vehicleFreightPunkId()}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.selectedVehicle.vehicleFreightPunkUrl(), title: 'Freight Punk ID #{id}'.replace('{id}', $data.selectedVehicle.vehicleFreightPunkId())}" /></a>
+																				<!-- /ko -->
+																				<!-- ko if: $data.selectedVehicle && $data.selectedVehicle.vehicleImageUrl -->
+																					<br />
+																					<span class="item-text" data-bind="text: $data.selectedVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.numberOfRefuels" title="Number of Refuels"></span>
+																					<!-- ko if: ($data.selectedVehicle.vehicleFreightPunkId() > 0) -->
+																						&nbsp;::&nbsp;
+																						<span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.selectedVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																					<!-- /ko -->
+																				<!-- /ko -->
+																			</div>
+																		</div>
+																	</td>
+																	<td style="width: 10px; white-space: nowrap;"></td>
+																	<td class="cell-race-title">
+																		<div class="race-selector" data-bind="text: name, click: $parent.selectRace"></div>
+																		<div>D: <span data-bind="text: Number($data.raceDistance()).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.weight).toLocaleString()"></span>kg</div>
+																		<div>
+																			<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																			Your Best: 
+																			<!-- ko if: $data.selectedVehicle -->
+																				<span>
+																					<a class="item-text" data-bind="attr: {href: garageUrl.replace('{id}', $data.selectedVehicle.vehicleId()) }" target="_new"><span data-bind="text: $data.selectedVehicle.vehicleName()"></span></a><br />
+																					<!-- ko if: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																						<span title="Max Capacity">MC: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_capacity_display"></span>kg</span>,
+																						<span title="Fuel Efficiency">FE: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.fuel_efficiency"></span></span>,
+																						<span title="Emission Rate">ER: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.emission_rate"></span></span><br />
+																						<span title="Max Range">MR: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_range_display"></span>km</span>,
+																						<span title="Max Speed">MS: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.max_speed_display"></span>km/hr</span>
+																					<!-- /ko -->
+																				</span>
+																				<br />
+																				<!-- ko if: $data.selectedVehicle.SelectedPermutation.finalAdjustedTime -->
+																					<span title="FinalEta">ETA: <span data-bind="text: $data.selectedVehicle.SelectedPermutation.finalAdjustedTime"></span>s</span>
+																					<br />
+																				<!-- /ko -->
+																				<!-- ko foreach: $data.selectedVehicle.SelectedPermutation.comboUpgrades -->
+																					<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																					<!-- ko if: $index < $parent.length -->
+																					&nbsp;-&nbsp;
+																					<!-- /ko -->
+																				<!-- /ko -->
+																			<!-- /ko -->
+																			<br />
+																			<!-- ko if: $data.selectedVehicle.vehicleTokenId -->
+																				<div data-bind="attr: {class: $data.ApplyUpgradesNowClass()}, click: applyUpgradesNow, text: $data.ApplyUpgradesNowText()"></div>
+																			<!-- /ko -->
+																		</div>
+																		<div>
+																			<!-- ko if: $data.promo_link -->
+																				Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																			<!-- /ko -->
+																		</div>
+																	</td>
+																</tr>
+															</table>
+														</div>
+													</div>
+												<!-- /ko -->
+											</div>
+										</div>
+									<!-- /ko -->
+								</div>
+							</div>
+						</div>
+						<div class="panel panel-middle panel-container-vertical" id="divDashboard">
+							<ul class="infinite-tabs" id="tabsMiddle">
+								<li class="active locked tab" id="dashboardTab"><a href="#dashboardContent">Dashboard</a></li>
+								<li class="locked tab" data-bind="click: function() { refreshAdjustables(); }" id="adjustablesTab"><a href="#adjustablesContent">Adjustables</a></li>
+							</ul>
+							<div class="middle-panel-content tab-content" id="dashboardContent" style="height: 92%;">
+								<br />
+								<u style="font-size: 12pt"><span data-bind="text: Username"></span>'s Dashboard</u>
+								<br /><br />
+								<table>
+									<tbody>
+										<tr>
+											<td style="width: 100%;">
+												<table>
+													<tbody>
+														<tr>
+															<td style="vertical-align: top;">
+															<table>
+																<thead>
+																	<tr><th class="dashboard-table dashboard-table-header">Upgraded Vehicles (Excludes Leased)</th></tr>
+																</thead>
+																<tbody>
+																	<tr><td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: UserVehiclesUpgradedCount"></span> / <span data-bind="text: UserVehiclesCount"></span></td></tr>
+																</tbody>
+															</table>
+														</td>
+														<td style="min-width: 15px; width: 15px;">&nbsp;</td>
+														<td style="vertical-align: top;">
+															<table>
+																<thead>
+																	<tr><th class="dashboard-table dashboard-table-header">Permutations Enabled</th></tr>
+																</thead>
+																<tbody>
+																	<tr><td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: (mySettings.enable_permutations) ? 'Yes' : 'No'"></span></td></tr>
+																</tbody>
+															</table>
+														</td>
+														<td style="min-width: 15px; width: 15px;">&nbsp;</td>
+														<td style="vertical-align: top;">
+															<table>
+																<thead>
+																	<tr><th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium" colspan="2">Participation Thresholds</th></tr>
+																	<tr>
+																		<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-small">Paid</th>
+																		<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-small">Free</th>
+																	</tr>
+																</thead>
+																<tbody>
+																	<tr>
+																		<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: ParticipationThresholds().Paid"></span></td>
+																		<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: ParticipationThresholds().Free"></span></td>
+																	</tr>
+																</tbody>
+															</table>
+														</td>
+														<td style="min-width: 15px; width: 15px;">&nbsp;</td>
+														<td style="vertical-align: top;">
+															<table>
+																<thead>
+																	<tr><th class="dashboard-table dashboard-table-header">Log Level</th></tr>
+																</thead>
+																<tbody>
+																	<tr>
+																		<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: LogLevelText"></span></td>
+																	</tr>
+																</tbody>
+															</table>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<!--
+										<tr><td>&nbsp;</td></tr>
+										<tr>
+											<td style="vertical-align: top;">
+												<table>
+													<tbody>
+														<tr>
+															<td>
+																<table>
+																	<thead>
+																		<tr>
+																			<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium" style="vertical-align: middle;">WPR</th>
+																			<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium" colspan="2" style="text-align: right;">
+																				All * Free * Paid
+																			</th>
+																		</tr>
+																		<tr>
+																			<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium">Wins</th>
+																			<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium">Podiums</th>
+																			<th class="dashboard-table dashboard-table-header dashboard-table-cell-text-medium">Total</th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<tr>
+																			<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: '(Wins)'"></span></td>
+																			<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: '(Podiums)'"></span></td>
+																			<td class="dashboard-table dashboard-table-cell dashboard-table-cell-text-large"><span data-bind="text: '(Total)'"></span></td>
+																		</tr>
+																	</tbody>
+																</table>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</td>
+										</tr>
+										-->
+									</tbody>
+								</table>
+							</div>
+							<div class="middle-panel-content tab-content" id="adjustablesContent">
+								<div class="tab-inner-container">
+									ADJUSTABLES:  This will show the best stats of vehicle types against the selected vehicle in the first race of the selected view (Free or Paid).<br />
+									You can also select a race to compare against other vehicle types in the same class - note this will PAUSE the timer to allow you to compare.<br />
+									(NOTE - THIS AREA IS STILL UNDER CONSTRUCTION, ALL FUNCTIONALITY IS NOT YET PRESENT.)<br />
+									<br />
+									<div id="divSelectedRaceToAdjust">
+										<table class="adjustable-comparison-table">
+											<tbody>
+												<tr>
+													<td style="width: 35%;">
+														<table style="width: 100%;">
+															<tr>
+																<td class="adjustable-cell adjustable-cell-large-text" style="width: 150px;">Race: </td>
+																<td class="adjustable-cell adjustable-cell-large-text" style="white-space: nowrap; width: 270px;">
+																	<span data-bind="text: ($data.Race()) ? $data.Race().name : ''"></span>
+																	&nbsp;
+																	<span class="cell-race-weather">
+																		<!-- ko if: $data.Race() -->
+																			<span data-bind="attr: {class: 'race-image-weather-' + $data.Race().weather()}"></span>
+																		<!-- /ko -->
+																	</span>
+																</td>
+																<td class="adjustable-cell" style="min-width: 20px; width: 20px;">&nbsp;</td>
+																<td class="adjustable-cell" style="width: 50%;">
+																	<div style="float: left;">Race Distance: <input class="form-input-adjustable-delay" data-bind="textInput: ($data.Race()) ? $data.Race().distance : null" id="adjustablesRaceDistance" style="width: 100px;" type="text" /></div>
+																	<div style="float: left;">Cargo Weight: <input class="form-input-adjustable-delay" data-bind="textInput: ($data.Race()) ? $data.Race().weight : null" id="adjustablesCargoWeight" style="width: 100px;" type="text" /></div>
+																</td>
+															</tr>
+															<tr><td class="settings-spacer" colspan="5">&nbsp;</td></tr>
+															<tr style="display: none;">
+																<td class="adjustable-cell" style="vertical-align: top; width: 150px; white-space: nowrap;">Adjustable Category:</td>
+																<td class="adjustable-cell" style="vertical-align: top; width: 270px;">
+																	<div class="adjustable-group vehicle-class-all2 vehicle-class-ground">Delays</div>
+																	<div><br /></div>
+																	<div class="adjustable-group vehicle-class-all2 vehicle-class-ground">Exclusion Ranges</div>
+																	<div><br /></div>
+																	<div class="adjustable-group vehicle-class-all2 vehicle-class-ground">Time Factor</div>
+																</td>
+																<td class="adjustable-cell" style="min-width: 20px; width: 20px;">&nbsp;</td>
+																<td colspan="2" style="vertical-align: top; width: 65%;">
+																	<table>
+																		<tbody>
+																			<tr>
+																			</tr>
+																		</tbody>
+																	</table>
+																</td>
+															</tr>
+														</table>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<table class="adjustable-comparison-table adjustable-comparison-table-border" id="tblTerrainWeatherComparisons" style="display: none;">
+										<thead>
+											<tr>
+												<th>Color Legend</th>
+												<th>
+													<table style="width: 100%;">
+														<tr>
+															<td class="adjustable-cell" colspan="3" style="text-align: center;">FAST</td>
+															<td class="adjustable-cell" colspan="3" style="text-align: center;">AVERAGE</td>
+															<td class="adjustable-cell" colspan="3" style="text-align: center;">SLOW</td>
+														</tr>
+														<tr>
+															<td class="adjustable-cell adjustable-cell-speed-1">Fastest</td>
+															<td class="adjustable-cell adjustable-cell-speed-2">Very Fast</td>
+															<td class="adjustable-cell adjustable-cell-speed-3">Fast</td>
+															<td class="adjustable-cell adjustable-cell-speed-4">Quick</td>
+															<td class="adjustable-cell adjustable-cell-speed-5">Average</td>
+															<td class="adjustable-cell adjustable-cell-speed-6">Lagging</td>
+															<td class="adjustable-cell adjustable-cell-speed-7">Slow</td>
+															<td class="adjustable-cell adjustable-cell-speed-8">Very Slow</td>
+															<td class="adjustable-cell adjustable-cell-speed-9">Slowest</td>
+														</tr>
+													</table>
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<!-- ko foreach: $root -->
+												<tr data-bind="attr: {class: 'class-' + $data.vehicleClass()}">
+													<td data-bind="text: ((!$data.isTemplate()) ? $data.vehicleName : 'Perfect stats ' + $data.vehicleType())" style="width: 200px;"></td>
+													<td>
+														<table class="adjustable-comparison-table adjustable-comparison-table-border">
+															<thead>
+																<tr>
+																	<th>&nbsp;</th>
+																	<!-- ko foreach: Object.keys($data.adjustables.terrain) -->
+																		<th data-bind="text: $data"></th>
+																	<!-- /ko -->
+																</tr>
+															</thead>
+															<tbody>
+																<!-- ko foreach: Object.keys($data.adjustables.weather) -->
+																	<tr>
+																		<td data-bind="text: $data"></td>
+																		<!-- ko foreach: Object.keys($parent.adjustables.terrain) -->
+																			<td style="vertical-align: middle;"><div data-bind="attr: {id: 'Terrain_' + $data + '_Weather_' + $parent + '_' + $parents[1].vehicleTemplate.template_id()}" style="text-align: center; vertical-align: middle;"></div></td>
+																		<!-- /ko -->
+																	</tr>
+																<!-- /ko -->
+															</tbody>
+														</table>
+													</td>
+												</tr>
+											<!-- /ko -->
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="panel panel-right" id="tab-container">
+							<div class="tab-inner-container">
+								<div class="right-panel-content">
+									<ul class="infinite-tabs" id="tabsRight">
+										<li class="active locked tab" id="joinedTab"><a href="#joinedContent">Joined (<span id="spnJoinedRacesCount"></span>)</a></li>
+										<li class="locked tab" id="nextToRaceTab"><a href="#nextToRaceContent">Next to Race (<span id="spnNextToRaceCount"></span>)</a></li>
+										<li class="locked tab" id="resultsTab"><a href="#resultsContent">Results</a></li>
+									</ul>
+									<div class="tab-content" id="joinedContent">
+										<div id="joinedRaces">
+											<span data-bind='foreach: joinedRaceList'>
+												<div class="item-text item-joined-race">
+													<div data-bind="attr: {class: 'item-joined-race-' + $data.class}">
+														<table class="item-text item-joined-race item-joined-race-details">
+															<tr>
+																<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																	<div style="width: 100%; text-align: center;">
+																		<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: (($data.entry_fee > 0) ? $data.entry_fee : 'FREE')"></span></div>
+																		<br />
+																		<span class="cell-race-terrain">
+																			<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																		</span>
+																		<span class="cell-race-weather">
+																			<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																		</span>
+																		<br />
+																		<div class="cell-race-image" style="width: 100%;">
+																				<br />
+																				<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.enteredVehicle.id}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" /></a>
+																				<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																					&nbsp;
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.enteredVehicle.vehicleFreightPunkId}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.vehicleFreightPunkUrl, title: 'Freight Punk ID #{id}'.replace('{id}', $data.enteredVehicle.vehicleFreightPunkId)}" /></a>
+																				<!-- /ko -->
+																				<br />
+																				<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Refuels"></span>
+																				<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																					&nbsp;::&nbsp;
+																					<span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																				<!-- /ko -->
+																		</div>
+																	</div>
+																</td>
+																<td style="width: 10px; white-space: nowrap;"></td>
+																<td class="cell-race-title">
+																	<div data-bind="text: name" style="font-weight: bold;"></div>
+																	<div>D: <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.enteredVehicle.weight).toLocaleString()"></span>kg</div>
+																	<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																	<div>
+																		Your Entry: 
+																		<!-- ko if: $data.enteredVehicle -->
+																			<span>
+																				<span data-bind="text: $data.enteredVehicle.name"></span><br />
+																				<!-- ko if: $data.enteredVehicle -->
+																					<span title="Max Capacity">MC: <span data-bind="text: $data.enteredVehicle.max_capacity_display"></span>kg</span>,
+																					<span title="Fuel Efficiency">FE: <span data-bind="text: $data.enteredVehicle.fuel_efficiency"></span></span>,
+																					<span title="Emission Rate">ER: <span data-bind="text: $data.enteredVehicle.emission_rate"></span></span><br />
+																					<span title="Max Range">MR: <span data-bind="text: $data.enteredVehicle.max_range_display"></span>km</span>,
+																					<span title="Max Speed">MS: <span data-bind="text: $data.enteredVehicle.max_speed_display"></span>km/hr</span>
+																				<!-- /ko -->
+																			</span>
+																			<br />
+																			<!-- ko foreach: $data.enteredVehicle.SelectedPermutation.comboUpgrades -->
+																				<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																				<!-- ko if: $index < $parent.length -->
+																				&nbsp;-&nbsp;
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		<!-- /ko -->
+																		<br />
+																	</div>
+																	<br />
+																	<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																	<!-- ko if: $data.promo_link -->
+																		<div>
+																			Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																		</div>
+																	<!-- /ko -->
+															</td>
+															</tr>
+														</table>
+													</div>
+												</div>
+											</span>
+										</div>
+									</div>
+									<div class="tab-content" id="nextToRaceContent">
+										<div id="nextToRaceRaces">
+											<div id="divAtLeast1NextToRaceRaces" style="display: none;">
+												<div data-bind="foreach: joinedRaceList">
+													<div class="item-text item-joined-race">
+														<div data-bind="attr: {class: 'item-joined-race-' + $data.class}">
+															<table class="item-text item-joined-race item-joined-race-details">
+																<tr>
+																	<td class="cell-race-class" style="white-space: nowrap; width: 60px;">
+																		<div style="width: 100%; text-align: center;">
+																			<div><span data-bind="attr: {class: 'race-image-class-' + $data.class}"></span>&nbsp;&nbsp;<span data-bind="text: $data.participants.length + '/' + maxParticipants[$data.class];" style="font-size: 12pt; text-align: center;"></span><br /><span data-bind="text: (($data.entry_fee > 0) ? $data.entry_fee : 'FREE')"></span></div>
+																			<br />
+																			<span class="cell-race-terrain">
+																				<span data-bind="attr: {class: 'race-image-terrain-' + $data.terrain, title: $data.terrain}, text: $parent.terrainIcon($data.terrain) " />
+																			</span>
+																			<span class="cell-race-weather">
+																				<span data-bind="attr: {class: 'race-image-weather-' + $data.weather}" />
+																			</span>
+																			<br />
+																			<!-- ko if: $data.enteredVehicle.id -->
+																				<div class="cell-race-image" style="width: 100%;">
+																					<br />
+																					<a data-bind="attr: {href: 'https://worldoffreight.xyz/garage?id=' + $data.enteredVehicle.id}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.image, title: '{name} (ID #{id})'.replace('{name}', $data.enteredVehicle.name).replace('{id}', $data.enteredVehicle.id)}" /></a>
+																					<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																						&nbsp;
+																						<a data-bind="attr: {href: 'https://worldoffreight.xyz/drivers/' + $data.enteredVehicle.vehicleFreightPunkId}"><img class="best-vehicle image-vehicle-thumbnail" data-bind="attr: {src: $data.enteredVehicle.vehicleFreightPunkUrl, title: 'Freight Punk ID #{id}'.replace('{id}', $data.enteredVehicle.vehicleFreightPunkId)}" /></a>
+																					<!-- /ko -->
+																					<br />
+																					<span class="item-text" data-bind="text: $data.enteredVehicle.numberOfTrips" title="Number of Trips"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.numberOfRefuels" title="Number of Refuels"></span>
+																					<!-- ko if: ($data.enteredVehicle.vehicleFreightPunkId > 0) -->
+																						&nbsp;::&nbsp;
+																						<span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkXp" title="Freight Punk XP Earned"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkLevel" title="Freight Punk Level"></span> / <span class="item-text" data-bind="text: $data.enteredVehicle.vehicleFreightPunkSkillPoints" title="Freight Punk Skill Points Available"></span>
+																					<!-- /ko -->
+																				</div>
+																			<!-- /ko -->
+																		</div>
+																	</td>
+																	<td style="width: 10px; white-space: nowrap;"></td>
+																	<td class="cell-race-title">
+																		<div data-bind="text: name" style="font-weight: bold;"></div>
+																		<div>D: <span data-bind="text: Number($data.enteredVehicle.raceDistance).toLocaleString()"></span>km, C: <span data-bind="text: Number($data.enteredVehicle.weight).toLocaleString()"></span>kg</div>
+																		<div style="border-bottom: 1px solid white; width: 100%;">&nbsp;</div>
+																		<div>
+																			Your Entry: 
+																			<!-- ko if: $data.enteredVehicle -->
+																				<span>
+																					<span data-bind="text: $data.enteredVehicle.name"></span><br />
+																					<!-- ko if: $data.enteredVehicle.id -->
+																						<span title="Max Capacity">MC: <span data-bind="text: $data.enteredVehicle.max_capacity_display"></span>kg</span>,
+																						<span title="Fuel Efficiency">FE: <span data-bind="text: $data.enteredVehicle.fuel_efficiency"></span></span>,
+																						<span title="Emission Rate">ER: <span data-bind="text: $data.enteredVehicle.emission_rate"></span></span><br />
+																						<span title="Max Range">MR: <span data-bind="text: $data.enteredVehicle.max_range_display"></span>km</span>,
+																						<span title="Max Speed">MS: <span data-bind="text: $data.enteredVehicle.max_speed_display"></span>km/hr</span>
+																					<!-- /ko -->
+																				</span>
+																				<br />
+																				<!-- ko foreach: $data.enteredVehicle.SelectedPermutation.comboUpgrades -->
+																					<span data-bind="text: upgrade.abbreviation, attr: {title: upgrade.name}"></span>
+																					<!-- ko if: $index < $parent.length -->
+																					&nbsp;-&nbsp;
+																					<!-- /ko -->
+																				<!-- /ko -->
+																			<!-- /ko -->
+																		</div>
+																		<br />
+																		<div style="border-top: 1px solid white; width: 100%;">&nbsp;</div>
+																		<!-- ko if: $data.promo_link -->
+																			<div>
+																				Sponsor: <a class="item-text" data-bind="attr: {href: $data.promo_link}" target="_new"><span data-bind="text: $data.sponsor"></span></a>
+																			</div>
+																		<!-- /ko -->
+																	</td>
+																</tr>
+															</table>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div id="divNoNextToRaceRaces" style="display: none;">
+												<br />
+												No races starting in the next 10 minutes.
+												<br />
+												Better get busy racing then!
+											</div>
+										</div>
+									</div>
+									<div class="tab-content" id="resultsContent">
+										Results View Coming Soon!
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="nav-page" id="divNavFleet">
+			<div class="panel panel-container-horizontal">
+				<div class="panel panel-left">
+					<div class="item-title">Fleet List (Coming Soon!)</div>0
+				</div>
+				<div class="panel panel-right">
+					<div class="item-title">Vehicle Details (Coming Soon!)</div>
+				</div>
+			</div>
+		</div>
+		<div class="nav-page" id="divNavSettings">
+			<div class="panel panel-container-horizontal">
+				<div class="panel panel-left">
+					<table style="width: 100%;">
+						<tr>
+							<td class="item-title" style="height: 30px; width: 100%;">
+								<span class="item-text" style="vertical-align: bottom;">Settings</span>
+								<span style="float: right;">
+									<button class="button-save" id="btnSaveSettings">
+										&nbsp;Save&nbsp;&nbsp;
+									</button>
+								</span>
+								<div class="item-text" id="divSaved" style="display: none;">Saved. Unless otherwise specified, the file was saved to your Downloads folder; be sure to copy it to your racer.html folder.</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingAuthKey" id="tdLinkAuthKey">
+								<div style="vertical-align: middle;">Authorization Key</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingEnablePermutations" id="tdLinkEnablePermutations">
+								<div style="vertical-align: middle;">Enable Permutations</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingExcludedVehicles" id="tdLinkExcludedVehicles">
+								<div style="vertical-align: middle;">Excluded Vehicles</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingParticipationThresholds" id="tdLinkParticipationThresholds">
+								<div style="vertical-align: middle;">Participation Thresholds</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer">&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingWalletAddress" id="tdLinkWalletAddress">
+								<div style="vertical-align: middle;">Wallet Address</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="settings-spacer"><hr style="color: lightyellow;" /></td>
+						</tr>
+						<tr>
+							<td class="settings-panel settings-item settings-link" for="tdSettingMisc" id="tdLinkMisc">
+								<div style="vertical-align: middle;">Miscellaneous</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="panel panel-right">
+					<div class="item-title" style="height: 30px;">Details</div>
+					<table style="width: 100%;">
+						<tr class="settings-detail" id="tdSettingAuthKey">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Authorization Key</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 40px;">Value:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-string" data-bind="value: authorization_key" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingEnablePermutations">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Enable Permutations</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="white-space: nowrap; width: 50px;">Enabled:</td>
+										<td class="settings-item">
+											<input id="chkEnablePermutations" data-bind="checked: enable_permutations" name="enablePermutations" type="checkbox" value="true" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingExcludedVehicles">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Excluded Vehicles</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="white-space: nowrap; width: 50px;">Token IDs:</td>
+										<td class="settings-item">
+											<div data-bind="text: excluded_vehicles"></div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" colspan="2">
+											<div id="divExcludedUserVehicles" style="width: 100%;">
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingParticipationThresholds">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Participation Thresholds</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 100px;">Paid Races:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="numeric, value: participation_thresholds().paid" type="text" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 100px;">Free Races:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="numeric, value: participation_thresholds().free" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingWalletAddress">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Wallet Address</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 40px;">Value:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-string" data-bind="value: wallet_address" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr class="settings-detail" id="tdSettingMisc">
+							<td>
+								<table style="width: 100%;">
+									<tr>
+										<td class="settings-panel settings-item" colspan="2">
+											<div style="vertical-align: middle;">Miscellaneous Settings:</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="width: 300px;">Limit Total Results (Free + Paid + Joined Races) to:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: race_query_result_limit" type="text" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item" style="vertical-align: top;">Log Level:</td>
+										<td class="settings-item">
+											<div>
+												<input id="chkLogLevel0" data-bind="checked: log_level_text" name="logLevel" type="radio" value="None" /> <label for="chkLogLevel0">None</label><br />
+												<input id="chkLogLevel1" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Error" /> <label for="chkLogLevel1">Error (Minimum logging - only errors)</label><br />
+												<input id="chkLogLevel2" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Warning" /> <label for="chkLogLevel2">Warning (Mild logging - Errors and warnings)</label><br />
+												<input id="chkLogLevel4" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Info" /> <label for="chkLogLevel4">Info (Significant Logging - Details about races + permutations + upgrades, along with errors and warnings)</label><br />
+												<input id="chkLogLevel8" data-bind="checked: log_level_text" name="logLevel" type="radio" value="Debug" /> <label for="chkLogLevel8">Debug (All Logging)</label><br />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item">Max Log Entries:</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: max_log_entries" type="text" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="settings-item">Refresh Rate (Min 20 seconds):</td>
+										<td class="settings-item">
+											<div>
+												<input class="settings-input-numeric" data-bind="value: refresh_rate_seconds" type="text" />
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="nav-page" id="divNavInfo">
+			<div class="panel panel-container-horizontal">
+				<div class="panel panel-left">
+					<div class="item-title">This Space Intentionally Left Blank.</div>
+				</div>
+				<div class="panel panel-right">
+					<ul class="infinite-tabs" id="tabsInfo">
+						<li class="active locked tab" id="versionHistoryTab"><a href="#versionHistoryContent">Version History</a></li>
+						<li class="locked tab" id="instructionsTab"><a href="#instructionsContent">Instructions</a></li>
+						<li class="locked tab" id="statusTab"><a href="#statusContent">Status Log</a></li>
+					</ul>
+					<div class="middle-panel-content tab-content" id="versionHistoryContent">
+						<div class="item-title item-text middle-panel-text" id="divVersionHistory">
+						</div>
+					</div>
+					<div class="middle-panel-content tab-content" id="instructionsContent">
+						<div class="item-title item-text middle-panel-text" id="divInstructions">
+						</div>
+					</div>	
+					<div class="middle-panel-content tab-content" id="statusContent">
+						<br />
+						<div data-bind="visible: ($data.LogLevelValue() > 0) ? 'block' : 'none'">
+							The log currently has <span data-bind="text: $data.StatusLogLength" style="font-weight: bold;"></span> entries logged out of a max <span data-bind="text: $data.MaxLogEntries" style="font-weight: bold;"></span> entries allowed.
+							<br /><br />
+							<button class="button-save" id="btnSaveLog">
+								&nbsp;&nbsp;Save and Clear Log&nbsp;&nbsp;
+							</button>
+							<div class="item-text" id="divSaved" style="display: none;">Saved. Unless otherwise specified, the file was saved to your Downloads folder.</div>
+						</div>
+						<div data-bind="visible: ($data.LogLevelValue() == 0) ? 'block' : 'none'">
+							Logging is currently disabled.
+						</div>
+					</div>
+				</div>
+			</div>        
+		</div>
+		<div id="divUserVehicles" style="visibility: hidden;">
+			<!-- ko foreach: $data -->
+				<img class="image-vehicle-small" data-bind="attr: {id: 'vehicle_' + token_id(), src: image(), title: '{name} (ID #{id})'.replace('{name}', name()).replace('{id}', token_id())}" />
+				<span class="image-vehicle-spacer">&nbsp;&nbsp;&nbsp;</span>
+			<!-- /ko -->
+		</div>
+		<div class="middle-panel-content tab-content" style="display: none;">
+			<div id="sliderDistance"></div>
+			<div class="adjustables-vehicle-classes">
+				<span class="vehicle-class-ground"><span id="spnAdjustablesGround"></span> &nbsp;&nbsp; Ground</span>
+				<span class="image-vehicle-filter-spacer">&nbsp;</span>
+				<span class="vehicle-class-water"><span id="spnAdjustablesWater"></span> &nbsp;&nbsp; Water</span>
+				<span class="image-vehicle-filter-spacer">&nbsp;</span>
+				<span class="vehicle-class-air"><span id="spnAdjustablesAir"></span> &nbsp;&nbsp; Air</span>
+				<span class="image-vehicle-filter-spacer">&nbsp;</span>
+				<span class="vehicle-class-space"><span id="spnAdjustablesSpace"></span> &nbsp;&nbsp; Space</span>
+			</div>
+		</div>
+		<div style="visibility: hidden;">
+			<svg title="Ground" id="img_class_ground" xmlns="http://www.w3.org/2000/svg" width="24.777" height="10.282" viewBox="0 0 24.777 10.282"><g id="Group_3619" data-name="Group 3619" transform="translate(-3326.844 -1033.487)"><g id="Group_3610" data-name="Group 3610" transform="translate(3328.101 1037.079)"><path id="Path_923" data-name="Path 923" d="M3351.657,1044.976h-4.691v-.55a1.5,1.5,0,1,0-2.994,0v.55h-7.442v-.55a1.5,1.5,0,1,0-2.994,0v.55h-4.3v-2.9l2.8-1.741,9.662.005,6.686.912.031.008a2.969,2.969,0,0,1,2.135,1.506Zm-3.65-1.1h1.872l-.34-.686a2.015,2.015,0,0,0-1.366-.859l-1.5-.2A2.6,2.6,0,0,1,3348.008,1043.876Zm-10.436,0h5.359a2.607,2.607,0,0,1,1.993-1.989l-3.333-.455h-9.237l-2.016,1.253v1.191h2.158a2.6,2.6,0,0,1,5.076,0Z" transform="translate(-3329.238 -1040.332)" fill="#11d552"></path></g><g id="Group_3613" data-name="Group 3613" transform="translate(3331.299 1038.576)"><g id="Group_3611" data-name="Group 3611" transform="translate(0 0)"><path id="Path_924" data-name="Path 924" d="M3337.931,1048.378a2.6,2.6,0,1,1,2.6-2.6A2.6,2.6,0,0,1,3337.931,1048.378Zm0-4.093a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,3337.931,1044.285Z" transform="translate(-3335.334 -1043.185)" fill="#11d552"></path></g><g id="Group_3612" data-name="Group 3612" transform="translate(10.436 0)"><path id="Path_925" data-name="Path 925" d="M3357.818,1048.378a2.6,2.6,0,1,1,2.6-2.6A2.6,2.6,0,0,1,3357.818,1048.378Zm0-4.093a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,3357.818,1044.285Z" transform="translate(-3355.222 -1043.185)" fill="#11d552"></path></g></g><g id="Group_3614" data-name="Group 3614" transform="translate(3348.786 1040.623)"><rect id="Rectangle_659" data-name="Rectangle 659" width="2.835" height="1.1" transform="translate(0)" fill="#11d552"></rect></g><g id="Group_3615" data-name="Group 3615" transform="translate(3326.844 1033.487)"><rect id="Rectangle_660" data-name="Rectangle 660" width="5.637" height="1.1" fill="#11d552"></rect></g><g id="Group_3616" data-name="Group 3616" transform="translate(3328.633 1033.656)"><rect id="Rectangle_661" data-name="Rectangle 661" width="1.1" height="4.523" transform="matrix(0.976, -0.218, 0.218, 0.976, 0, 0.24)" fill="#11d552"></rect></g><g id="Group_3617" data-name="Group 3617" transform="translate(3338.447 1035.147)"><path id="Path_926" data-name="Path 926" d="M3353.013,1039.333h-1.1a1.285,1.285,0,0,0-.383-.982,2.617,2.617,0,0,0-1.475-.571v1.215h-1.1v-2.318l.526-.023a4.268,4.268,0,0,1,2.81.9A2.36,2.36,0,0,1,3353.013,1039.333Z" transform="translate(-3348.955 -1036.651)" fill="#11d552"></path></g><g id="Group_3618" data-name="Group 3618" transform="translate(3334.355 1036.107)"><rect id="Rectangle_662" data-name="Rectangle 662" width="1.1" height="1.522" transform="translate(0 0)" fill="#11d552"></rect></g></g></svg>
+			<svg title="Water" id="img_class_water" xmlns="http://www.w3.org/2000/svg" width="14.726" height="16.985" viewBox="0 0 14.726 16.985"><g id="Group_3635" data-name="Group 3635" transform="translate(-3450.782 -1223.896)"><g id="Group_3631" data-name="Group 3631" transform="translate(3450.782 1235.209)"><path id="Path_930" data-name="Path 930" d="M3459.9,1260.2h-3.6a3.532,3.532,0,0,1-2.732-1.287l-2.615-3.168a.743.743,0,0,1,.573-1.216h13.237a.743.743,0,0,1,.565,1.225l-2.732,3.2A3.536,3.536,0,0,1,3459.9,1260.2Zm-8.31-4.9,2.573,3.117a2.76,2.76,0,0,0,2.136,1.006h3.6a2.766,2.766,0,0,0,2.107-.972l2.688-3.151Zm-.065-.387v.387h0Z" transform="translate(-3450.782 -1254.531)" fill="#87deff"></path></g><g id="Group_3632" data-name="Group 3632" transform="translate(3457.758 1223.896)"><rect id="Rectangle_670" data-name="Rectangle 670" width="0.774" height="11.7" transform="translate(0 0)" fill="#87deff"></rect></g><g id="Group_3633" data-name="Group 3633" transform="translate(3457.998 1224.189)"><path id="Path_931" data-name="Path 931" d="M3470.323,1235.4v-.774a4.583,4.583,0,0,0,0-9.167v-.774a5.357,5.357,0,1,1,0,10.715Z" transform="translate(-3470.323 -1224.69)" fill="#87deff"></path></g><g id="Group_3634" data-name="Group 3634" transform="translate(3458.696 1236.717)"><path id="Path_932" data-name="Path 932" d="M3473.539,1261.27a1.327,1.327,0,1,1,1.328-1.327A1.329,1.329,0,0,1,3473.539,1261.27Zm0-1.881a.554.554,0,1,0,.553.553A.554.554,0,0,0,3473.539,1259.39Z" transform="translate(-3472.212 -1258.616)" fill="#87deff"></path></g></g></svg>
+			<svg title="Air" id="img_class_air" xmlns="http://www.w3.org/2000/svg" width="27.239" height="15.761" viewBox="0 0 27.239 15.761"><g id="Group_3630" data-name="Group 3630" transform="translate(-3323.204 -916.508)"><g id="Group_3620" data-name="Group 3620" transform="translate(3334.479 920.064)"><path id="Path_927" data-name="Path 927" d="M3352.788,933.429c-.494,0-.992-.014-1.475-.027-.456-.013-.887-.025-1.288-.025a4.969,4.969,0,0,1,0-9.934c1.394,0,3.21,1.019,4.859,2.727,1.247,1.291,2.58,3.223,2.58,4.77a2.032,2.032,0,0,1-.613,1.516C3356.007,933.278,3354.421,933.429,3352.788,933.429Zm-2.762-8.911a3.894,3.894,0,0,0,0,7.784c.416,0,.854.012,1.318.025,1.775.049,3.985.111,4.759-.641a.973.973,0,0,0,.288-.746c0-1-.916-2.613-2.278-4.024C3352.683,925.438,3351.118,924.519,3350.025,924.519Z" transform="translate(-3345.193 -923.444)" fill="#acacac"></path></g><g id="Group_3621" data-name="Group 3621" transform="translate(3327.634 922.926)"><rect id="Rectangle_663" data-name="Rectangle 663" width="7.618" height="1.075" fill="#acacac"></rect></g><g id="Group_3622" data-name="Group 3622" transform="translate(3327.634 924.494)"><rect id="Rectangle_664" data-name="Rectangle 664" width="7.382" height="1.075" fill="#acacac"></rect></g><g id="Group_3623" data-name="Group 3623" transform="translate(3323.204 921.684)"><path id="Path_928" data-name="Path 928" d="M3325.858,931.91a2.654,2.654,0,1,1,2.654-2.654A2.657,2.657,0,0,1,3325.858,931.91Zm0-4.233a1.579,1.579,0,1,0,1.58,1.579A1.581,1.581,0,0,0,3325.858,927.677Z" transform="translate(-3323.204 -926.602)" fill="#acacac"></path></g><g id="Group_3624" data-name="Group 3624" transform="translate(3338.774 916.508)"><rect id="Rectangle_665" data-name="Rectangle 665" width="1.075" height="4.094" fill="#acacac"></rect></g><g id="Group_3625" data-name="Group 3625" transform="translate(3328.179 917.798)"><rect id="Rectangle_666" data-name="Rectangle 666" width="22.264" height="1.075" fill="#acacac"></rect></g><g id="Group_3626" data-name="Group 3626" transform="translate(3332.685 931.194)"><rect id="Rectangle_667" data-name="Rectangle 667" width="13.252" height="1.075" fill="#acacac"></rect></g><g id="Group_3627" data-name="Group 3627" transform="translate(3323.986 922.466)"><rect id="Rectangle_668" data-name="Rectangle 668" width="4.221" height="1.075" transform="translate(0 2.984) rotate(-45)" fill="#acacac"></rect></g><g id="Group_3628" data-name="Group 3628" transform="translate(3323.986 922.466)"><rect id="Rectangle_669" data-name="Rectangle 669" width="1.075" height="4.221" transform="translate(0 0.76) rotate(-45)" fill="#acacac"></rect></g><g id="Group_3629" data-name="Group 3629" transform="translate(3337.432 920.852)"><path id="Path_929" data-name="Path 929" d="M3359.732,932.381h-2.962l-2.64-2.64h-3.178v-4.761h1.074v3.686h2.549l2.64,2.64h2.517Z" transform="translate(-3350.952 -924.981)" fill="#acacac"></path></g></g></svg>
+			<svg title="Space" id="img_class_space" xmlns="http://www.w3.org/2000/svg" width="18.35" height="18.35" viewBox="0 0 18.35 18.35"><g id="Group_3643" data-name="Group 3643" transform="translate(-3447.31 -1118.343)"><g id="Group_3637" data-name="Group 3637" transform="translate(3455.601 1119.071)"><path id="Path_933" data-name="Path 933" d="M3473.15,1129.533a4.663,4.663,0,1,1,3.3-1.365A4.653,4.653,0,0,1,3473.15,1129.533Zm0-8.511a3.845,3.845,0,1,0,2.72,1.125h0A3.835,3.835,0,0,0,3473.15,1121.022Z" transform="translate(-3468.485 -1120.202)" fill="#bd2f50"></path></g><g id="Group_3638" data-name="Group 3638" transform="translate(3447.31 1120.42)"><rect id="Rectangle_671" data-name="Rectangle 671" width="12.959" height="0.821" transform="translate(0 8.623) rotate(-41.716)" fill="#bd2f50"></rect></g><g id="Group_3639" data-name="Group 3639" transform="translate(3450.828 1123.446)"><rect id="Rectangle_672" data-name="Rectangle 672" width="12.937" height="0.821" transform="matrix(0.707, -0.707, 0.707, 0.707, 0, 9.148)" fill="#bd2f50"></rect></g><g id="Group_3640" data-name="Group 3640" transform="translate(3454.347 1126.474)"><rect id="Rectangle_673" data-name="Rectangle 673" width="12.959" height="0.821" transform="translate(0 9.673) rotate(-48.286)" fill="#bd2f50"></rect></g><g id="Group_3641" data-name="Group 3641" transform="translate(3462.403 1118.343)"><rect id="Rectangle_674" data-name="Rectangle 674" width="3.784" height="0.821" transform="translate(0 2.676) rotate(-45)" fill="#bd2f50"></rect></g><g id="Group_3642" data-name="Group 3642" transform="translate(3460.907 1119.693)"><path id="Path_934" data-name="Path 934" d="M3485.439,1125.194a3.407,3.407,0,0,1-3.4-3.4h.821a2.585,2.585,0,0,0,2.583,2.582Z" transform="translate(-3482.036 -1121.791)" fill="#bd2f50"></path></g></g></svg>
+
+			<svg title="Foggy" id="img_weather_foggy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M22.332,16.668a.5.5,0,0,1-.664.747c-5.009-4.459-6.912-3.111-10.062-.88-.422.3-.861.611-1.328.922a5.65,5.65,0,0,1-3.192,1,8.772,8.772,0,0,1-5.439-2.392.5.5,0,0,1,.707-.707c.151.15,3.758,3.682,7.369,1.271.458-.306.891-.611,1.3-.9C14.214,13.464,16.731,11.681,22.332,16.668ZM11.027,20.721c-.378.267-.771.546-1.184.824a.5.5,0,1,0,.559.83c.421-.284.819-.566,1.2-.838,3.153-2.233,5.054-3.58,10.063.877a.5.5,0,0,0,.664-.746C16.731,16.681,14.212,18.465,11.027,20.721ZM16,5.459H14.473a4.5,4.5,0,0,0-8.948.025A4.518,4.518,0,0,0,2.669,6.933,4.464,4.464,0,0,0,1.521,10.4a4.629,4.629,0,0,0,4.651,4.06h4.041c.509-.359,1.007-.7,1.5-1H6.172A3.621,3.621,0,0,1,2.517,10.3,3.5,3.5,0,0,1,6,6.459a.5.5,0,0,0,.5-.5,3.5,3.5,0,0,1,7,0,.5.5,0,0,0,.5.5h2a2.5,2.5,0,0,1,2.5,2.5v.107a1.4,1.4,0,0,0,1.393,1.393,1.562,1.562,0,0,1,1.532,1.016,1.527,1.527,0,0,1-.218,1.375,1.483,1.483,0,0,1-.748.529c.307.188.622.4.946.627a2.471,2.471,0,0,0,.606-.562,2.52,2.52,0,0,0,.371-2.262,2.567,2.567,0,0,0-2.489-1.723.393.393,0,0,1-.393-.393V8.959A3.5,3.5,0,0,0,16,5.459Z"></path></svg>
+			<svg title="Icy" id="img_weather_icy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5.381,4.876A4.631,4.631,0,0,1,7.2,5.269a.507.507,0,0,0,.448-.028A.55.55,0,0,0,7.9,4.876a4.4,4.4,0,0,1,8.688-.392.513.513,0,0,0,.5.392h.084c2.494,0,4.428,2.69,4.428,5.016s-1.934,5.016-4.428,5.016H5.409c-2.494,0-4.428-2.69-4.428-5.016S2.887,4.876,5.381,4.876Zm0,11.042h11.77c3.083,0,5.409-3.167,5.409-6,0-2.746-2.158-5.8-5.1-6a5.382,5.382,0,0,0-10.425.252,5.458,5.458,0,0,0-1.625-.252C2.326,3.923,0,7.09,0,9.921S2.27,15.918,5.381,15.918Z" fill="#ddd"></path><path d="M14.763,64.44l1.878-1.878a.377.377,0,0,0-.532-.532L14.23,63.908a.39.39,0,0,0,0,.532.417.417,0,0,0,.252.112A1.932,1.932,0,0,0,14.763,64.44Z" transform="translate(-10.167 -44.571)" fill="#ddd"></path><path d="M22.363,76.619l.757-.757a.377.377,0,0,0-.532-.532l-.757.757a.39.39,0,0,0,0,.532.417.417,0,0,0,.252.112A.266.266,0,0,0,22.363,76.619Z" transform="translate(-15.637 -54.143)" fill="#ddd"></path><path d="M28.539,59.417h0a.819.819,0,0,1,.454.15l.035.023,1.144,1.144.018.024a.846.846,0,0,1,.16.7l0,.013-.393,1.488a.748.748,0,0,1-.556.562l-1.489.393a.784.784,0,0,1-.19.023.773.773,0,0,1-.546-.218L26.08,62.624a.787.787,0,0,1-.195-.735v-.005l.39-1.476a.748.748,0,0,1,.556-.562L28.3,59.46A.726.726,0,0,1,28.539,59.417Zm.987,1.861L28.518,60.27l-1.436.379-.374,1.414,1.025,1.025,1.414-.374.378-1.432Z" transform="translate(-18.614 -42.766)" fill="#ddd"></path><path d="M46.127,63.462a.773.773,0,0,1,.546.218L48.1,65.109a.7.7,0,0,1,.184.775L47.765,67.8a.748.748,0,0,1-.554.56l-1.966.534a.784.784,0,0,1-.19.023.773.773,0,0,1-.546-.218L43.08,67.273a.787.787,0,0,1-.195-.735l0-.008.53-1.951a.748.748,0,0,1,.554-.56l1.967-.534A.784.784,0,0,1,46.127,63.462Zm1.346,2.207-1.361-1.361-1.891.513-.513,1.891,1.361,1.361,1.891-.513Z" transform="translate(-30.85 -45.677)" fill="#ddd"></path></svg>
+			<svg title="Rainy" id="img_weather_rainy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M12,17.5a.5.5,0,0,1,.5.5v4a.5.5,0,0,1-1,0V18A.5.5,0,0,1,12,17.5ZM7.5,18v4a.5.5,0,0,0,1,0V18a.5.5,0,1,0-1,0Zm-4,0v4a.5.5,0,0,0,1,0V18a.5.5,0,0,0-1,0Zm12,0v4a.5.5,0,1,0,1,0V18a.5.5,0,0,0-1,0Zm4,0v4a.5.5,0,0,0,1,0V18a.5.5,0,0,0-1,0Zm.5-3.5H6.172a4.63,4.63,0,0,1-4.651-4.06A4.465,4.465,0,0,1,2.669,6.974,4.52,4.52,0,0,1,5.525,5.525,4.5,4.5,0,0,1,14.473,5.5H16A3.5,3.5,0,0,1,19.5,9v.107a.392.392,0,0,0,.392.393,2.567,2.567,0,0,1,2.489,1.723A2.507,2.507,0,0,1,20,14.5Zm1.424-2.984A1.561,1.561,0,0,0,19.893,10.5,1.394,1.394,0,0,1,18.5,9.107V9A2.5,2.5,0,0,0,16,6.5H14a.5.5,0,0,1-.5-.5,3.5,3.5,0,0,0-7,0,.5.5,0,0,1-.5.5,3.5,3.5,0,0,0-3.484,3.846A3.622,3.622,0,0,0,6.172,13.5H20a1.49,1.49,0,0,0,1.207-.609A1.53,1.53,0,0,0,21.425,11.516Z"></path></svg>
+			<svg title="Snowy" id="img_weather_snowy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M17.5,16a.5.5,0,0,1-.5.5H13.207l2.682,2.682a.5.5,0,0,1-.707.707L12.5,17.207V21a.5.5,0,0,1-1,0V17.207L8.818,19.889a.5.5,0,0,1-.707-.707L10.793,16.5H7a.5.5,0,0,1,0-1h3.793L8.111,12.818a.5.5,0,0,1,.707-.707L11.5,14.793V11a.5.5,0,0,1,1,0v3.793l2.682-2.682a.5.5,0,0,1,.707.707L13.207,15.5H17A.5.5,0,0,1,17.5,16Zm2.393-5.5a.393.393,0,0,1-.393-.393V10A3.5,3.5,0,0,0,16,6.5H14.473a4.5,4.5,0,0,0-8.948.025A4.513,4.513,0,0,0,2.67,7.974,4.465,4.465,0,0,0,1.521,11.44a4.568,4.568,0,0,0,3.591,3.927,1.994,1.994,0,0,1,.626-.907,3.588,3.588,0,0,1-3.222-3.115A3.5,3.5,0,0,1,6,7.5.5.5,0,0,0,6.5,7a3.5,3.5,0,0,1,7,0,.5.5,0,0,0,.5.5h2A2.5,2.5,0,0,1,18.5,10v.107A1.4,1.4,0,0,0,19.893,11.5a1.562,1.562,0,0,1,1.532,1.016,1.53,1.53,0,0,1-.218,1.375A1.487,1.487,0,0,1,20,14.5H18.311a2,2,0,0,1,.619,1H20a2.507,2.507,0,0,0,2.382-3.277A2.567,2.567,0,0,0,19.893,10.5Z"></path></svg>
+			<svg title="Sunny" id="img_weather_sunny" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M6.5,12A5.5,5.5,0,1,0,12,6.5,5.506,5.506,0,0,0,6.5,12ZM12,7.5A4.5,4.5,0,1,1,7.5,12,4.505,4.505,0,0,1,12,7.5Zm0-3a.5.5,0,0,1-.5-.5V2a.5.5,0,0,1,1,0V4A.5.5,0,0,1,12,4.5Zm0,15a.5.5,0,0,1,.5.5v2a.5.5,0,0,1-1,0V20A.5.5,0,0,1,12,19.5ZM19.425,5.283,18.011,6.7A.5.5,0,1,1,17.3,5.99l1.414-1.414a.5.5,0,0,1,.707.707ZM6.7,17.3a.5.5,0,0,1,0,.707L5.282,19.425a.5.5,0,1,1-.707-.707L5.99,17.3A.5.5,0,0,1,6.7,17.3ZM22.5,12a.5.5,0,0,1-.5.5H20a.5.5,0,0,1,0-1h2A.5.5,0,0,1,22.5,12Zm-18,0a.5.5,0,0,1-.5.5H2a.5.5,0,0,1,0-1H4A.5.5,0,0,1,4.5,12Zm13.511,5.3,1.414,1.415a.5.5,0,0,1-.707.707L17.3,18.01a.5.5,0,0,1,.707-.707ZM6.7,5.99A.5.5,0,0,1,5.99,6.7L4.575,5.283a.5.5,0,1,1,.707-.707Z"></path></svg>
+			<svg title="Stormy" id="img_weather_stormy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M17.7,14.2H6.3C4,14.2,1.9,12,1.9,9.6C1.9,7.2,4,5,6.3,5C6.9,5,7.5,5.1,8,5.4c0.1,0.1,0.3,0.1,0.4,0C8.6,5.3,8.7,5.1,8.7,5 C9,2.8,10.8,1.2,13,1.2c2.1,0,3.8,1.4,4.2,3.4C17.3,4.8,17.4,5,17.7,5c0.1,0,0.1,0,0.1,0c2.3,0,4.3,2.1,4.3,4.6 C22,12,20,14.2,17.7,14.2z M18,4c-0.6-2.2-2.7-3.8-5.1-3.8c-2.5,0-4.6,1.7-5.1,4.1C7.3,4.1,6.8,4,6.3,4C3.4,4,1,6.6,1,9.6 s2.4,5.6,5.3,5.6h11.5c2.8,0,5.3-2.5,5.3-5.6C23,6.7,20.8,4.2,18,4z"></path><path d="M7.7,23.9C7.8,23.9,7.9,24,8,24c0.1,0,0.2-0.1,0.4-0.1l3-3.1c0.1-0.1,0.2-0.4,0.1-0.5c-0.1-0.2-0.2-0.3-0.4-0.3H9.9l1.9-1.8 c0.2-0.2,0.2-0.5,0-0.7c-0.2-0.2-0.5-0.2-0.7,0L8.4,20c-0.1,0.1-0.2,0.4-0.1,0.5c0.1,0.2,0.2,0.3,0.4,0.3h1.2l-2.2,2.3 C7.5,23.4,7.5,23.7,7.7,23.9z"></path><path d="M14.5,20.2l2.4-2.4c0.2-0.2,0.2-0.5,0-0.7s-0.5-0.2-0.7,0l-2.4,2.4c-0.2,0.2-0.2,0.5,0,0.7c0.1,0.1,0.2,0.1,0.3,0.1 C14.3,20.3,14.4,20.3,14.5,20.2z"></path><path d="M4.9,20.2l2.4-2.4c0.2-0.2,0.2-0.5,0-0.7c-0.2-0.2-0.5-0.2-0.7,0l-2.4,2.4C4,19.7,4,20,4.2,20.2c0.1,0.1,0.2,0.1,0.3,0.1 C4.7,20.3,4.8,20.3,4.9,20.2z"></path></svg>
+			<svg title="Windy" id="img_weather_windy" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DDDDDD"><path d="M1.5,8A.5.5,0,0,1,2,7.5H9a2.5,2.5,0,0,0,0-5H8a.5.5,0,0,1,0-1H9a3.5,3.5,0,0,1,0,7H2A.5.5,0,0,1,1.5,8ZM2,16.5H19a2.5,2.5,0,0,1,0,5H18a.5.5,0,0,0,0,1h1a3.5,3.5,0,0,0,0-7H2a.5.5,0,0,0,0,1Zm0-4H19a3.5,3.5,0,0,0,0-7H18a.5.5,0,0,0,0,1h1a2.5,2.5,0,0,1,0,5H2a.5.5,0,0,0,0,1Z"></path></svg>
+
+			<svg id="img_garage_performance" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="37" viewBox="0 0 48 37"><defs><linearGradient id="linear-gradient" x1="1.481" y1="-0.344" x2="0.039" y2="0.839" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#f9830d"></stop><stop offset="1" stop-color="#ffbb06"></stop></linearGradient><clipPath id="clip-path"><rect id="Rectangle_1994" data-name="Rectangle 1994" width="37" height="48" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></rect></clipPath></defs><g id="Group_4498" data-name="Group 4498" transform="translate(48) rotate(90)"><g id="Group_4497" data-name="Group 4497"><path id="Path_1397" data-name="Path 1397" d="M32,48H5a5.006,5.006,0,0,1-5-5V5A5.006,5.006,0,0,1,5,0H32a5.006,5.006,0,0,1,5,5V43a5.006,5.006,0,0,1-5,5M5,2A3,3,0,0,0,2,5V43a3,3,0,0,0,3,3H32a3,3,0,0,0,3-3V5a3,3,0,0,0-3-3Z" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1398" data-name="Path 1398" d="M31,13V6H27v7a1,1,0,0,1-2,0V5a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1v8a1,1,0,0,1-2,0" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1399" data-name="Path 1399" d="M32,44H26a1,1,0,0,1-1-1V19a1,1,0,0,1,2,0V42h4V19a1,1,0,0,1,2,0V43a1,1,0,0,1-1,1" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1400" data-name="Path 1400" d="M14,44a4,4,0,0,1-4-4V25a1,1,0,0,1,2,0V40a2,2,0,0,0,4,0V25a1,1,0,0,1,2,0V40a4,4,0,0,1-4,4" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1401" data-name="Path 1401" d="M16,11V8a2,2,0,0,0-4,0v3a1,1,0,0,1-2,0V8a4,4,0,0,1,8,0v3a1,1,0,0,1-2,0" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1402" data-name="Path 1402" d="M17.138,26H10.862A3.01,3.01,0,0,1,7.87,23.214C6.817,8.484,5.354,10,17.852,10a3,3,0,0,1,2.993,3.214l-.715,10A3.01,3.01,0,0,1,17.138,26m-6.99-14a1,1,0,0,0-1,1.071l.715,10a1,1,0,0,0,1,.929h6.276a1,1,0,0,0,1-.929c.77-10.779.865-10.306.449-10.753S18.406,12,10.148,12" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1403" data-name="Path 1403" d="M8.64,22H5a1,1,0,0,1-1-1V15a1,1,0,0,1,1-1H8.36a1,1,0,0,1,0,2H6v4H8.64a1,1,0,0,1,0,2" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1404" data-name="Path 1404" d="M32,28H26a1,1,0,0,1-1-1V19a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1v8a1,1,0,0,1-1,1m-5-2h4V20H27Z" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1405" data-name="Path 1405" d="M32,14H26a1,1,0,0,1-1-1V5a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1v8a1,1,0,0,1-1,1m-5-2h4V6H27Z" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1406" data-name="Path 1406" d="M32,36H26a1,1,0,0,1-1-1V27a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1v8a1,1,0,0,1-1,1m-5-2h4V28H27Z" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path><path id="Path_1407" data-name="Path 1407" d="M32,44H26a1,1,0,0,1-1-1V35a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1v8a1,1,0,0,1-1,1m-5-2h4V36H27Z" stroke="rgba(0,0,0,0)" stroke-width="1" fill="url(#linear-gradient)"></path></g></g></svg>
+		</div>
+</body>
+</html>

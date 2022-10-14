@@ -1,0 +1,879 @@
+body, table
+{
+    border-collapse: collapse;
+    border-width: 1px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    margin: 0px;
+}
+
+.adjustable-cell
+{
+    color: lightyellow;
+    cursor: pointer;
+}
+
+.adjustable-cell-large-text
+{
+    font-size: 0.9rem
+}
+.adjustable-group
+{
+    display: block;
+}
+
+.adjustable-cell-speed-1
+{
+    background-color: darkgreen;
+}
+
+.adjustable-cell-speed-2
+{
+    background-color: green;
+}
+
+.adjustable-cell-speed-3
+{
+    background-color: lightgreen;
+    color: darkblue;
+}
+
+.adjustable-cell-speed-4
+{
+    background-color: yellow;
+    color: darkblue;
+}
+
+.adjustable-cell-speed-5
+{
+    background-color: gold;
+    color: darkblue;
+}
+
+.adjustable-cell-speed-6
+{
+    background-color: orange;
+    color: darkblue;
+}
+
+.adjustable-cell-speed-7
+{
+    background-color: pink;
+    color: darkblue;
+}
+
+.adjustable-cell-speed-8
+{
+    background-color: red;
+}
+
+.adjustable-cell-speed-9
+{
+    background-color: darkred;
+}
+
+.adjustable-comparison-table
+{
+    border: 1px solid lightyellow;
+    border-collapse: collapse;
+    color: lightyellow;
+    margin: 5px;
+    padding: 5px;
+    width: 99%;
+}
+
+.adjustable-comparison-table-border th, .adjustable-comparison-table-border td
+{
+    width: 100px;
+    border: 1px solid #555;
+}
+
+.adjustables-vehicle-classes
+{
+    height: 34px;
+    font-size: 1rem;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Sets the containers height and width */
+.base-timer 
+{
+    color: lightyellow;
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+/* Removes SVG styling that would hide the time label */
+.base-timer__circle 
+{
+    fill: none;
+    stroke: none;
+}
+
+.base-timer__label 
+{
+    position: absolute;
+    
+    /* Size should match the parent container */
+    width: 32px;
+    height: 32px;
+    
+    /* Keep the label aligned to the top */
+    top: 0;
+    
+    /* Create a flexible box that centers content vertically and horizontally */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    /* Sort of an arbitrary number; adjust to your liking */
+    font-size: 9px;
+}
+
+/* The SVG path that displays the timer's progress */
+.base-timer__path-elapsed 
+{
+    stroke-width: 6px;
+    stroke: grey;
+}
+
+.base-timer__path-remaining 
+{
+    /* Just as thick as the original ring */
+    stroke-width: 6px;
+  
+    /* Rounds the line endings to create a seamless circle */
+    stroke-linecap: round;
+  
+    /* Makes sure the animation starts at the top of the circle */
+    transform: rotate(90deg);
+    transform-origin: center;
+  
+    /* One second aligns with the speed of the countdown timer */
+    transition: 1s linear all;
+  
+    /* Allows the ring to change color when the color value updates */
+    stroke: currentColor;
+}
+  
+.base-timer__path-remaining.info
+{
+    color: rgb(65, 184, 131);
+}
+    
+.base-timer__path-remaining.alert
+{
+    color: orange;
+}
+    
+.base-timer__path-remaining.warning
+{
+    color: red;
+}
+      
+.base-timer__svg 
+{
+    /* Flips the svg and makes the animation to move left-to-right */
+    transform: scaleX(-1);
+}
+
+.body-main
+{
+    height: 86vh;
+    overflow: hidden;
+}
+
+.button-save
+{
+    border-radius: 8px;
+    background-color: green;
+    color: lightyellow;
+    padding: 4px;
+}
+
+.cell-race-class
+{
+    text-align: right;
+    padding-right: 3px;
+    white-space: nowrap;
+    width: 30px;
+    vertical-align: middle;
+}
+
+.cell-race-details
+{
+    width: 90%;
+    vertical-align: middle;
+}
+
+.cell-race-image
+{
+    text-align: center;
+    width: 35px;
+}
+
+.cell-race-terrain
+{
+    width: 20px; 
+    text-align: center;
+    vertical-align: middle;
+}
+
+.cell-race-weather
+{
+    width: 20px; 
+    vertical-align: middle;
+}
+
+.dashboard-table
+{
+    border: 1px solid #444;
+    border-collapse: collapse;
+    margin: 5px;
+    padding: 5px;
+}
+
+.dashboard-table-cell
+{
+    color: lightseagreen;
+    text-align: center;
+}
+
+.dashboard-table-header
+{
+    background-color: lightgoldenrodyellow;
+    color: darkred;
+}
+
+.dashboard-table-cell-text-large
+{
+    font-size: 14pt;    
+}
+
+.dashboard-table-cell-text-medium
+{
+    font-size: 12pt;
+}
+
+.dashboard-table-cell-text-medium
+{
+    font-size: 10pt;
+}
+
+.form-input
+{
+    background: radial-gradient(lightblue, lightyellow);
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    outline: none;
+}
+
+.form-input-adjustable-delay
+{
+    color: brown;
+    width: 50px;
+}
+
+.header-panel
+{
+    background-color: black;
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 100px;
+    white-space: nowrap;
+    width: 100%;
+    z-index: 0;
+}
+
+.header-panel-left
+{
+    border: 1px solid #888;
+    flex: 0 0 auto;
+    height: 100%;
+    padding-left: 10px;
+    white-space: nowrap;
+    min-width: 390px;
+    vertical-align: top;
+    width: 390px;
+}
+
+.header-panel-right
+{
+    border: 1px solid #888;
+    flex: 0 0 auto;
+    height: 100%;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.icon-container
+{
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+.icon-filter
+{
+    cursor: pointer;
+    height: 20px;
+    min-height: 20px;
+    min-width: 30px;
+    text-align: center;
+    width: 30px;
+}
+
+.icon-filter-class-all
+{
+    font-size: 12pt;
+    color: red;
+    kerning: 0px;
+}
+
+.icon-filter-terrain-all
+{
+    font-size: 12pt;
+    color: darkgoldenrod;
+    kerning: 0px;
+}
+
+.icon-filter-weather-all
+{
+    font-size: 12pt;
+    color: lightblue;
+    kerning: 0px;
+}
+
+.icon-filter-group-class
+{
+    padding: 5px;
+    width: 45%;
+}
+
+.icon-filter-title
+{
+    color: lightyellow;
+    padding-right: 10px;
+    white-space: nowrap;
+    width: 10%;
+}
+
+.icon-letter-terrain
+{
+    font-size: 18pt;
+    color: grey;
+}
+
+.icon-padder
+{
+    display: inline-block;
+    width: 6px;
+}
+
+.image-vehicle-excluded
+{
+    border: 1px solid greenyellow;
+}
+
+.image-vehicle-filter-spacer
+{
+    float: left;
+    min-width: 15px;
+    white-space: nowrap;
+    width: 15px;
+}
+
+.image-vehicle-small
+{
+    width: 100px;
+}
+
+.image-vehicle-spacer
+{
+    float: left;
+    min-width: 40px;
+    white-space: nowrap;
+    width: 40px;
+}
+
+.image-vehicle-thumbnail
+{
+    width: 30px;
+}
+
+.info-participation-thresholds
+{
+    display: inline;
+}
+
+.item-joined-race, .item-unjoined-race
+{
+    display: block;
+}
+
+.item-joined-race-air, .item-unjoined-race-air
+{
+    background: linear-gradient(black, #444);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-details, .item-unjoined-race-details
+{
+    width: 100%;
+}
+
+.item-joined-race-ground, .item-unjoined-race-ground
+{
+    background: linear-gradient(black, darkgreen);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-space, .item-unjoined-race-space
+{
+    background: linear-gradient(black, #500000);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-joined-race-water, .item-unjoined-race-water
+{
+    background: linear-gradient(black, darkblue);
+    background-color: black;
+    margin: 10px;
+    padding: 5px 10px;
+}
+
+.item-text
+{
+    color: lightyellow;
+}
+
+.item-text-empty-content
+{
+    color: lightyellow;
+    font-size: 10pt;
+    margin: 10px;
+}
+
+.item-title
+{
+    border-bottom: 1px dotted #888;
+}
+
+.left-panel-content
+{
+    border: 1px solid #444;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.link-apply-upgrades
+{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.menu-filter-class td
+{
+    background: linear-gradient(black, #333);
+}
+
+.message-popup
+{
+    background-color: pink;
+    color: red;
+    font-size: 10pt;
+    height: 40px;
+    line-height: 40px;
+    max-width: 400px;
+    padding: 10px;
+    position: absolute;
+    right: 10px;
+    top: 20px;
+    vertical-align: middle;
+    width: 400px;
+    z-index: 99;
+}
+
+.middle-panel-content
+{
+    border: 1px solid #444;
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+.middle-panel-text
+{
+    height: 99%; 
+    overflow-y: scroll;
+    white-space: pre-wrap; 
+}
+
+.nav-icon
+{
+    text-align: center;
+    vertical-align: middle;
+    width: 100px;
+}
+
+.nav-icon-border
+{
+    border: 1px solid greenyellow;
+}
+
+.nav-page
+{
+    background-color: black;
+    color: lightyellow;
+    display: none;
+    height: 100%;
+}
+
+.nav-spacer
+{
+    min-width: 10px;
+    width: 40px;
+}
+
+.nav-image
+{
+    cursor: pointer;
+    margin: 0px;
+    text-align: center;
+}
+
+.nav-image-outer
+{
+    padding: 3px;
+    height: 40px;
+}
+
+.nav-title
+{
+    cursor: pointer;
+    font-size: 12pt;
+    margin: 0px;
+    padding: 2px;
+    text-align: center;
+}
+
+.panel
+{
+    background: black;
+    border: 1px solid #888;
+    border-collapse: collapse;
+    color: white;
+}
+
+.panel-body
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    height: 50%;
+    padding: 0px;
+}
+
+.panel-bottom 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    max-height: 60%;
+    min-height: 60%;
+    padding: 10px;
+}
+
+.panel-container-horizontal
+{
+    border-collapse: collapse;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.panel-container-vertical
+{
+    border-collapse: collapse;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+}
+
+.panel-header
+{   
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding: 10px;
+    height: 70px;
+    min-height: 70px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.panel-left 
+{
+    border-collapse: collapse;
+    flex: 0 0 auto;
+    padding: 10px;
+    min-height: 200px;
+    min-width: 380px;
+    white-space: nowrap;
+    width: 380px;
+}
+
+.panel-middle
+{
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+.panel-right 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    /* resizable */
+    padding: 10px;
+    min-height: 200px;
+    min-width: 400px;
+}
+
+.panel-top 
+{
+    border-collapse: collapse;
+    flex: 1 1 auto;
+    padding: 10px;
+    height: 400px;
+    white-space: nowrap;
+    width: 100%;
+    z-index: 0;
+}
+
+.play-disabled
+{
+    background-color: #500000;
+}
+
+.play-enabled
+{
+    background-color: black;
+}
+
+.race-selector
+{
+    cursor: pointer; 
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.right-panel-content
+{
+    border: 1px solid #444;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.settings-detail
+{
+    width: 100%;
+}
+
+.settings-input-numeric
+{
+    color: darkgreen;
+    height: 30px;
+    width: 100%;
+}
+
+.settings-input-string
+{
+    color: darkred;
+    height: 30px;
+    width: 100%;
+}
+
+.settings-item
+{
+    color: lightyellow;
+    cursor: pointer;
+    height: 40px; 
+    line-height: 40px;
+}
+
+.settings-link
+{
+    display: block;  
+}
+
+.settings-panel
+{
+    background: radial-gradient(black, #444);
+    background-color: black;
+    margin: 2px;
+    padding: 5px 10px;
+}
+.settings-spacer
+{
+    font-size: 8pt;
+    height: 20px;
+}
+
+.severity-info
+{
+    color: lightgreen;
+}
+
+.severity-error
+{
+    color: #ff6666;
+}
+
+.status-content-message
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    white-space: normal;
+    word-break: break-all;
+    word-wrap: break-word;
+    width: 56%;
+}
+
+.status-content-severity
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    width: 14%;
+}
+
+.status-content-time
+{
+    border: 1px solid white;
+    border-collapse: collapse;
+    color: white;
+    white-space: nowrap;
+    width: 30%;
+}
+
+.status-header-message
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-header-severity
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-header-time
+{
+    background-color: lightgoldenrodyellow;
+    border: 1px solid darkblue;
+    border-collapse: collapse;
+    color: darkblue;
+}
+
+.status-table
+{
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.tab 
+{
+    z-index: auto;
+}
+
+.tab-content
+{
+    vertical-align: top;
+    z-index: auto;
+}
+
+.tab-inner-container
+{
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    text-align: left;
+    width: 100%;
+}
+
+.vehicle-class-all
+{
+    align-items: center;
+    border-radius: 17px;
+    cursor: pointer;
+    display: flex;
+    float: left;
+    font-size: 0.875rem;
+    height: 30px;
+    justify-content: flex-start;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100px;
+        -webkit-box-align: center;
+        -webkit-box-pack: start;
+        --x-gradient-stops: var(--x-gradient-from),var(--x-gradient-to,transparent);
+}
+
+.vehicle-class-all2
+{
+    align-items: center;
+    border-radius: 17px;
+    cursor: pointer;
+    display: flex;
+    font-size: 0.875rem;
+    height: 30px;
+    justify-content: flex-start;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 120px;
+}
+
+.vehicle-class-air 
+{
+    background-color: rgb(31, 37, 51);
+    color: rgb(172, 172, 172);
+}
+
+.vehicle-class-ground 
+{
+    background-color: rgb(31, 37, 51);
+    color: rgb(17, 213, 82);
+}
+
+.vehicle-class-space 
+{
+    background-color: rgb(31, 37, 51);
+    color: rgb(189, 47, 80);
+}
+
+.vehicle-class-water 
+{
+    background-color: rgb(31, 37, 51);
+    color: rgb(135, 222, 255);
+}
+
+.wof-version
+{
+    font-weight: bold;
+}

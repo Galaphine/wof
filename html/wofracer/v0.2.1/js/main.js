@@ -1,4 +1,4 @@
-const CURRENT_VERSION = "0.2.0";
+const CURRENT_VERSION = "0.2.1";
 
 /*
     WOF Racer script - see README.md for details on usage and latest features.

@@ -1,6 +1,6 @@
-WOF Racer v0.2.0
+WOF Racer v0.2.1
 
-Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer/v0.2.0
+Download all files from this location:  https://github.com/Galaphine/wof/tree/master/html/wofracer
 
 Read the included Instructions.txt file for details on how to set up and run the script.
 

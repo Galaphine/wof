@@ -892,7 +892,7 @@
 														<tbody>
 															<!-- ko foreach: $data.excludedVehicles -->
 																<tr>
-																	<td class="settings-item2" data-bind="text: $index() + 1"></td>
+																	<td class="settings-item2" data-bind="text: '#' + ($index() + 1) + ' - WOF #' + token_id"></td>
 																	<td class="settings-item2">
 																		<img class="image-vehicle-small" data-bind="attr: {id: 'vehicle_' + $data.token_id, src: $data.image, title: '{name} (ID #{id})'.replace('{name}', $data.name).replace('{id}', $data.token_id)}, click: function() { imageVehicleSmallClick('include', $data.token_id)};" />
 																	</td>

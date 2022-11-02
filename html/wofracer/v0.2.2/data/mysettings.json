@@ -1,0 +1,17 @@
+{
+    "enable_permutations": true,
+    "excluded_vehicles": [],
+    "log_level": 0,
+    "log_level_text": "None",
+    "max_participants": 12,
+    "max_log_entries": 10000000,
+    "participation_thresholds": {
+        "free": "3",
+        "paid": "9"
+    },
+    "race_query_result_limit": 50,
+    "refreshRateMilliseconds": 20000,
+    "refresh_rate_seconds": 20,
+    "refreshRateSeconds": 20,
+    "wallet_address": "<Your Wallet Address>"
+}
